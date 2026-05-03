@@ -1,193 +1,189 @@
-# Chess
+# Chess Engine
 
 ## Overview
 
-This is a chess game developed in C++ and C# with the goal of creating a fully-featured chess application. The project is currently in development and aims to provide a seamless chess-playing experience with a modern user interface.
+A chess engine written in C & C++ implementing a complete chess game with a CPU opponent and LAN multiplayer. The project is structured as a core static library, a plain C API wrapper (DLL), and a console application for testing (all built through a unified Python-driven CMake build system).
 
 ## Features
 
--   **Modern User Interface**:
-    -   A clean and intuitive interface built with the latest WinUI 3 framework for Windows.
-
--   **Enhanced Gameplay Experience**:
-    -   **Captured Pieces Display**: The UI keeps a visual tally of all captured pieces for both players.
-    -   **Game Controls**: Easily undo your last move or reset the board to start a new game.
-
--   **Intelligent CPU Opponent**:
-    -   **Play Against the AI**: Challenge yourself in a single-player mode against a computer-controlled opponent.
-    -   **Adjustable Difficulty**: Choose from multiple difficulty levels, from random moves to advanced strategies using Minimax with Alpha-Beta pruning.
-    -   **Flexible Setup**: Decide whether to play as White or Black when starting a game against the CPU.
-    -   **Performance Optimizations**: The engine uses techniques like transposition tables to ensure responsive and intelligent AI gameplay.
-
--   **Advanced Multiplayer**:
-    -   **LAN Gaming**: Host or join games on your local network.
-    -   **Automatic Discovery**: Automatically finds other players hosting games on the network.
-    -   **Network Selection**: For users with multiple network connections, you can choose the specific network for multiplayer games, ensuring a stable connection.
-
--   **Personalization**:
-    -   **Custom Styles**: Tailor the look of the game by choosing from different styles for the board and pieces.
-    -   **Player Naming**: Set your own name for multiplayer sessions.
-    -   **Audio Controls**: Independently adjust the volume for sound effects, atmosphere, and the master output.
-
+- **CPU Opponent**: Single-player mode against the AI at multiple difficulty levels, from random moves to Minimax with Alpha-Beta pruning. Transposition tables are used to avoid redundant evaluation.
+- **Adjustable Sides**: Choose whether to play as White or Black when starting a game against the CPU.
+- **LAN Multiplayer**: Host or join games on your local network with automatic peer discovery. On machines with multiple network interfaces, a specific adapter can be selected for a stable connection.
 
 ## Technology Stack
 
-- **Backend (Chess.Engine)**: C++20, utilizing the asio library for networking
-- **Frontend (Chess.UI)**: C# with .NET8 and WinUI 3 for the user interface
-- **Build System**: CMake, with a Python script to automate the build process
-- **Testing**:
-   - **C++**: GoogleTest
-   - **C#**: xUnit, Moq
-- **Communication**: The C# frontend communicates with the C++ backend via P/Invoke
-- **Developer Tooling** (optional, CMake-integrated):
-   - **Doxygen** with [doxygen-awesome-css](https://jothepro.github.io/doxygen-awesome-css/) for documentation
-   - **CppCheck** for static analysis
-   - **Clang-Format** for automatic source formatting
-
-## Future Plans
-- **Currently the project goes through a restructuring of the engine in order to support bitboards**
-- **CPU Evaluation Algorithms** 
-   - Refine and improve positional and move evaluation algorithms for different CPU difficulties
-- **Onboarding** 
-   - Create onboarding process
-- **Create score**
-   - Enhance the sound engine for playback of dynamic score
-   - Compose dynamic score
-
+| Category | Technology |
+|---|---|
+| Language | C++20 |
+| Networking | [ASIO](https://think-async.com/Asio/) (standalone, no Boost) |
+| Build System | CMake 4.0+, Python 3.x |
+| Dependency Management | [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) |
+| Testing | GoogleTest 1.15.2 + CTest |
+| Documentation | Doxygen + doxygen-awesome-css |
+| Static Analysis | CppCheck |
+| Formatting | clang-format |
 
 ## Project Structure
 
-- **Chess.UI**:
-    - **Chess.UI**: The main WinUI 3 project containing the user interface, view models, and services for the application.
-    - **Chess.UI.Test**: Contains unit tests (xUnit, Moq) for the `Chess.UI` project to ensure the reliability of the frontend logic.
-- **Chess.Engine**:
-    - **cmake**: Containing several cmake modules used in this project.
-    - **src**:
-        - **Chess.Engine.API**: A C++ DLL project that exposes the core engine functionalities through a C-style API, allowing the C# frontend to communicate with the C++ backend via P/Invoke.
-        - **Chess.Engine.Core**: The core of the chess engine, written in C++. It includes all the game logic, such as the chessboard representation, move generation, validation, and the game state machine.
-    - **tests**:
-        - **Core.Tests**: Contains unit tests (GoogleTest) for the C++ core engine, verifying the correctness and stability of the game logic.
-
+```
+Chess-Engine/
+├── cmake/              # CMake modules (formatting, docs, testing, versioning, etc.)
+├── scripts/            # Python build automation modules
+├── src/
+│   ├── core/           # Core engine — game logic, move generation, AI (static library)
+│   ├── capi/           # Plain C wrapper around the core (shared library / DLL)
+│   └── console_app/    # Console application for manual testing
+├── tests/
+│   └── Core.Tests/     # GoogleTest unit tests
+├── build/              # Generated build artifacts (not committed)
+├── install/            # Installed headers and libraries (not committed)
+└── build.py            # Build entry point
+```
 
 ## Prerequisites
 
-- **C++ Compiler**: Compatible with C++20 or higher.
-- **CMake**: Version 3.15 or higher.
-- **Git**: For cloning the repository.
-- **.NET8**: For Windows App SDK / WinUi3
-- **Visual Studio 2022**: With C++ Desktop Development workload.
-- **Python**: Version 3.x (for running `build.py`).
+- **C++ Compiler**: C++20 or higher (MSVC recommended on Windows)
+- **CMake**: Version 4.0 or higher
+- **Git**: Required — the build system derives the build number from commit history
+- **Python**: 3.x (for `build.py`)
 
+### Optional Developer Tools
 
-### Optional CMake Modules
+The following tools are CMake-integrated and entirely optional. Each is controlled by a CMake option (all default to `ON` except `ENABLE_MEMCHECK`); builds do not fail if a tool is absent and its option is explicitly set to `OFF`.
 
-The following developer tools are integrated into the CMake build.  
-They are **optional**, controlled by CMake options, and can be enabled/disabled explicitly.  
-If enabled but the tool is missing, CMake will warn or fail depending on the module.
+| Tool | CMake Option | Purpose | Install (Windows) |
+|---|---|---|---|
+| Doxygen | `ENABLE_DOXYGEN` | HTML documentation | [doxygen.nl](https://www.doxygen.nl/download.html) + [Graphviz](https://graphviz.org/download/) for diagrams |
+| CppCheck | `ENABLE_CPPCHECK` | Static analysis | `winget install cppcheck` |
+| clang-format | `ENABLE_FORMAT` | Source formatting | `winget install llvm` |
+| Valgrind | `ENABLE_MEMCHECK` | Memory checking (off by default) | Linux only |
 
-- **Doxygen** (`ENABLE_DOXYGEN`):  
-  Generates HTML documentation from source code.  
-  - Install: [Doxygen](https://www.doxygen.nl/download.html) and optionally [Graphviz](https://graphviz.org/download/) for diagrams.
-  
-  - Turn off in top-level `CMakeLists.txt`:
-    ```cmake
-    set(ENABLE_DOXYGEN OFF)
-    ```
+To disable a tool, set its option in the root `CMakeLists.txt` before configuring:
 
-- **CppCheck** (`ENABLE_CPPCHECK`):  
-  Runs [CppCheck](http://cppcheck.sourceforge.net/) for static analysis.  
-  - Install (Windows with winget):  
-    ```bash
-    winget install cppcheck
-    ```
-  - Disable in CMake:
-    ```cmake
-    set(ENABLE_CPPCHECK OFF)
-    ```
-
-- **Clang-Format** (`ENABLE_FORMAT`):  
-  Automatically formats C++ sources using `.clang-format`.  
-  - Install (Windows with winget):  
-    ```bash
-    winget install llvm
-    ```
-    (which includes `clang-format`)
-
-  - Disable in CMake:
-    ```cmake
-    set(ENABLE_FORMAT OFF)
-    ```
-
-Each module is guarded by its own CMake option, so builds will not fail if the tool is missing and the option is explicitly set to `OFF`.
-Under Build
-
+```cmake
+set(ENABLE_CPPCHECK OFF)
+```
 
 ## Getting Started
 
 ### Cloning the Repository
 
-Clone the repository using the following command:
-
 ```bash
-git clone git@github.com:Diversiam90815/Chess.git
+git clone git@github.com:Diversiam90815/Chess-Engine.git
+cd Chess-Engine
 ```
 
-### Building the Project
+### Building
 
-The Chess Game project uses a `build.py` script to automate the build process.
+All builds go through `build.py`, which handles CMake configuration, compilation, and testing in a single command.
 
-#### Build Instructions
-
-##### Prepare the Build Environment
-
-Navigate to the project directory and run:
-
-```bash
-python build.py -p
-```
-
-For a **Debug** build, include the `--debug` or `-d` option:
-
-```bash
-python build.py -pd
-```
-
-##### Build the Project
-
-The build preperation is included within the build process of the application. So, to build the project, you can directly call
-
-Debug build:
-
-```bash
-python build.py -bd
-```
-
-Release build:
+**Release build:**
 
 ```bash
 python build.py -b
 ```
 
+**Debug build:**
 
-### Build Script Details (`build.py`)
+```bash
+python build.py -bd
+```
 
-The `build.py` script simplifies the build process:
+### `build.py` Flag Reference
 
-- **Options**:
-  - `--prepare` or `-p`: Generates build files using CMake.
-  - `--build` or `-b`: Compiles the project.
-  - `--debug` or `-d`: Sets the build configuration to Debug mode.
-  - `--test` or `-t`: Runs the C++ unit tests (via CTest).
-  - `--docs`: Generates Doxygen documentation (opens in your default browser).
+| Flag | Long form | Description |
+|---|---|---|
+| `-p` | `--prepare` | Run CMake configure only (no compile) |
+| `-b` | `--build` | Configure and compile |
+| `-d` | `--debug` | Use Debug configuration (default: Release) |
+| `-c CONFIG` | `--configuration` | Explicit config: `Debug`, `Release`, or `RelWithDebInfo` |
+| `-a ARCH` | `--architecture` | Target architecture: `x64` (default) or `ARM64` |
+| `-pl PLATFORM` | `--platform` | CMake generator: `Ninja`, `VS2022`, or `VS2026` |
+| `-t` | `--runtest` | Run CTest after building |
+| `--docs` | | Generate Doxygen documentation and open in the browser |
 
+Examples:
 
-## Testing
+```bash
+# Build then run tests
+python build.py -bt
 
-The project includes a suite of tests for both the backend and the frontend UI to ensure code quality and reliability.
+# Debug build targeting ARM64 with a Visual Studio 2022 solution
+python build.py -b -d -a ARM64 -pl VS2022
 
-- **Backend (Chess.Engine.Tests)**: The C++ engine is tested using the **GoogleTest** framework. Tests cover core functionalities such as move generation, validation and execution.
-- **Frontend (Chess.UI.Tests)**: The C# UI and its view models are tested using **xUnit**, with **Moq** for creating mock objects.
+# Generate HTML documentation
+python build.py --docs
+```
 
+### Build Outputs
+
+| Artifact | Location |
+|---|---|
+| Core static library | `build/<arch>/src/core/` |
+| C API DLL | `build/<arch>/src/capi/` |
+| Console application | `build/<arch>/src/console_app/` |
+| Test executable | `build/<arch>/tests/` |
+| Installed headers / libs | `install/` |
+| Doxygen HTML docs | `build/doxygen/html/index.html` |
+
+### Running Tests
+
+```bash
+python build.py -bt    # build then run tests
+python build.py -t     # run tests against an existing build
+```
+
+Tests are discovered automatically via `gtest_discover_tests()` and run through CTest with `--output-on-failure`.
+
+## Build System Architecture
+
+The build system is split into two layers: a **Python layer** that provides a consistent developer interface, and a **CMake layer** that performs the actual configuration and compilation.
+
+### Python Layer (`scripts/`)
+
+Rather than a single monolithic script, the build automation is broken into focused modules:
+
+| Module | Responsibility |
+|---|---|
+| `build_runner.py` | Invokes CMake configure and build commands |
+| `argument_parser.py` | CLI argument parsing and validation |
+| `enums.py` | Typed enums for architecture, configuration, and platform |
+| `paths.py` | Centralised path constants (root, build, install directories) |
+| `versioning.py` | Reads `git rev-list` commit count and updates `PROJECT_VERSION` before each configure |
+| `env_config.py` | Detects environment (Development / Staging / Production) from the active git branch |
+| `utils.py` | Subprocess execution helpers and a `working_directory` context manager |
+
+### CMake Layer (`cmake/`)
+
+| Module | Responsibility |
+|---|---|
+| `cpm.cmake` | CPM package manager : downloads all dependencies at configure time |
+| `BuildInfo.cmake` | Injects git metadata (commit SHA, branch, timestamp) into `buildinfo.h` at build time |
+| `Format.cmake` | Runs clang-format as a pre-build step across all C++ sources |
+| `CppCheck.cmake` | Attaches cppcheck as a `CXX_CPPCHECK` property on each target |
+| `Doxygen.cmake` | Configures documentation generation with the doxygen-awesome-css theme |
+| `Testing.cmake` | Integrates GoogleTest and CTest, with optional memory checking |
+| `Memcheck.cmake` | Valgrind-based memory analysis (disabled by default) |
+
+### Version Management
+
+Project versions follow the pattern `MAJOR.MINOR.PATCH.BUILD`. The build number is derived automatically from the total git commit count (`git rev-list HEAD --count`) and written back to `CMakeLists.txt` before each configure step. The same metadata (commit SHA, branch name, and build timestamp) is compiled directly into the binary via a generated `buildinfo.h`, making every binary traceable to an exact revision.
+
+### External Dependencies
+
+All dependencies are managed by CPM.cmake and downloaded automatically at configure time; no manual installation is required beyond the tools listed in [Prerequisites](#prerequisites).
+
+| Dependency | Version | Purpose |
+|---|---|---|
+| Logger | 1.3.81 | Logging infrastructure |
+| nlohmann_json | 3.12.0 | JSON parsing and serialisation |
+| ASIO | 1.30.2 | Async networking (TCP, UDP, peer discovery) |
+| GoogleTest | 1.15.2 | Unit testing |
+| doxygen-awesome-css | 2.3.1 | Documentation theme |
+
+## Future Plans
+
+- Refine positional evaluation and move scoring across CPU difficulty levels
 
 ## License
 

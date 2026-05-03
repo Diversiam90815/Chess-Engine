@@ -291,6 +291,22 @@ Engine_API int GetCurrentNetworkAdapterID()
 
 
 //=========================================================================
+// Settings
+//=========================================================================
+
+Engine_API void SetLocalPlayerName(const char *name)
+{
+	UserSettingsCache::GetInstance()->setLocalPlayerName(name ? name : "");
+}
+
+
+Engine_API void SetDiscoveryPort(int port)
+{
+	UserSettingsCache::GetInstance()->setDiscoveryPort(port);
+}
+
+
+//=========================================================================
 // Utilities
 //=========================================================================
 

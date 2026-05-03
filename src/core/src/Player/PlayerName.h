@@ -9,8 +9,9 @@
 
 #include <Windows.h>
 
-#include "UserSettings.h"
 #include "Logging.h"
+#include "UserSettingsCache.h"
+
 
 /// <summary>
 /// Represents and manages the local player's name, including setting and retrieving it.
@@ -26,10 +27,8 @@ public:
 
 private:
 	// At first startup we select the local PC name as the player name by default
-	std::string	 getComputerNameAsPlayerName();
+	std::string getComputerNameAsPlayerName();
 
 
-	std::string	 mLocalPlayerName;
-
-	UserSettings mUserSettings;
+	std::string mLocalPlayerName;
 };

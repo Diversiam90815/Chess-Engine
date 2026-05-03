@@ -14,7 +14,6 @@ void PlayerName::setLocalPlayerName(const std::string &name)
 		return;
 
 	mLocalPlayerName = name;
-	mUserSettings.setLocalPlayerName(name);
 
 	LOG_INFO("Local Player name has been set to : {}", name);
 }
@@ -25,7 +24,7 @@ std::string PlayerName::getLocalPlayerName()
 	if (!mLocalPlayerName.empty())
 		return mLocalPlayerName;
 
-	std::string tmpName = mUserSettings.getLocalPlayerName();
+	std::string tmpName = UserSettingsCache::GetInstance()->getLocalPlayerName();
 
 	if (tmpName.empty())
 	{

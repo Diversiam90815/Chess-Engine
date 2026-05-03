@@ -9,7 +9,7 @@
 
 #include "NetworkInformation.h"
 #include "IObservable.h"
-#include "UserSettings.h"
+
 
 /// <summary>
 /// Manages network adapters and provides network-related operations, including initialization, adapter selection, and status queries.
@@ -34,12 +34,6 @@ public:
 	bool							   changeCurrentNetworkAdapter(const int ID);
 
 private:
-	void			   initializeNetworkAdapter();
-
-	void			   initAdapterInConfig();
-
-	UserSettings	   mUserSettings;
-
 	NetworkInformation mNetworkInfo;
 
 	std::atomic<bool>  initialized{false};

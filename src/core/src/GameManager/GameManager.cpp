@@ -44,8 +44,6 @@ bool GameManager::init()
 
 	SystemInfo::logSystemInfo();
 
-	mUserSettings.init();
-
 	initializeComponents();
 	wireComponents();
 

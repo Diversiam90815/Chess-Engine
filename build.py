@@ -19,12 +19,12 @@ def main():
 
     build_dir = get_build_dir(str(args.architecture))
     test_dir = build_dir / "tests"
-    runner = BuildRunner(root_dir=ENGINE_DIR, build_dir=build_dir, project_name="Chess Game")
+    runner = BuildRunner(root_dir=ROOT_DIR, build_dir=build_dir, project_name="Chess Engine")
 
     runner.update_environment()
     runner.update_app_version()
 
-    print("==== Chess Game Configuration ====")
+    print("==== Chess Engine Configuration ====")
     print(f"Current Directory:          {ROOT_DIR}")
     print(f"Build Directory:            {build_dir}")
     print(f"Test Build Directory:       {test_dir}")

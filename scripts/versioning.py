@@ -2,8 +2,8 @@ import re
 from pathlib import Path
 from subprocess import check_output
 from typing import Optional
-import xml.etree.ElementTree as ET
 from .paths import *
+
 
 class VersionManager:
 
@@ -54,37 +54,4 @@ class VersionManager:
         new_version = ".".join(parts)
 
         self._write_version(new_version)
-        self.update_app_version_in_exe(new_version, build_props_file=DIRECTORY_BUILD_PROPS_FILE)
-        self.update_app_version_in_manifest(new_version)
         return new_version
-
-
-    def update_app_version_in_exe(self,version, build_props_file):   
-        tree = ET.parse(build_props_file)
-        root = tree.getroot()
-
-        version_element = root.find('.//Version')
-
-        if version_element is not None:
-            # Update the Version text
-            version_element.text = version
-            
-        tree.write(build_props_file, encoding='utf-8', xml_declaration=True)
-
-
-    def update_app_version_in_manifest(self, version):               
-        ET.register_namespace("", "http://schemas.microsoft.com/appx/manifest/foundation/windows10")
-        ET.register_namespace("mp", "http://schemas.microsoft.com/appx/2014/phone/manifest")
-        ET.register_namespace("uap", "http://schemas.microsoft.com/appx/manifest/uap/windows10")
-        ET.register_namespace("rescap", "http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities")
-
-        tree = ET.parse(PACKAGE_MANIFEST_FILE)
-        root = tree.getroot()
-
-        identity_element = root.find('.//{http://schemas.microsoft.com/appx/manifest/foundation/windows10}Identity')
-        
-        if identity_element is not None:           
-            identity_element.set('Version', version)
-            
-            # Write the changes back to the file
-            tree.write(PACKAGE_MANIFEST_FILE, encoding='utf-8', xml_declaration=True)

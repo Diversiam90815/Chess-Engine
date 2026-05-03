@@ -118,10 +118,10 @@ private:
 
 
 	AdapterBuffer					mAdapterAddresses{nullptr, [](IP_ADAPTER_ADDRESSES *p)
-									  {
-										  if (p)
-											  free(p);
-									  }};
+													  {
+										if (p)
+											free(p);
+													  }};
 	ULONG							mOutBufLen{0};
 
 	std::unique_ptr<WinsockSession> mWinsockSession;

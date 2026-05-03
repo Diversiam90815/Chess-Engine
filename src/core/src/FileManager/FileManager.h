@@ -2,7 +2,7 @@
   ==============================================================================
 	Module:         FileManager
 	Description:    Singleton managing application file paths (logging, AppData).
-	                AppData path needs to be set once via the Engine API due to WinUI's virtualization.
+					AppData path needs to be set once via the Engine API due to WinUI's virtualization.
   ==============================================================================
 */
 

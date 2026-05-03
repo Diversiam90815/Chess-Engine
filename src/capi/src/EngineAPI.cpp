@@ -42,6 +42,7 @@ static char *StringToCharPtr(std::string string)
 	return charPtr;
 }
 
+
 static GameConfiguration ConvertCConfig(CGameConfiguration cConfig)
 {
 	GameModeSelection mode		 = static_cast<GameModeSelection>(cConfig.mode);
@@ -76,6 +77,7 @@ static UserSettingsInit ConvertCSettings(CUserSettingsInit cSettings)
 //			Core Engine Lifecycle
 //=============================================
 
+
 Engine_API void Init(CUserSettingsInit settings)
 {
 	UserSettingsInit init = ConvertCSettings(settings);
@@ -88,7 +90,6 @@ Engine_API void Init(CUserSettingsInit settings)
 Engine_API void Deinit()
 {
 	GameManager::ReleaseInstance();
-	FileManager::ReleaseInstance();
 	UserSettingsCache::ReleaseInstance();
 }
 
@@ -315,11 +316,4 @@ Engine_API float GetWindowScalingFactor(HWND hwnd)
 	int	  dpi			= GetDpiForWindow(hwnd);
 	float scalingFactor = (float)dpi / 96;
 	return scalingFactor;
-}
-
-
-Engine_API void SetUnvirtualizedAppDataPath(const char *appDataPath)
-{
-	FileManager *fmg = FileManager::GetInstance();
-	fmg->setAppDataPath(appDataPath);
 }

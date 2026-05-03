@@ -73,7 +73,7 @@ void GameManager::shutDown()
 
 void GameManager::startGame(GameConfiguration config)
 {
-	LOG_INFO("Starting game. Mode : {}", static_cast<int>(config.mode)); // TODO: Add string conversion to LoggingHelper
+	LOG_INFO("Starting game. Mode : {}", static_cast<int>(config.mode)); // TODO: Add string conversion to Logging
 	mStateMachine->onGameStart(config);
 }
 

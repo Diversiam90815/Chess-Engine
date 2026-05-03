@@ -1,8 +1,7 @@
 /*
   ==============================================================================
 	Module:         FileManager
-	Description:    Singleton managing application file paths (logging, AppData).
-					AppData path needs to be set once via the Engine API due to WinUI's virtualization.
+	Description:    Managing application file paths (eg. logging).
   ==============================================================================
 */
 
@@ -11,31 +10,22 @@
 #include <filesystem>
 
 #include "Parameters.h"
-#include "Logging.h"
+#include "UserSettingsCache.h"
 
 
 namespace fs = std::filesystem;
 
 /**
- * @brief	Manages application file paths. Singleton accessor pattern.
-			AppData path needs to be set once via the Engine.API due to the virtualization inside WinUi apps.
+ * @brief	Manages application file paths.
  */
 class FileManager
 {
 public:
+	FileManager()  = default;
 	~FileManager() = default;
 
-	static FileManager *GetInstance();
-	static void			ReleaseInstance();
-
-	fs::path			getAppDataPath();
-	void				setAppDataPath(std::string path);
-	fs::path			getLoggingPath();
+	fs::path getLoggingPath();
 
 private:
-	FileManager() = default;
-
-	bool		createDirectoryIfNeeded(const fs::path &directory);
-
-	std::string mAppDataPath = "";
+	bool createDirectoryIfNeeded(const fs::path &directory);
 };

@@ -86,7 +86,7 @@ set(GAME_MANAGER_FILES
 set(PLAYER_FILES
 	${PLAYER_DIR}/Player.h      		${PLAYER_DIR}/Player.cpp
 	${PLAYER_DIR}/PlayerName.h			${PLAYER_DIR}/PlayerName.cpp
-	${PLAYER_DIR}/CPUPlayer.h      	${PLAYER_DIR}/CPUPlayer.cpp
+	${PLAYER_DIR}/CPUPlayer.h      		${PLAYER_DIR}/CPUPlayer.cpp
 )
 
 set(HELPER_FILES
@@ -103,7 +103,6 @@ set(HELPER_FILES
 
 set(LOGGER_FILES
 	${LOGGER_DIR}/Logging.h             ${LOGGER_DIR}/Logging.cpp
-	${LOGGER_DIR}/LoggingHelper.h       ${LOGGER_DIR}/LoggingHelper.cpp
 )
 
 set(FILEMANAGER_FILES

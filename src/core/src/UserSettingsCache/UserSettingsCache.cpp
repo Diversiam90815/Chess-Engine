@@ -39,6 +39,12 @@ void UserSettingsCache::initialize(const UserSettingsInit &init)
 }
 
 
+std::string UserSettingsCache::getAppDataPath() const
+{
+	return mAppDataPath;
+}
+
+
 void UserSettingsCache::setLocalPlayerName(const std::string &name)
 {
 	std::lock_guard lock(mMutex);

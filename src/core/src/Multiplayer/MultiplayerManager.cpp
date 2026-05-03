@@ -212,12 +212,12 @@ void MultiplayerManager::onRemoteInvitationResponseReceived(const InvitationResp
 
 void MultiplayerManager::onRemotePlayerChosenReceived(const Side player)
 {
-	LOG_INFO("Received a player chosen message from the remote. Player = {}", LoggingHelper::sideToString(player));
+	LOG_INFO("Received a player chosen message from the remote. Player = {}", Logging::sideToString(player));
 
 	// The remote chose that player, so we switch locally to the corresponding oppsosite playercolor
 	Side localPlayer = player == Side::White ? Side::Black : Side::White;
 
-	LOG_INFO("So we set ourselves to Player {}", LoggingHelper::sideToString(localPlayer));
+	LOG_INFO("So we set ourselves to Player {}", Logging::sideToString(localPlayer));
 
 	remotePlayerChosen(localPlayer);
 }
@@ -225,7 +225,7 @@ void MultiplayerManager::onRemotePlayerChosenReceived(const Side player)
 
 void MultiplayerManager::onRemotePlayerReadyFlagReceived(const bool flag)
 {
-	LOG_INFO("Received a remote ready for game flag: {}", LoggingHelper::boolToString(flag));
+	LOG_INFO("Received a remote ready for game flag: {}", Logging::boolToString(flag));
 	setRemotePlayerReadyForGameFlag(flag);
 }
 

@@ -91,7 +91,6 @@ extern "C"
 	//=========================================================================
 
 	Engine_API float GetWindowScalingFactor(HWND hwnd);
-	Engine_API void	 SetUnvirtualizedAppDataPath(const char *appDataPath);
 
 
 #ifdef __cplusplus

@@ -46,8 +46,8 @@ bool GameController::initializeGame(GameConfiguration config)
 
 		mCPUPlayer.configure(cpuConfig);
 
-		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", LoggingHelper::sideToString(spConfig.humanPlayerColor),
-				 LoggingHelper::sideToString(cpuColor), LoggingHelper::cpuDifficultyToString(spConfig.aiDifficulty));
+		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", Logging::sideToString(spConfig.humanPlayerColor), Logging::sideToString(cpuColor),
+				 Logging::cpuDifficultyToString(spConfig.aiDifficulty));
 
 		break;
 	}
@@ -58,7 +58,7 @@ bool GameController::initializeGame(GameConfiguration config)
 		mLocalPlayer					  = mpConfig.localPlayerColor;
 		mCurrentPlayer					  = Side::White; // White always starts
 
-		LOG_INFO("Game initialized: Multiplayer mode (Local player: {})", LoggingHelper::sideToString(mpConfig.localPlayerColor));
+		LOG_INFO("Game initialized: Multiplayer mode (Local player: {})", Logging::sideToString(mpConfig.localPlayerColor));
 
 		break;
 	}

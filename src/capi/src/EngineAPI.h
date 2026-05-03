@@ -20,7 +20,7 @@ extern "C"
 	// Core Engine Lifecycle
 	//=========================================================================
 
-	Engine_API void	 Init();
+	Engine_API void	 Init(CUserSettingsInit settings);
 	Engine_API void	 Deinit();
 	Engine_API void	 SetDelegate(PFN_CALLBACK pDelegate);
 

@@ -11,19 +11,33 @@
 #include <mutex>
 
 
-/// <summary>
-/// Singleton cache holding user settings.
-/// </summary>
+/**
+ * @brief	Initialization payload pushed from the C# host during startup.
+ */
+struct UserSettingsInit
+{
+	std::string playerName;
+	std::string appDataPath;
+	int			discoveryUDPPort;
+};
+
+
+
+/**
+ * @brief	Singleton cache holding user settings.
+ */
 class UserSettingsCache
 {
 public:
 	static UserSettingsCache *GetInstance();
 	static void				  ReleaseInstance();
 
-
 	// Non-copyable / non-movable
 	UserSettingsCache(const UserSettingsCache &)			= delete;
 	UserSettingsCache &operator=(const UserSettingsCache &) = delete;
+
+	void			   initialize(const UserSettingsInit &init);
+
 
 	//=========================================================================
 	// Player
@@ -48,6 +62,9 @@ private:
 
 	// Player
 	std::string		   mLocalPlayerName = "";
+
+	// Cache/Logging path
+	std::string		   mAppDataPath		= "";
 
 	// Discovery
 	int				   mDiscoveryPort	= 0;

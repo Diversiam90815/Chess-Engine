@@ -13,6 +13,7 @@
 #include "GameManager.h"
 #include "FileManager.h"
 #include "Logging.h"
+#include "UserSettingsCache.h"
 
 
 //=============================================
@@ -60,13 +61,26 @@ static GameConfiguration ConvertCConfig(CGameConfiguration cConfig)
 }
 
 
+static UserSettingsInit ConvertCSettings(CUserSettingsInit cSettings)
+{
+	UserSettingsInit init;
+	init.playerName		  = cSettings.playerName;
+	init.discoveryUDPPort = cSettings.discoveryUDPPort;
+	init.appDataPath	  = cSettings.appDataPath;
+	return init;
+}
+
+
 
 //=============================================
 //			Core Engine Lifecycle
 //=============================================
 
-Engine_API void Init()
+Engine_API void Init(CUserSettingsInit settings)
 {
+	UserSettingsInit init = ConvertCSettings(settings);
+
+	UserSettingsCache::GetInstance()->initialize(init);
 	GameManager::GetInstance()->init();
 }
 
@@ -75,6 +89,7 @@ Engine_API void Deinit()
 {
 	GameManager::ReleaseInstance();
 	FileManager::ReleaseInstance();
+	UserSettingsCache::ReleaseInstance();
 }
 
 

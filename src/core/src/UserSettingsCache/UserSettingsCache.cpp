@@ -30,6 +30,15 @@ void UserSettingsCache::ReleaseInstance()
 }
 
 
+void UserSettingsCache::initialize(const UserSettingsInit &init)
+{
+	std::lock_guard lock(mMutex);
+	mLocalPlayerName = init.playerName;
+	mDiscoveryPort	 = init.discoveryUDPPort;
+	mAppDataPath	 = init.appDataPath;
+}
+
+
 void UserSettingsCache::setLocalPlayerName(const std::string &name)
 {
 	std::lock_guard lock(mMutex);

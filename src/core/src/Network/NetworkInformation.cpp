@@ -142,7 +142,6 @@ void NetworkInformation::setCurrentNetworkAdapter(const NetworkAdapter &adapter)
 		return;
 
 	mCurrentNetworkAdapter = adapter;
-	FileManager::GetInstance()->setSelectedNetworkAdapter(adapter);
 
 	LOG_INFO("Set user defined adapter to :");
 	LOG_INFO("\t Adapter:\t {}", adapter.AdapterName);

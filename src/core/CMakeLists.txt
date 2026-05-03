@@ -13,7 +13,7 @@ set (PLAYER_DIR						${SOURCE_DIR}/Player)
 set (HELPER_DIR						${SOURCE_DIR}/Helper)
 set (FILEMANAGER_DIR				${SOURCE_DIR}/FileManager)
 set (LOGGER_DIR						${SOURCE_DIR}/Logger)
-set (USERSETTINGS_DIR				${SOURCE_DIR}/UserSettings)
+set (USERSETTINGSCACHE_DIR			${SOURCE_DIR}/UserSettingsCache)
 set (INPUTSOURCE_DIR				${SOURCE_DIR}/InputSource)
 set (NETWORK_DIR					${SOURCE_DIR}/Network)
 set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
@@ -22,6 +22,7 @@ set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
 
 
 set(ALL_PROJECT_DIRS 
+			${SOURCE_DIR}
 			${MOVE_DIR}
 			${GAME_MANAGER_DIR}
 			${GAME_ENGINE_DIR}
@@ -32,8 +33,7 @@ set(ALL_PROJECT_DIRS
 			${HELPER_DIR}
 			${LOGGER_DIR}
 			${FILEMANAGER_DIR}
-			${SOURCE_DIR}
-			${USERSETTINGS_DIR}
+			${USERSETTINGSCACHE_DIR}
 			${INPUTSOURCE_DIR}
 			${NETWORK_DIR}
 			${MULTIPLAYER_DIR}
@@ -86,7 +86,7 @@ set(GAME_MANAGER_FILES
 set(PLAYER_FILES
 	${PLAYER_DIR}/Player.h      		${PLAYER_DIR}/Player.cpp
 	${PLAYER_DIR}/PlayerName.h			${PLAYER_DIR}/PlayerName.cpp
-	${PLAYER_DIR}/CPUPlayer.h      	${PLAYER_DIR}/CPUPlayer.cpp
+	${PLAYER_DIR}/CPUPlayer.h      		${PLAYER_DIR}/CPUPlayer.cpp
 )
 
 set(HELPER_FILES
@@ -103,21 +103,20 @@ set(HELPER_FILES
 
 set(LOGGER_FILES
 	${LOGGER_DIR}/Logging.h             ${LOGGER_DIR}/Logging.cpp
-	${LOGGER_DIR}/LoggingHelper.h       ${LOGGER_DIR}/LoggingHelper.cpp
 )
 
 set(FILEMANAGER_FILES
 	${FILEMANAGER_DIR}/FileManager.h    ${FILEMANAGER_DIR}/FileManager.cpp
 )
 
-set(USERSETTINGS_FILES
-	${USERSETTINGS_DIR}/UserSettings.h    ${USERSETTINGS_DIR}/UserSettings.cpp
-)
-
 set(NETWORK_FILES
 	${NETWORK_DIR}/NetworkAdapter.h
 	${NETWORK_DIR}/NetworkManager.h         ${NETWORK_DIR}/NetworkManager.cpp
 	${NETWORK_DIR}/NetworkInformation.h     ${NETWORK_DIR}/NetworkInformation.cpp
+)
+
+set(USERSETTINGSCACHE_FILES
+	${USERSETTINGSCACHE_DIR}/UserSettingsCache.h	${USERSETTINGSCACHE_DIR}/UserSettingsCache.cpp
 )
 
 set(INPUTSOURCE_FILES
@@ -157,7 +156,7 @@ set(ALL_FILES
 	${HELPER_FILES}
 	${LOGGER_FILES}
 	${FILEMANAGER_FILES}
-	${USERSETTINGS_FILES}
+	${USERSETTINGSCACHE_FILES}
 	${INPUTSOURCE_FILES}
 	${NETWORK_FILES}
 	${MULTIPLAYER_FILES}

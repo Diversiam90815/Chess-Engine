@@ -10,7 +10,6 @@
 #include "GameController.h"
 #include "Player.h"
 #include "Logging.h"
-#include "UserSettings.h"
 #include "IObservable.h"
 #include "WinUIInputSource.h"
 #include "NetworkManager.h"
@@ -86,35 +85,6 @@ public:
 	bool						changeCurrentNetworkAdapter(int ID);
 	int							getCurrentNetworkAdapterID();
 
-	//=========================================================================
-	// User Settings
-	//=========================================================================
-
-	void						setLocalPlayerName(const std::string &name) { mPlayerName.setLocalPlayerName(name); };
-	std::string					getLocalPlayerName() { return mPlayerName.getLocalPlayerName(); };
-
-	void						setBoardTheme(const std::string &theme) { mUserSettings.setCurrentBoardTheme(theme); }
-	std::string					getBoardTheme() { return mUserSettings.getCurrentBoardTheme(); }
-
-	void						setPieceTheme(const std::string &theme) { mUserSettings.setCurrentPieceTheme(theme); }
-	std::string					getPieceTheme() { return mUserSettings.getCurrentPieceTheme(); }
-
-	// Audio settings
-	void						setSFXEnabled(const bool enabled) { mUserSettings.setSFXEnabled(enabled); }
-	bool						getSFXEnabled() { return mUserSettings.getSFXEnabled(); }
-	void						setSFXVolume(const float volume) { mUserSettings.setSFXVolume(volume); }
-	float						getSFXVolume() { return mUserSettings.getSFXVolume(); }
-
-	void						setAtmosEnabled(const bool enabled) { mUserSettings.setAtmosEnabled(enabled); }
-	bool						getAtmosEnabled() { return mUserSettings.getAtmosEnabled(); }
-	void						setAtmosVolume(const float volume) { mUserSettings.setAtmosVolume(volume); }
-	float						getAtmosVolume() { return mUserSettings.getAtmosVolume(); }
-
-	void						setAtmosScenario(const std::string &scenario) { mUserSettings.setAtmosScenario(scenario); }
-	std::string					getAtmosScenario() { return mUserSettings.getAtmosScenario(); }
-
-	void						setMasterVolume(const float volume) { mUserSettings.setMasterVolume(volume); }
-	float						getMasterVolume() { return mUserSettings.getMasterVolume(); }
 
 private:
 	GameManager() = default;
@@ -136,7 +106,6 @@ private:
 	//=========================================================================
 
 	Logging								mLog;
-	UserSettings						mUserSettings;
 	PlayerName							mPlayerName;
 
 	std::shared_ptr<MultiplayerManager> mMultiplayerManager;

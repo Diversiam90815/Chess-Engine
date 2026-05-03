@@ -51,56 +51,15 @@ enum class GameState
 };
 
 
-/// <summary>
-/// Enumerates the different types of settings available.
-/// </summary>
-enum class SettingsType
-{
-	BoardStyle,
-	ChessPieceStyle,
-	PlayerName,
-	AudioSFXEnabled,
-	AudioSFXVolume,
-	AudioAtmosEnabled,
-	AudioAtmosVolume,
-	AudioAtmosScenario,
-	AudioMasterVolume,
-	DiscoveryUDPPort,
-};
-
-
 //============================================================
 //			File Manager
 //============================================================
 
 namespace FileName
 {
-constexpr auto LoggingFolder	= "Logs";
-constexpr auto LogFile			= "Chess.log";
-
-constexpr auto UserSettingsFile = "Config.json";
-constexpr auto SettingsFolder	= "Settings";
+constexpr auto LoggingFolder = "Logs";
+constexpr auto LogFile		 = "Chess.log";
 } // namespace FileName
-
-
-//============================================================
-//			Config File Settings
-//============================================================
-
-namespace SettingName
-{
-constexpr auto BoardStyleSetting		 = "BoardStyle";
-constexpr auto PieceStyleSetting		 = "PieceStyle";
-constexpr auto SelectedAdapter			 = "Selected_Adapter";
-constexpr auto PlayerNameSetting		 = "PlayerName";
-constexpr auto AudioSFXVolumeSetting	 = "Audio_SFX_Volume";
-constexpr auto AudioSFXEnabledSetting	 = "Audio_SFX_Enabled";
-constexpr auto AudioAtmosVolumeSetting	 = "Audio_Atmos_Volume";
-constexpr auto AudioAtmosEnabledSetting	 = "Audio_Atmos_Enabled";
-constexpr auto AudioAtmosScenarioSetting = "Audio_Atmos_Scenario";
-constexpr auto AudioMasterVolumeSetting	 = "Audio_Master_Volume";
-constexpr auto DiscoveryUDPPortSetting	 = "Discovery_UDP_Port";
-} // namespace SettingName
 
 
 //============================================================

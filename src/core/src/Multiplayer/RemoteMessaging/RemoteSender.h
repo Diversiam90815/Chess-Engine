@@ -10,7 +10,7 @@
 #include "IObserver.h"
 #include "IObservable.h"
 #include "Logging.h"
-
+#include "JsonConversion.h"
 
 /**
  * @brief	High-level producer of outgoing multiplayer messages.

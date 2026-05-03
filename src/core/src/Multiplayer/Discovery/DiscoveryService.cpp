@@ -11,8 +11,7 @@
 DiscoveryService::DiscoveryService(asio::io_context &ioContext) : mSocket(ioContext), mTimer(ioContext)
 {
 	mIoContext	   = &ioContext;
-
-	mDiscoveryPort = mUserSettings.getDiscoveryPort();
+	mDiscoveryPort = UserSettingsCache::GetInstance()->getDiscoveryPort();
 }
 
 

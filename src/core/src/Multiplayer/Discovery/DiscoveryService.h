@@ -18,7 +18,7 @@
 #include "Discovery/DiscoveryEndpoint.h"
 #include "ThreadBase.h"
 #include "IObservable.h"
-#include "UserSettings.h"
+#include "UserSettingsCache.h"
 
 
 using asio::ip::udp;
@@ -132,6 +132,4 @@ private:
 	const std::string	   broadCastAddress = "255.255.255.255";
 
 	asio::steady_timer	   mTimer;
-
-	UserSettings		   mUserSettings;
 };

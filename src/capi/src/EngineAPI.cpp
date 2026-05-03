@@ -13,6 +13,7 @@
 #include "GameManager.h"
 #include "FileManager.h"
 #include "Logging.h"
+#include "UserSettingsCache.h"
 
 
 //=============================================
@@ -41,6 +42,7 @@ static char *StringToCharPtr(std::string string)
 	return charPtr;
 }
 
+
 static GameConfiguration ConvertCConfig(CGameConfiguration cConfig)
 {
 	GameModeSelection mode		 = static_cast<GameModeSelection>(cConfig.mode);
@@ -60,13 +62,27 @@ static GameConfiguration ConvertCConfig(CGameConfiguration cConfig)
 }
 
 
+static UserSettingsInit ConvertCSettings(CUserSettingsInit cSettings)
+{
+	UserSettingsInit init;
+	init.playerName		  = cSettings.playerName;
+	init.discoveryUDPPort = cSettings.discoveryUDPPort;
+	init.appDataPath	  = cSettings.appDataPath;
+	return init;
+}
+
+
 
 //=============================================
 //			Core Engine Lifecycle
 //=============================================
 
-Engine_API void Init()
+
+Engine_API void Init(CUserSettingsInit settings)
 {
+	UserSettingsInit init = ConvertCSettings(settings);
+
+	UserSettingsCache::GetInstance()->initialize(init);
 	GameManager::GetInstance()->init();
 }
 
@@ -74,7 +90,7 @@ Engine_API void Init()
 Engine_API void Deinit()
 {
 	GameManager::ReleaseInstance();
-	FileManager::ReleaseInstance();
+	UserSettingsCache::ReleaseInstance();
 }
 
 
@@ -234,109 +250,6 @@ Engine_API void LogDebugWithCaller(const char *message, const char *method, cons
 
 
 //=========================================================================
-// Settings
-//=========================================================================
-
-Engine_API void SetCurrentBoardTheme(const char *theme)
-{
-	GameManager::GetInstance()->setBoardTheme(theme);
-}
-
-Engine_API char *GetCurrentBoardTheme()
-{
-	std::string theme	 = GameManager::GetInstance()->getBoardTheme();
-	char	   *themeTmp = StringToCharPtr(theme);
-	return themeTmp;
-}
-
-Engine_API void SetCurrentPieceTheme(const char *theme)
-{
-	GameManager::GetInstance()->setPieceTheme(theme);
-}
-
-Engine_API char *GetCurrentPieceTheme()
-{
-	std::string theme	 = GameManager::GetInstance()->getPieceTheme();
-	char	   *themeTmp = StringToCharPtr(theme);
-	return themeTmp;
-}
-
-Engine_API void SetLocalPlayerName(const char *name)
-{
-	GameManager::GetInstance()->setLocalPlayerName(name);
-}
-
-Engine_API char *GetLocalPlayerName()
-{
-	std::string name	= GameManager::GetInstance()->getLocalPlayerName();
-	char	   *tmpName = StringToCharPtr(name);
-	return tmpName;
-}
-
-Engine_API bool GetSFXEnabled()
-{
-	return GameManager::GetInstance()->getSFXEnabled();
-}
-
-Engine_API void SetSFXEnabled(bool enabled)
-{
-	GameManager::GetInstance()->setSFXEnabled(enabled);
-}
-
-Engine_API bool GetAtmosEnabled()
-{
-	return GameManager::GetInstance()->getAtmosEnabled();
-}
-
-Engine_API void SetAtmosEnabled(bool enabled)
-{
-	GameManager::GetInstance()->setAtmosEnabled(enabled);
-}
-
-Engine_API void SetSFXVolume(float volume)
-{
-	GameManager::GetInstance()->setSFXVolume(volume);
-}
-
-Engine_API float GetSFXVolume()
-{
-	return GameManager::GetInstance()->getSFXVolume();
-}
-
-Engine_API void SetAtmosVolume(float volume)
-{
-	GameManager::GetInstance()->setAtmosVolume(volume);
-}
-
-Engine_API float GetAtmosVolume()
-{
-	return GameManager::GetInstance()->getAtmosVolume();
-}
-
-Engine_API void SetAtmosScenario(const char *scenario)
-{
-	GameManager::GetInstance()->setAtmosScenario(scenario);
-}
-
-Engine_API char *GetAtmosScenario()
-{
-	std::string sScenario = GameManager::GetInstance()->getAtmosScenario();
-	char	   *scenario  = StringToCharPtr(sScenario);
-	return scenario;
-}
-
-Engine_API void SetMasterVolume(float volume)
-{
-	GameManager::GetInstance()->setMasterVolume(volume);
-}
-
-Engine_API float GetMasterVolume()
-{
-	return GameManager::GetInstance()->getMasterVolume();
-}
-
-
-//=========================================================================
 // Network
 //=========================================================================
 
@@ -379,6 +292,22 @@ Engine_API int GetCurrentNetworkAdapterID()
 
 
 //=========================================================================
+// Settings
+//=========================================================================
+
+Engine_API void SetLocalPlayerName(const char *name)
+{
+	UserSettingsCache::GetInstance()->setLocalPlayerName(name ? name : "");
+}
+
+
+Engine_API void SetDiscoveryPort(int port)
+{
+	UserSettingsCache::GetInstance()->setDiscoveryPort(port);
+}
+
+
+//=========================================================================
 // Utilities
 //=========================================================================
 
@@ -387,11 +316,4 @@ Engine_API float GetWindowScalingFactor(HWND hwnd)
 	int	  dpi			= GetDpiForWindow(hwnd);
 	float scalingFactor = (float)dpi / 96;
 	return scalingFactor;
-}
-
-
-Engine_API void SetUnvirtualizedAppDataPath(const char *appDataPath)
-{
-	FileManager *fmg = FileManager::GetInstance();
-	fmg->setAppDataPath(appDataPath);
 }

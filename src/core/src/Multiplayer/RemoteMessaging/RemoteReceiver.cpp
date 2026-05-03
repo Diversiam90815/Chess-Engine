@@ -39,7 +39,7 @@ void RemoteReceiver::onMessageReceived(MultiplayerMessageType type, std::vector<
 
 		remoteConnectionStateReceived(state.state);
 
-		LOG_INFO("Received a connection state from remote: {}", LoggingHelper::connectionStateToString(state.state).c_str());
+		LOG_INFO("Received a connection state from remote: {}", Logging::connectionStateToString(state.state).c_str());
 		break;
 	}
 
@@ -97,7 +97,7 @@ void RemoteReceiver::onMessageReceived(MultiplayerMessageType type, std::vector<
 	{
 		Side remotePlayer = tryGetContentFromMessage<Side>(jMessage, RemoteControl::PlayerChosenKey);
 
-		LOG_INFO("Received player chosen from remote message Remote Player : {}", LoggingHelper::sideToString(remotePlayer));
+		LOG_INFO("Received player chosen from remote message Remote Player : {}", Logging::sideToString(remotePlayer));
 		remotePlayerChosenReceived(remotePlayer);
 
 		break;
@@ -107,7 +107,7 @@ void RemoteReceiver::onMessageReceived(MultiplayerMessageType type, std::vector<
 	{
 		bool flag = tryGetContentFromMessage<bool>(jMessage, RemoteControl::PlayerReadyFlagKey);
 
-		LOG_INFO("Received player ready for game flag : {}", LoggingHelper::boolToString(flag));
+		LOG_INFO("Received player ready for game flag : {}", Logging::boolToString(flag));
 		remotePlayerReadyFlagReceived(flag);
 
 		break;

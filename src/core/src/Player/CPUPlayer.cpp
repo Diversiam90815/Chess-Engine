@@ -25,8 +25,8 @@ void CPUPlayer::configure(const CPUConfiguration &config)
 	mConfig = config;
 	LOG_INFO("CPU player configured:");
 	LOG_INFO("\tDifficulty:\t{}", static_cast<int>(config.difficulty));
-	LOG_INFO("\tPlayer:\t{}", LoggingHelper::sideToString(config.cpuColor).c_str());
-	LOG_INFO("\tEnabled:\t{}", LoggingHelper::boolToString(config.enabled).c_str());
+	LOG_INFO("\tPlayer:\t{}", Logging::sideToString(config.cpuColor).c_str());
+	LOG_INFO("\tEnabled:\t{}", Logging::boolToString(config.enabled).c_str());
 
 	clearTranspositionTable();
 }

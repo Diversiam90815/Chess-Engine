@@ -102,6 +102,19 @@ extern "C"
 		char errorMessage[MAX_STRING_LENGTH];
 	} CConnectionEvent;
 
+
+
+	/**
+	 * @brief	User settings initialization payload from the C# host.
+	 */
+	typedef struct
+	{
+		char playerName[MAX_STRING_LENGTH];
+		int	 discoveryUDPPort;
+		char appDataPath[512];
+	} CUserSettingsInit;
+
+
 #ifdef __cplusplus
 }
 #endif

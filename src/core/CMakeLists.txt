@@ -15,8 +15,6 @@ set (FILEMANAGER_DIR				${SOURCE_DIR}/FileManager)
 set (LOGGER_DIR						${SOURCE_DIR}/Logger)
 set (USERSETTINGSCACHE_DIR			${SOURCE_DIR}/UserSettingsCache)
 set (INPUTSOURCE_DIR				${SOURCE_DIR}/InputSource)
-set (NETWORK_DIR					${SOURCE_DIR}/Network)
-set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
 
@@ -35,8 +33,6 @@ set(ALL_PROJECT_DIRS
 			${FILEMANAGER_DIR}
 			${USERSETTINGSCACHE_DIR}
 			${INPUTSOURCE_DIR}
-			${NETWORK_DIR}
-			${MULTIPLAYER_DIR}
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
 )
@@ -109,12 +105,6 @@ set(FILEMANAGER_FILES
 	${FILEMANAGER_DIR}/FileManager.h    ${FILEMANAGER_DIR}/FileManager.cpp
 )
 
-set(NETWORK_FILES
-	${NETWORK_DIR}/NetworkAdapter.h
-	${NETWORK_DIR}/NetworkManager.h         ${NETWORK_DIR}/NetworkManager.cpp
-	${NETWORK_DIR}/NetworkInformation.h     ${NETWORK_DIR}/NetworkInformation.cpp
-)
-
 set(USERSETTINGSCACHE_FILES
 	${USERSETTINGSCACHE_DIR}/UserSettingsCache.h	${USERSETTINGSCACHE_DIR}/UserSettingsCache.cpp
 )
@@ -127,22 +117,6 @@ set(INPUTSOURCE_FILES
 
 set(EVALUATION_FILES
 	${EVALUATION_DIR}/Evaluation.h  	${EVALUATION_DIR}/Evaluation.cpp  
-)
-
-set(MULTIPLAYER_FILES
-	${MULTIPLAYER_DIR}/ConnectionStatus.h
-	${MULTIPLAYER_DIR}/Discovery/DiscoveryEndpoint.h
-	${MULTIPLAYER_DIR}/RemoteMessaging/MultiplayerMessageStruct.h
-	${MULTIPLAYER_DIR}/RemoteMessaging/CommunicationThreads.h			${MULTIPLAYER_DIR}/RemoteMessaging/CommunicationThreads.cpp
-	${MULTIPLAYER_DIR}/MultiplayerManager.h							${MULTIPLAYER_DIR}/MultiplayerManager.cpp
-	${MULTIPLAYER_DIR}/Discovery/DiscoveryService.h					${MULTIPLAYER_DIR}/Discovery/DiscoveryService.cpp
-	${MULTIPLAYER_DIR}/TCPConnection/TCPInterfaces.h
-	${MULTIPLAYER_DIR}/TCPConnection/TCPSession.h						${MULTIPLAYER_DIR}/TCPConnection/TCPSession.cpp
-	${MULTIPLAYER_DIR}/TCPConnection/TCPServer.h						${MULTIPLAYER_DIR}/TCPConnection/TCPServer.cpp
-	${MULTIPLAYER_DIR}/TCPConnection/TCPClient.h						${MULTIPLAYER_DIR}/TCPConnection/TCPClient.cpp
-	${MULTIPLAYER_DIR}/RemoteMessaging/RemoteSender.h					${MULTIPLAYER_DIR}/RemoteMessaging/RemoteSender.cpp
-	${MULTIPLAYER_DIR}/RemoteMessaging/RemoteReceiver.h				${MULTIPLAYER_DIR}/RemoteMessaging/RemoteReceiver.cpp
-	${MULTIPLAYER_DIR}/RemoteMessaging/RemoteCommunication.h			${MULTIPLAYER_DIR}/RemoteMessaging/RemoteCommunication.cpp
 )
 
 set(ALL_FILES
@@ -158,12 +132,9 @@ set(ALL_FILES
 	${FILEMANAGER_FILES}
 	${USERSETTINGSCACHE_FILES}
 	${INPUTSOURCE_FILES}
-	${NETWORK_FILES}
-	${MULTIPLAYER_FILES}
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
 )
-
 
 include(cpm)
 
@@ -177,13 +148,6 @@ CPMAddPackage(
   NAME nlohmann_json
   GITHUB_REPOSITORY nlohmann/json
   VERSION 3.12.0
-)
-
-CPMAddPackage(
-  NAME asio
-  GITHUB_REPOSITORY chriskohlhoff/asio
-  GIT_TAG asio-1-30-2 
-  OPTIONS "ASIO_STANDALONE ON"
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
@@ -215,7 +179,6 @@ target_compile_definitions(${TARGET_NAME} PUBLIC
 	_WIN32_WINNT=0x0A00
 	WINVER=0x0A00
 	NTDDI_VERSION=NTDDI_WIN10 
-	ASIO_STANDALONE
 )
 
 target_compile_options(${TARGET_NAME} PRIVATE
@@ -236,13 +199,11 @@ set(Include_Dirs
 		${PROJECT_BINARY_DIR}
 		${ALL_PROJECT_DIRS}
 		${LOGGER_INCLUDE_FILE}
-		${asio_SOURCE_DIR}/asio/include
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC ${Include_Dirs})
 
 set(TARGET_LIBS		Logger
-					iphlpapi
 					windowscodecs
 					WindowsApp
 					nlohmann_json::nlohmann_json

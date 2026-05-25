@@ -150,6 +150,12 @@ CPMAddPackage(
   VERSION 3.12.0
 )
 
+CPMAddPackage(
+  NAME NetLink
+  GITHUB_REPOSITORY Diversiam90815/NetLink
+  GIT_TAG v0.1.0
+)
+
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
 
 include(BuildInfo)
@@ -207,6 +213,7 @@ set(TARGET_LIBS		Logger
 					windowscodecs
 					WindowsApp
 					nlohmann_json::nlohmann_json
+					NetLink
 )
 
 target_link_libraries(${TARGET_NAME} PUBLIC ${TARGET_LIBS})

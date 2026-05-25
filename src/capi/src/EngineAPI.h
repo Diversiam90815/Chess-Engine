@@ -49,11 +49,15 @@ extern "C"
 	// Multiplayer
 	//=========================================================================
 
-	Engine_API void	 StartedMultiplayer();
-	Engine_API void	 StartRemoteDiscovery(bool isHost);
-	Engine_API void	 AnswerConnectionInvitation(bool accept);
-	Engine_API void	 SendConnectionRequestToHost();
-	Engine_API void	 StoppedMultiplayer();
+	Engine_API void	 StartMultiplayer();
+	Engine_API void	 StopMultiplayer();
+
+	Engine_API void	 FindOpponent();
+	Engine_API int	 GetDiscoveredOpponentCount();
+	Engine_API bool	 GetDiscoveredOpponentAtIndex(int index, char *name, int maxLen);
+	Engine_API void	 ConnectToOpponent(int index);
+	Engine_API void	 RespondToConnectionRequest(bool accept);
+
 	Engine_API void	 SetLocalPlayer(int iLocalPlayer);
 	Engine_API void	 SetLocalPlayerReady(bool ready);
 
@@ -69,13 +73,12 @@ extern "C"
 
 
 	//=========================================================================
-	// Network
+	// Network Adapters
 	//=========================================================================
 
 	Engine_API int	 GetNetworkAdapterCount();
 	Engine_API bool	 GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInstance *adapter);
 	Engine_API bool	 ChangeCurrentAdapter(int ID);
-	Engine_API int	 GetCurrentNetworkAdapterID();
 
 
 	//=========================================================================

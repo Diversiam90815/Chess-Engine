@@ -90,7 +90,6 @@ set(PLAYER_FILES
 set(HELPER_FILES
 	${HELPER_DIR}/SystemInfo.h
 	${HELPER_DIR}/PieceValues.h
-	${HELPER_DIR}/JsonConversion.h
 	${HELPER_DIR}/Parameters.h
 	${HELPER_DIR}/ThreadBase.h
 	${HELPER_DIR}/Conversion.h
@@ -150,12 +149,6 @@ CPMAddPackage(
   NAME Logger
   GITHUB_REPOSITORY Diversiam90815/Logger
   VERSION 1.3.81
-)
-
-CPMAddPackage(
-  NAME nlohmann_json
-  GITHUB_REPOSITORY nlohmann/json
-  VERSION 3.12.0
 )
 
 CPMAddPackage(

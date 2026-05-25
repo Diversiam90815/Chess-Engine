@@ -20,7 +20,7 @@ void WinUIInputSource::onAddCapturedPiece(Side player, PieceType captured)
 	PlayerCapturedPieceEvent event{};
 	event.playerColor = player;
 	event.pieceType	  = captured;
-	event.captured	  = true; // We captured a piece
+	event.captured	  = true;
 	sendToUI(MessageType::PlayerCapturedPiece, &event);
 }
 
@@ -30,7 +30,7 @@ void WinUIInputSource::onRemoveLastCapturedPiece(Side player, PieceType captured
 	PlayerCapturedPieceEvent event{};
 	event.playerColor = player;
 	event.pieceType	  = captured;
-	event.captured	  = false; // we removed the last captured piece
+	event.captured	  = false;
 	sendToUI(MessageType::PlayerCapturedPiece, &event);
 }
 
@@ -96,17 +96,27 @@ void WinUIInputSource::onPlayerChanged(Side playersTurn)
 }
 
 
-void WinUIInputSource::onConnectionStateChanged(const ConnectionStatusEvent event)
+void WinUIInputSource::onMultiplayerStateChanged(const MultiplayerEvent &event)
 {
-	CConnectionEvent tmpEvent = convertToCStyleConnectionStateEvent(event);
+	CConnectionEvent cEvent = convertToConnectionEvent(event);
 
-	sendToUI(MessageType::ConnectionStateChanged, &tmpEvent);
+	sendToUI(MessageType::ConnectionStateChanged, &cEvent);
 }
 
 
-void WinUIInputSource::onRemotePlayerChosen(Side local)
+void WinUIInputSource::onOpponentFound(const std::string &name)
 {
-	sendToUI(MessageType::MultiplayerPlayerChosen, &local);
+	CConnectionEvent cEvent{};
+	cEvent.state = static_cast<int>(MultiplayerState::OpponentFound);
+	StringCbCopyA(cEvent.remoteName, MAX_STRING_LENGTH, name.c_str());
+
+	sendToUI(MessageType::OpponentDiscovered, &cEvent);
+}
+
+
+void WinUIInputSource::onRemotePlayerChosen(Side remotePlayer)
+{
+	sendToUI(MessageType::MultiplayerPlayerChosen, &remotePlayer);
 }
 
 
@@ -122,28 +132,22 @@ bool WinUIInputSource::sendToUI(MessageType type, void *message) const
 }
 
 
-CConnectionEvent WinUIInputSource::convertToCStyleConnectionStateEvent(const ConnectionStatusEvent state)
+CConnectionEvent WinUIInputSource::convertToConnectionEvent(const MultiplayerEvent &event)
 {
-	CConnectionEvent c_style_state{};
-	c_style_state.state = static_cast<int>(state.state);
+	CConnectionEvent cEvent{};
+	cEvent.state = static_cast<int>(event.state);
 
-	if (state.state == ConnectionState::Error)
+	if (!event.errorMessage.empty())
 	{
-		size_t len		  = state.errorMessage.size();
-		size_t bufferSize = (len + 1) * sizeof(char);
-		char  *strCopy	  = static_cast<char *>(CoTaskMemAlloc(bufferSize));
-		StringCbCopyA(c_style_state.errorMessage, bufferSize, state.errorMessage.c_str());
+		StringCbCopyA(cEvent.errorMessage, MAX_STRING_LENGTH, event.errorMessage.c_str());
 	}
 
-	if (!state.remoteEndpoint.playerName.empty())
+	if (!event.remoteName.empty())
 	{
-		size_t len		  = state.remoteEndpoint.playerName.size();
-		size_t bufferSize = (len + 1) * sizeof(char);
-		char  *strCopy	  = static_cast<char *>(CoTaskMemAlloc(bufferSize));
-		StringCbCopyA(c_style_state.remoteName, bufferSize, state.remoteEndpoint.playerName.c_str());
+		StringCbCopyA(cEvent.remoteName, MAX_STRING_LENGTH, event.remoteName.c_str());
 	}
 
-	return c_style_state;
+	return cEvent;
 }
 
 

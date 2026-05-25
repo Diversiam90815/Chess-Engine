@@ -7,13 +7,9 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-
 #include "Move.h"
 #include "Parameters.h"
-#include "NetworkAdapter.h"
-#include "Multiplayer/RemoteMessaging/MultiplayerMessageStruct.h"
-#include "Multiplayer/ConnectionStatus.h"
+#include "MultiplayerTypes.h"
 #include "BitboardTypes.h"
 
 
@@ -27,64 +23,12 @@ public:
 };
 
 
-class IRemoteReceiverObserver
+class IMultiplayerObserver
 {
 public:
-	virtual ~IRemoteReceiverObserver() {};
+	virtual ~IMultiplayerObserver() {};
 
-	virtual void onMessageReceived(MultiplayerMessageType type, std::vector<uint8_t> &message) = 0;
-};
-
-
-class INetworkObserver
-{
-public:
-	virtual ~INetworkObserver() {};
-
-	virtual void onNetworkAdapterChanged(const NetworkAdapter &adapter) = 0;
-};
-
-
-class IRemoteMessagesObserver
-{
-public:
-	virtual ~IRemoteMessagesObserver() {};
-
-	virtual void onRemoteConnectionStateReceived(const ConnectionState &state)			= 0;
-	virtual void onRemoteMoveReceived(const Move &remoteMove)							= 0;
-	virtual void onRemoteChatMessageReceived(const std::string &mesage)					= 0;
-	virtual void onRemoteInvitationReceived(const InvitationRequest &invite)			= 0;
-	virtual void onRemoteInvitationResponseReceived(const InvitationResponse &response) = 0;
-	virtual void onRemotePlayerChosenReceived(const Side player)						= 0;
-	virtual void onRemotePlayerReadyFlagReceived(const bool flag)						= 0;
-};
-
-
-class IRemoteSenderObserver
-{
-public:
-	virtual ~IRemoteSenderObserver() {};
-
-	virtual void onSendMessage(MultiplayerMessageType type, std::vector<uint8_t> &message) = 0;
-};
-
-
-class IDiscoveryObserver
-{
-public:
-	virtual ~IDiscoveryObserver() {};
-
-	virtual void onRemoteFound(const Endpoint &remote) = 0;
-};
-
-
-class IConnectionStatusObserver
-{
-public:
-	virtual ~IConnectionStatusObserver() {};
-
-	virtual void onConnectionStateChanged(const ConnectionStatusEvent event) = 0;
-	virtual void onLocalPlayerChosen(const Side localPlayer)				 = 0;
-	virtual void onRemotePlayerChosen(Side remotePlayer)					 = 0;
-	virtual void onLocalReadyFlagSet(const bool flag)						 = 0;
+	virtual void onMultiplayerStateChanged(const MultiplayerEvent &event) = 0;
+	virtual void onOpponentFound(const std::string &name)				  = 0;
+	virtual void onRemotePlayerChosen(Side remotePlayer)				  = 0;
 };

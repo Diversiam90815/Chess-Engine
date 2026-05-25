@@ -12,9 +12,9 @@
 #include "BitboardTypes.h"
 
 
-/// <summary>
-/// Represents the possible end states of a chess game.
-/// </summary>
+// <summary>
+// Represents the possible end states of a chess game.
+// </summary>
 enum class EndGameState
 {
 	OnGoing	  = 1,
@@ -36,9 +36,9 @@ enum class CPUDifficulty
 };
 
 
-/// <summary>
-/// Represents the various states of a game used in the StateMachine.
-/// </summary>
+// <summary>
+// Represents the various states of a game used in the StateMachine.
+// </summary>
 enum class GameState
 {
 	Init				 = 1,

@@ -17,6 +17,7 @@ set (USERSETTINGSCACHE_DIR			${SOURCE_DIR}/UserSettingsCache)
 set (INPUTSOURCE_DIR				${SOURCE_DIR}/InputSource)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
+set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
 
 
 set(ALL_PROJECT_DIRS 
@@ -35,6 +36,7 @@ set(ALL_PROJECT_DIRS
 			${INPUTSOURCE_DIR}
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
+			${MULTIPLAYER_DIR}
 )
 
 include_directories(${ALL_PROJECT_DIRS})
@@ -116,7 +118,12 @@ set(INPUTSOURCE_FILES
 )
 
 set(EVALUATION_FILES
-	${EVALUATION_DIR}/Evaluation.h  	${EVALUATION_DIR}/Evaluation.cpp  
+	${EVALUATION_DIR}/Evaluation.h  	${EVALUATION_DIR}/Evaluation.cpp
+)
+
+set(MULTIPLAYER_FILES
+	${MULTIPLAYER_DIR}/MultiplayerTypes.h
+	${MULTIPLAYER_DIR}/MultiplayerManager.h		${MULTIPLAYER_DIR}/MultiplayerManager.cpp
 )
 
 set(ALL_FILES
@@ -134,6 +141,7 @@ set(ALL_FILES
 	${INPUTSOURCE_FILES}
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
+	${MULTIPLAYER_FILES}
 )
 
 include(cpm)

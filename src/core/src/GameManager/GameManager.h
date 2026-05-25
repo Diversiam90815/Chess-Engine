@@ -12,7 +12,6 @@
 #include "Logging.h"
 #include "IObservable.h"
 #include "WinUIInputSource.h"
-#include "NetworkManager.h"
 #include "MultiplayerManager.h"
 #include "PlayerName.h"
 #include "SystemInfo.h"
@@ -24,66 +23,67 @@ class GameManager
 public:
 	~GameManager();
 
-	static GameManager		   *GetInstance();
-	static void					ReleaseInstance();
+	static GameManager					*GetInstance();
+	static void							 ReleaseInstance();
 
 	//=========================================================================
 	// Lifecycle
 	//=========================================================================
 
-	bool						init();
-	void						shutDown();
+	bool								 init();
+	void								 shutDown();
 
 	//=========================================================================
 	// Game Control
 	//=========================================================================
 
-	void						startGame(GameConfiguration config);
-	void						resetGame();
-	void						undoMove();
+	void								 startGame(GameConfiguration config);
+	void								 resetGame();
+	void								 undoMove();
 
 	//=========================================================================
 	// Input Events
 	//=========================================================================
 
-	void						onSquareSelected(Square sq);
-	void						onPromotionChosen(PieceType piece);
+	void								 onSquareSelected(Square sq);
+	void								 onPromotionChosen(PieceType piece);
 
 	//=========================================================================
 	// UI Integration
 	//=========================================================================
 
-	void						setDelegate(PFN_CALLBACK delegate);
+	void								 setDelegate(PFN_CALLBACK delegate);
 
 	//=========================================================================
 	// Board State Queries
 	//=========================================================================
 
-	std::array<PieceType, 64>	getBoardPieces() const;
-	const MoveList			   &getCachedLegalMoves() const;
-	PieceType					getPieceAt(Square sq) const;
+	std::array<PieceType, 64>			 getBoardPieces() const;
+	const MoveList						&getCachedLegalMoves() const;
+	PieceType							 getPieceAt(Square sq) const;
 
 	//=========================================================================
 	// Multiplayer
 	//=========================================================================
 
-	void						startMultiplayerSession();
-	void						stoppedMultiplayer();
-	bool						isMultiplayerActive() const { return mIsMultiplayerMode; }
+	void								 startMultiplayer();
+	void								 stopMultiplayer();
+	bool								 isMultiplayerActive() const { return mIsMultiplayerMode; }
 
-	void						startRemoteDiscovery(bool isHost);
-	void						answerConnectionInvitation(bool accepted);
-	void						sendConnectionRequestToHost();
-	void						setLocalPlayerInMultiplayer(Side localPlayer);
-	void						setLocalPlayerReady(bool ready);
+	void								 findOpponent();
+	std::vector<std::string>			 getDiscoveredOpponents();
+	void								 connectToOpponent(int index);
+	void								 respondToConnectionRequest(bool accept);
+
+	void								 setLocalPlayerColor(Side localPlayer);
+	void								 setLocalPlayerReady(bool ready);
 
 	//=========================================================================
-	// Network
+	// Network Adapters
 	//=========================================================================
 
-	std::vector<NetworkAdapter> getNetworkAdapters();
-	bool						changeCurrentNetworkAdapter(int ID);
-	int							getCurrentNetworkAdapterID();
+	std::vector<netlink::NetworkAdapter> getNetworkAdapters();
+	bool								 changeCurrentNetworkAdapter(int ID);
 
 
 private:
@@ -91,7 +91,6 @@ private:
 
 	void								initializeComponents();
 	void								wireComponents();
-	void								setupMultiplayObservers();
 
 	//=========================================================================
 	// Core Components
@@ -109,7 +108,6 @@ private:
 	PlayerName							mPlayerName;
 
 	std::shared_ptr<MultiplayerManager> mMultiplayerManager;
-	std::unique_ptr<NetworkManager>		mNetworkManager;
 
 	//=========================================================================
 	// State

@@ -12,13 +12,10 @@
 #include <Logger.h>
 #include <string>
 
-#include "ConnectionStatus.h"
+#include "MultiplayerTypes.h"
 #include "FileManager.h"
 
 
-/// <summary>
-/// Provides logging functionality, including initialization of the logging system.
-/// </summary>
 class Logging
 {
 public:
@@ -29,7 +26,7 @@ public:
 
 	static std::string gameStateToString(GameState state);
 	static std::string boolToString(const bool value);
-	static std::string connectionStateToString(const ConnectionState state);
+	static std::string multiplayerStateToString(MultiplayerState state);
 	static std::string sideToString(const Side side);
 	static std::string cpuDifficultyToString(const CPUDifficulty diff);
 

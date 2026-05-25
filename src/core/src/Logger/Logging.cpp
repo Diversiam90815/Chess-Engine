@@ -50,22 +50,21 @@ std::string Logging::boolToString(const bool value)
 }
 
 
-std::string Logging::connectionStateToString(const ConnectionState state)
+std::string Logging::multiplayerStateToString(MultiplayerState state)
 {
 	switch (state)
 	{
-	case ConnectionState::None: return "None";
-	case ConnectionState::Disconnected: return "Disconnects";
-	case ConnectionState::HostingSession: return "Hosting Session";
-	case ConnectionState::WaitingForARemote: return "Waiting for a remote";
-	case ConnectionState::Connected: return "Connected";
-	case ConnectionState::Error: return "Error";
-	case ConnectionState::ConnectionRequested: return "Connection requested";
-	case ConnectionState::PendingHostApproval: return "Pending host approval";
-	case ConnectionState::ClientFoundHost: return "Client found host";
-	case ConnectionState::SetPlayerColor: return "Set player color";
-	case ConnectionState::GameStarted: return "Game Started";
-	default: return "Unknown ConnectionState";
+	case MultiplayerState::None: return "None";
+	case MultiplayerState::Searching: return "Searching";
+	case MultiplayerState::OpponentFound: return "Opponent Found";
+	case MultiplayerState::ConnectionRequested: return "Connection Requested";
+	case MultiplayerState::Connected: return "Connected";
+	case MultiplayerState::PlayerSetup: return "Player Setup";
+	case MultiplayerState::ReadyToStart: return "Ready To Start";
+	case MultiplayerState::InGame: return "In Game";
+	case MultiplayerState::Disconnected: return "Disconnected";
+	case MultiplayerState::Error: return "Error";
+	default: return "Unknown MultiplayerState";
 	}
 }
 

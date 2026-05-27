@@ -182,6 +182,12 @@ bool MultiplayerManager::setActiveAdapter(int adapterID)
 }
 
 
+int MultiplayerManager::getActiveAdapterID()
+{
+	return mNetLink.getActiveAdapterID();
+}
+
+
 void MultiplayerManager::setRemoteMoveCallback(std::function<void(Move)> callback)
 {
 	mRemoteMoveCallback = std::move(callback);

@@ -239,6 +239,15 @@ bool GameManager::changeCurrentNetworkAdapter(int ID)
 }
 
 
+int GameManager::getCurrentNetworkAdapterID()
+{
+	if (!mMultiplayerManager)
+		return 0;
+
+	return mMultiplayerManager->getActiveAdapterID();
+}
+
+
 //=========================================================================
 // Initialization
 //=========================================================================

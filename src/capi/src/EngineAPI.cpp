@@ -308,6 +308,11 @@ Engine_API bool ChangeCurrentAdapter(int ID)
 	return GameManager::GetInstance()->changeCurrentNetworkAdapter(ID);
 }
 
+Engine_API int GetCurrentNetworkAdapterID()
+{
+	return GameManager::GetInstance()->getCurrentNetworkAdapterID();
+}
+
 
 //=========================================================================
 // Settings

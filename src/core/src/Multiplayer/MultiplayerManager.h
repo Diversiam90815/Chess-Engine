@@ -65,6 +65,7 @@ public:
 
 	std::vector<netlink::NetworkAdapter> getAvailableAdapters();
 	bool								 setActiveAdapter(int adapterID);
+	int									 getActiveAdapterID();
 
 	//=========================================================================
 	// Callbacks

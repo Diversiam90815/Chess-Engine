@@ -84,6 +84,7 @@ public:
 
 	std::vector<netlink::NetworkAdapter> getNetworkAdapters();
 	bool								 changeCurrentNetworkAdapter(int ID);
+	int									 getCurrentNetworkAdapterID();
 
 
 private:

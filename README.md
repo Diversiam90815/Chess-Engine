@@ -2,20 +2,22 @@
 
 ## Overview
 
-A chess engine written in C & C++ implementing a complete chess game with a CPU opponent and LAN multiplayer. The project is structured as a core static library, a plain C API wrapper (DLL), and a console application for testing (all built through a unified Python-driven CMake build system).
+A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation, and the core is exposed as a plain C API (DLL) for straightforward integration with non-C++ runtimes. The project is structured as a core static library, a C API wrapper, and a console application for testing — all built through a unified Python-driven CMake build system.
 
 ## Features
 
-- **CPU Opponent**: Single-player mode against the AI at multiple difficulty levels, from random moves to Minimax with Alpha-Beta pruning. Transposition tables are used to avoid redundant evaluation.
+- **Bitboard Representation**: The board state is encoded entirely in 64-bit integers. Pre-computed attack tables and Zobrist hashing power efficient move generation, legal-move validation, and transposition-table lookups.
+- **CPU Opponent**: Single-player mode against the AI at multiple difficulty levels. Transposition tables are used to avoid redundant evaluation.
 - **Adjustable Sides**: Choose whether to play as White or Black when starting a game against the CPU.
-- **LAN Multiplayer**: Host or join games on your local network with automatic peer discovery. On machines with multiple network interfaces, a specific adapter can be selected for a stable connection.
+- **LAN Multiplayer**: Both players discover each other automatically on the local network. On machines with multiple network interfaces, a specific adapter can be selected for a stable connection.
+- **Plain C API (DLL)**: The entire engine is accessible through a plain C API exported as a DLL, making it straightforward to drive from C#, Python, or any runtime with C FFI support.
 
 ## Technology Stack
 
 | Category | Technology |
 |---|---|
 | Language | C++20 |
-| Networking | [ASIO](https://think-async.com/Asio/) (standalone, no Boost) |
+| Networking | [NetLink v0.1.0](https://github.com/Diversiam90815/NetLink) |
 | Build System | CMake 4.0+, Python 3.x |
 | Dependency Management | [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) |
 | Testing | GoogleTest 1.15.2 + CTest |
@@ -176,8 +178,7 @@ All dependencies are managed by CPM.cmake and downloaded automatically at config
 | Dependency | Version | Purpose |
 |---|---|---|
 | Logger | 1.3.81 | Logging infrastructure |
-| nlohmann_json | 3.12.0 | JSON parsing and serialisation |
-| ASIO | 1.30.2 | Async networking (TCP, UDP, peer discovery) |
+| NetLink | 0.1.0 | Peer discovery, TCP/UDP networking (bundles ASIO and nlohmann_json) |
 | GoogleTest | 1.15.2 | Unit testing |
 | doxygen-awesome-css | 2.3.1 | Documentation theme |
 

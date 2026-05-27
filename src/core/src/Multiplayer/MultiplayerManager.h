@@ -135,4 +135,6 @@ private:
 	mutable std::mutex				mMutex;
 
 	bool							mInitialized{false};
+	bool							mLocalPlayerReady{false};
+	bool							mRemotePlayerReady{false};
 };

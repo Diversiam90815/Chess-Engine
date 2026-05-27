@@ -135,6 +135,8 @@ void MultiplayerManager::disconnect()
 {
 	mNetLink.disconnect();
 	mNetLink.stopDiscovery();
+	mLocalPlayerReady  = false;
+	mRemotePlayerReady = false;
 
 	{
 		std::lock_guard lock(mMutex);
@@ -156,9 +158,13 @@ void MultiplayerManager::sendPlayerChosen(Side localPlayer)
 
 void MultiplayerManager::sendPlayerReady(bool ready)
 {
-	auto msg = serializePlayerReady(ready);
+	mLocalPlayerReady = ready;
+	auto msg		  = serializePlayerReady(ready);
 	mNetLink.send(msg);
 	LOG_DEBUG("Sent ready state: {}", ready);
+
+	if (mLocalPlayerReady && mRemotePlayerReady)
+		transitionTo(MultiplayerState::InGame);
 }
 
 
@@ -268,6 +274,9 @@ void MultiplayerManager::onConnectionChanged(const netlink::ConnectionEvent even
 	case netlink::ConnectionState::Connected:
 		mNetLink.stopDiscovery();
 		transitionTo(MultiplayerState::Connected, event.remote.displayName);
+		mLocalPlayerReady  = false;
+		mRemotePlayerReady = false;
+		transitionTo(MultiplayerState::PlayerSetup, event.remote.displayName);
 		break;
 
 	case netlink::ConnectionState::Disconnected: transitionTo(MultiplayerState::Disconnected); break;
@@ -307,9 +316,10 @@ void MultiplayerManager::onMessageReceived(const netlink::Message &message)
 	{
 		bool ready = deserializePlayerReady(message);
 		LOG_DEBUG("Remote player ready: {}", ready);
+		mRemotePlayerReady = ready;
 
-		if (ready && mState == MultiplayerState::PlayerSetup)
-			transitionTo(MultiplayerState::ReadyToStart);
+		if (mLocalPlayerReady && mRemotePlayerReady)
+			transitionTo(MultiplayerState::InGame);
 		break;
 	}
 

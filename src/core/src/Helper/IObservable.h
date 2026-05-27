@@ -1,21 +1,17 @@
 /*
   ==============================================================================
-	Module:			IObserver
-	Description:    Interface observer class used by the Observer Pattern
+	Module:			IObservable
+	Description:    Interface observable class used by the Observer Pattern
   ==============================================================================
 */
 
 #pragma once
 
 #include <memory>
-#include <nlohmann/json.hpp>
+#include <vector>
+#include <algorithm>
 
 #include "IObserver.h"
-#include "Move.h"
-#include "Multiplayer/RemoteMessaging/MultiplayerMessageStruct.h"
-
-
-using json = nlohmann::json;
 
 
 template <typename ObserverType>
@@ -53,64 +49,12 @@ public:
 };
 
 
-class IRemoteReceiverObservable : public ObservableBase<IRemoteReceiverObserver>
+class IMultiplayerObservable : public ObservableBase<IMultiplayerObserver>
 {
 public:
-	virtual ~IRemoteReceiverObservable() {};
+	virtual ~IMultiplayerObservable() {};
 
-	virtual void receivedMessage(MultiplayerMessageType type, std::vector<uint8_t> &message) = 0;
-};
-
-
-class INetworkObservable : public ObservableBase<INetworkObserver>
-{
-public:
-	virtual ~INetworkObservable() {};
-
-	virtual void networkAdapterChanged(const NetworkAdapter &adapter) = 0;
-};
-
-
-class IRemoteMessagesObservable : public ObservableBase<IRemoteMessagesObserver>
-{
-public:
-	virtual ~IRemoteMessagesObservable() {};
-
-	virtual void remoteConnectionStateReceived(const ConnectionState &state)		  = 0;
-	virtual void remoteMoveReceived(const Move &move)								  = 0;
-	virtual void remoteChatMessageReceived(const std::string &message)				  = 0;
-	virtual void remoteInvitationReceived(const InvitationRequest &invite)			  = 0;
-	virtual void remoteInvitationResponseReceived(const InvitationResponse &response) = 0;
-	virtual void remotePlayerChosenReceived(const Side player)						  = 0;
-	virtual void remotePlayerReadyFlagReceived(const bool flag)						  = 0;
-};
-
-
-class IRemoteSenderObservable : public ObservableBase<IRemoteSenderObserver>
-{
-public:
-	virtual ~IRemoteSenderObservable() {};
-
-	virtual void sendMessage(MultiplayerMessageType type, std::vector<uint8_t> &message) = 0;
-};
-
-
-class IDiscoveryObservable : public ObservableBase<IDiscoveryObserver>
-{
-public:
-	virtual ~IDiscoveryObservable() {};
-
-	virtual void remoteFound(const Endpoint &remote) = 0;
-};
-
-
-class IConnectionStatusObservable : public ObservableBase<IConnectionStatusObserver>
-{
-public:
-	virtual ~IConnectionStatusObservable() {};
-
-	virtual void connectionStatusChanged(const ConnectionStatusEvent event) = 0;
-	virtual void localPlayerChosen(const Side localPlayer)					= 0;
-	virtual void remotePlayerChosen(const Side localPlayer)					= 0;
-	virtual void localReadyFlagSet(const bool flag)							= 0;
+	virtual void multiplayerStateChanged(const MultiplayerEvent &event) = 0;
+	virtual void opponentFound(const std::string &name)					= 0;
+	virtual void remotePlayerChosen(Side remotePlayer)					= 0;
 };

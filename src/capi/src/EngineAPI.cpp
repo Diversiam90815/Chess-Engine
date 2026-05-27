@@ -187,36 +187,64 @@ Engine_API bool GetLegalMoveAtIndex(int index, MoveInstance *move)
 // Multiplayer
 //=========================================================================
 
-Engine_API void StartedMultiplayer()
+Engine_API void StartMultiplayer()
 {
-	GameManager::GetInstance()->startMultiplayerSession();
+	GameManager::GetInstance()->startMultiplayer();
 }
 
-Engine_API void StartRemoteDiscovery(bool isHost)
+
+Engine_API void StopMultiplayer()
 {
-	GameManager::GetInstance()->startRemoteDiscovery(isHost);
+	GameManager::GetInstance()->stopMultiplayer();
 }
 
-Engine_API void AnswerConnectionInvitation(bool accept)
+
+Engine_API void FindOpponent()
 {
-	GameManager::GetInstance()->answerConnectionInvitation(accept);
+	GameManager::GetInstance()->findOpponent();
 }
 
-Engine_API void SendConnectionRequestToHost()
+
+Engine_API int GetDiscoveredOpponentCount()
 {
-	GameManager::GetInstance()->sendConnectionRequestToHost();
+	auto opponents = GameManager::GetInstance()->getDiscoveredOpponents();
+	return static_cast<int>(opponents.size());
 }
 
-Engine_API void StoppedMultiplayer()
+
+Engine_API bool GetDiscoveredOpponentAtIndex(int index, char *name, int maxLen)
 {
-	GameManager::GetInstance()->stoppedMultiplayer();
+	auto opponents = GameManager::GetInstance()->getDiscoveredOpponents();
+
+	if (index < 0 || index >= static_cast<int>(opponents.size()))
+		return false;
+
+	if (!name || maxLen <= 0)
+		return false;
+
+	StringCbCopyA(name, maxLen, opponents[index].c_str());
+	return true;
 }
+
+
+Engine_API void ConnectToOpponent(int index)
+{
+	GameManager::GetInstance()->connectToOpponent(index);
+}
+
+
+Engine_API void RespondToConnectionRequest(bool accept)
+{
+	GameManager::GetInstance()->respondToConnectionRequest(accept);
+}
+
 
 Engine_API void SetLocalPlayer(int iLocalPlayer)
 {
-	Side local = (Side)iLocalPlayer;
-	GameManager::GetInstance()->setLocalPlayerInMultiplayer(local);
+	Side local = static_cast<Side>(iLocalPlayer);
+	GameManager::GetInstance()->setLocalPlayerColor(local);
 }
+
 
 Engine_API void SetLocalPlayerReady(bool ready)
 {
@@ -250,14 +278,13 @@ Engine_API void LogDebugWithCaller(const char *message, const char *method, cons
 
 
 //=========================================================================
-// Network
+// Network Adapters
 //=========================================================================
 
 Engine_API int GetNetworkAdapterCount()
 {
-	auto   adapters	   = GameManager::GetInstance()->getNetworkAdapters();
-	size_t numAdapters = adapters.size();
-	return numAdapters;
+	auto adapters = GameManager::GetInstance()->getNetworkAdapters();
+	return static_cast<int>(adapters.size());
 }
 
 Engine_API bool GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInstance *adapter)
@@ -267,27 +294,23 @@ Engine_API bool GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInsta
 	if (index >= adapters.size())
 		return false;
 
-	const auto &foundAdapter = adapters[index];
+	const auto &found = adapters[index];
 
-	adapter->ID				 = foundAdapter.ID;
-	adapter->type			 = static_cast<int>(foundAdapter.Type);
-	adapter->visibility		 = static_cast<int>(foundAdapter.Visibility);
-	StringCbCopyA(adapter->adapterName, MAX_STRING_LENGTH, foundAdapter.AdapterName.c_str());
-	StringCbCopyA(adapter->networkName, MAX_STRING_LENGTH, foundAdapter.NetworkName.c_str());
+	adapter->ID		  = found.id;
+	adapter->priority = static_cast<int>(found.priority);
+	StringCbCopyA(adapter->adapterName, MAX_STRING_LENGTH, found.adapterName.c_str());
+	StringCbCopyA(adapter->networkName, MAX_STRING_LENGTH, found.networkName.c_str());
 	return true;
 }
 
 Engine_API bool ChangeCurrentAdapter(int ID)
 {
-	bool result = GameManager::GetInstance()->changeCurrentNetworkAdapter(ID);
-	return result;
+	return GameManager::GetInstance()->changeCurrentNetworkAdapter(ID);
 }
-
 
 Engine_API int GetCurrentNetworkAdapterID()
 {
-	// TODO:
-	return 0;
+	return GameManager::GetInstance()->getCurrentNetworkAdapterID();
 }
 
 

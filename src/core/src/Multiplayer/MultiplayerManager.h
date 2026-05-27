@@ -1,233 +1,140 @@
 /*
-/*
   ==============================================================================
 	Module:         MultiplayerManager
-	Description:    Managing the multiplayer game mode
+	Description:    Chess multiplayer session management using NetLink
   ==============================================================================
 */
 
 #pragma once
 
-#include "TCPConnection/TCPClient.h"
-#include "TCPConnection/TCPServer.h"
-#include "Discovery/DiscoveryService.h"
-#include "RemoteMessaging/RemoteReceiver.h"
-#include "RemoteMessaging/RemoteSender.h"
-#include "RemoteMessaging/RemoteCommunication.h"
-#include "IObserver.h"
-#include "PlayerName.h"
+#include <functional>
+#include <vector>
+#include <mutex>
+#include <string>
 
-/**
- * @brief Coordinates multiplayer lifecycle: discovery, connection negotiation, TCP session
- *        management, player color selection, readiness synchronization, and remote message flow.
- */
-class MultiplayerManager : public INetworkObserver,
-						   public IConnectionStatusObservable,
-						   public IDiscoveryObserver,
-						   public IRemoteMessagesObserver,
-						   public std::enable_shared_from_this<MultiplayerManager>
+#include <NetLink/NetLink.h>
+
+#include "IObservable.h"
+#include "MultiplayerTypes.h"
+#include "Move.h"
+#include "Logging.h"
+
+
+class MultiplayerManager : public IMultiplayerObservable
 {
 public:
-	MultiplayerManager();
+	MultiplayerManager() = default;
 	~MultiplayerManager();
 
-	/**
-	 * @brief	Initialize manager with local network parameters.
-	 * @param	localIPv4 -> Local machine IPv4 used for discovery and binding.
-	 * @return	true if initialization succeeds.
-	 */
-	bool		init(const std::string &localIPv4);
+	MultiplayerManager(const MultiplayerManager &)							   = delete;
+	MultiplayerManager					&operator=(const MultiplayerManager &) = delete;
 
-	/**
-	 * @brief	Reset internal state (disconnects, clears flags/endpoints).
-	 */
-	void		reset();
+	//=========================================================================
+	// Lifecycle
+	//=========================================================================
 
-	/**
-	 * @brief	Start hosting (create TCP server + discovery broadcast).
-	 * @return	true if server successfully started.
-	 */
-	bool		hostSession();
+	void								 init();
+	void								 shutdown();
 
-	/**
-	 * @brief	Start client mode (discovery to locate host, then request connection).
-	 * @return	true if initial client startup succeeded.
-	 */
-	bool		startClient();
+	//=========================================================================
+	// Opponent Discovery & Connection
+	//=========================================================================
 
-	/**
-	 * @brief	Attempt to join a previously discovered remote host.
-	 * @note	Assumes discovery has populated remote endpoint.
-	 */
-	void		joinSession();
+	void								 findOpponent();
+	std::vector<std::string>			 getDiscoveredOpponents();
+	void								 connectToOpponent(int index);
+	void								 respondToConnectionRequest(bool accept);
+	void								 disconnect();
 
-	/**
-	 * @brief	Assign established TCP session (after accept/connect).
-	 */
-	void		setTCPSession(ITCPSession::pointer session);
+	//=========================================================================
+	// Game Setup (post-connection)
+	//=========================================================================
 
-	/**
-	 * @brief	Disconnect current session and tear down communication channels.
-	 */
-	void		disconnect();
+	void								 sendPlayerChosen(Side localPlayer);
+	void								 sendPlayerReady(bool ready);
 
-	/**
-	 * @brief	Local player's name (forwarded from PlayerName helper).
-	 */
-	std::string getLocalPlayerName() { return mPlayerName.getLocalPlayerName(); }
+	//=========================================================================
+	// In-Game Messaging
+	//=========================================================================
 
-	/**
-	 * @brief	Notified when active network adapter changes (re-evaluate discovery sockets).
-	 */
-	void		onNetworkAdapterChanged(const NetworkAdapter &adapter) override;
+	void								 sendMove(Move move);
 
-	/**
-	 * @brief	Begin discovery in specified mode (host advertising or client searching).
-	 * @param	IPv4 -> Local IPv4.
-	 * @param	port -> TCP port host intends to use.
-	 * @param	mode -> Discovery mode (host/client).
-	 * @return	true if discovery started.
-	 */
-	bool		startDiscovery(const std::string IPv4, const int port, DiscoveryMode mode);
+	//=========================================================================
+	// Network Adapters
+	//=========================================================================
 
-	/**
-	 * @brief	Wire internal observer relationships (sender/receiver/session).
-	 */
-	void		setInternalObservers();
+	std::vector<netlink::NetworkAdapter> getAvailableAdapters();
+	bool								 setActiveAdapter(int adapterID);
+	int									 getActiveAdapterID();
 
-	/**
-	 * @brief	Send connection request to host (client side).
-	 */
-	void		sendConnectRequest();
+	//=========================================================================
+	// Callbacks
+	//=========================================================================
 
-	/**
-	 * @brief	Send connection response (host side) accepting or rejecting.
-	 * @param	accepted -> True if accepted.
-	 * @param	reason -> Optional rejection reason.
-	 */
-	void		sendConnectResponse(bool accepted, std::string reason = "");
+	void								 setRemoteMoveCallback(std::function<void(Move)> callback);
 
-	/**
-	 * @brief	Observer callback when connection status changes (propagate outward).
-	 */
-	void		connectionStatusChanged(const ConnectionStatusEvent event) override;
+	//=========================================================================
+	// State
+	//=========================================================================
 
-	/**
-	 * @brief	Local player color decision.
-	 */
-	void		localPlayerChosen(const Side localPlayer) override;
+	MultiplayerState					 getState() const;
 
-	/**
-	 * @brief	Remote player has chosen his/her color. Observer contract.
-	 * @param	localPlayer -> already converted remote's color to the local player (Remote selects white, local is black,..).
-	 */
-	void		remotePlayerChosen(const Side local) override;
+	//=========================================================================
+	// IMultiplayerObservable
+	//=========================================================================
 
-	/**
-	 * @brief	Local ready flag toggled (used for synchronized game start). Observer contract.
-	 */
-	void		localReadyFlagSet(const bool flag) override;
-
-	/**
-	 * @brief	Discovery service found a remote endpoint. Observer contract.
-	 * @param	remote -> remote endpoint that has been found on the local network
-	 */
-	void		onRemoteFound(const Endpoint &remote) override;
-
-	/**
-	 * @brief	We received a move from the remote endpoint
-	 */
-	void		onRemoteMoveReceived(const Move &remoteMove) override;
-
-	void		onRemoteChatMessageReceived(const std::string &mesage) override {}
-
-	/**
-	 * @brief	Remote connection state broadcast received. Observer contract.
-	 */
-	void		onRemoteConnectionStateReceived(const ConnectionState &state) override;
-
-	/**
-	 * @brief	Invitation request received from remote (client -> host). Observer contract.
-	 */
-	void		onRemoteInvitationReceived(const InvitationRequest &invite) override;
-
-	/**
-	 * @brief	Response to earlier invitation (host -> client). Observer contract.
-	 */
-	void		onRemoteInvitationResponseReceived(const InvitationResponse &response) override;
-
-	/**
-	 * @brief	Remote player's color selection arrived. Observer contract.
-	 */
-	void		onRemotePlayerChosenReceived(const Side player) override;
-
-	/**
-	 * @brief	Remote player's readiness flag changed. Observer contract.
-	 * @param	flag -> true if the remote is ready to start the multiplayer game
-	 */
-	void		onRemotePlayerReadyFlagReceived(const bool flag) override;
-
-	/**
-	 * @brief	Set remote ready flag (internal update without event callback loop).
-	 * @param	flag -> true if the remote is ready to start the multiplayer game
-	 */
-	void		setRemotePlayerReadyForGameFlag(const bool flag);
-
-	/**
-	 * @brief	Check if both local and remote players are ready to start.
-	 * @return	true if ready to transition into active game state.
-	 */
-	bool		checkIfReadyForGame();
-
-	void		setRemoteMoveCallback(std::function<void(Move)> callback);
+	void								 multiplayerStateChanged(const MultiplayerEvent &event) override;
+	void								 opponentFound(const std::string &name) override;
+	void								 remotePlayerChosen(Side remotePlayer) override;
 
 private:
-	/**
-	 * @brief	Stop discovery service if running.
-	 */
-	void													   closeDiscovery();
+	//=========================================================================
+	// NetLink Callbacks
+	//=========================================================================
 
-	/**
-	 * @brief	Shutdown TCP server or client (whichever active).
-	 */
-	void													   closeTCPServerOrClient();
+	void					  onRemoteDiscovered(const netlink::Endpoint &remote);
+	void					  onConnectionChanged(const netlink::ConnectionEvent event);
+	void					  onMessageReceived(const netlink::Message &message);
+	void					  onAdapterChanged(const netlink::NetworkAdapter &adapter);
 
-	/**
-	 * @brief	Tear down remote communication abstraction (sender/receiver linkage).
-	 */
-	void													   closeRemoteCommunication();
+	//=========================================================================
+	// State Management
+	//=========================================================================
 
+	void					  transitionTo(MultiplayerState newState, const std::string &remoteName = "", const std::string &error = "");
 
-	ITCPSession::pointer									   mSession = nullptr;
+	//=========================================================================
+	// Message Serialization
+	//=========================================================================
 
-	std::unique_ptr<TCPServer>								   mServer;
-	std::unique_ptr<TCPClient>								   mClient;
-	std::unique_ptr<DiscoveryService>						   mDiscovery;
+	static netlink::Message	  serializeMove(Move move);
+	static netlink::Message	  serializePlayerChosen(Side side);
+	static netlink::Message	  serializePlayerReady(bool ready);
 
-	std::shared_ptr<RemoteCommunication>					   mRemoteCom;
-	std::shared_ptr<RemoteReceiver>							   mRemoteReceiver;
-	std::shared_ptr<RemoteSender>							   mRemoteSender;
+	static Move				  deserializeMove(const netlink::Message &msg);
+	static Side				  deserializePlayerChosen(const netlink::Message &msg);
+	static bool				  deserializePlayerReady(const netlink::Message &msg);
 
-	asio::io_context										   mIoContext;
-	asio::executor_work_guard<asio::io_context::executor_type> mWorkGuard;
-	std::thread												   mWorkerThread;
+	//=========================================================================
+	// Members
+	//=========================================================================
 
-	Side													   mLocalPlayerColor{};
-	std::string												   mLocalIPv4{};
+	netlink::NetLink		  mNetLink;
+	MultiplayerState		  mState{MultiplayerState::None};
+	std::function<void(Move)> mRemoteMoveCallback;
 
-	Endpoint												   mRemoteEndpoint;
+	const std::string		  mSecret = "316";
 
-	std::mutex												   mSessionMutex;
+	struct DiscoveredOpponent
+	{
+		std::string		  name;
+		netlink::Endpoint endpoint;
+	};
 
-	ConnectionStatusEvent									   mConnectionState{ConnectionState::None};
-	ConnectionStatusEvent									   mRemoteConnectionState{ConnectionState::None};
+	std::vector<DiscoveredOpponent> mDiscoveredOpponents;
+	mutable std::mutex				mMutex;
 
-	std::atomic<bool>										   mLocalPlayerReadyForGameFlag{false};
-	std::atomic<bool>										   mRemotePlayerReadyForGameFlag{false};
-
-	PlayerName												   mPlayerName;
-
-	std::function<void(Move)>								   mRemoteMoveReceivedCallback;
-
-	friend class GameManager;
+	bool							mInitialized{false};
+	bool							mLocalPlayerReady{false};
+	bool							mRemotePlayerReady{false};
 };

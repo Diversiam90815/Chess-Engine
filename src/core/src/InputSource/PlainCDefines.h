@@ -59,8 +59,7 @@ extern "C"
 	typedef struct
 	{
 		int	 ID;
-		int	 type;
-		int	 visibility;
+		int	 priority;
 		char adapterName[MAX_STRING_LENGTH];
 		char networkName[MAX_STRING_LENGTH];
 

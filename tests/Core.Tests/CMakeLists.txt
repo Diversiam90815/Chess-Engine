@@ -1,51 +1,32 @@
-﻿set(MoveTest_Dir            source/MoveTests)
-set(MultiplayerTest_Dir     source/MultiplayerTests)
-set(BoardTest_Dir           source/BoardTests)
-set(PlayerTest_Dir          source/PlayerTests)
-
-set (Test_Dir						${CMAKE_CURRENT_SOURCE_DIR}/source)
-
-set(MoveTest_Files
-    ${MoveTest_Dir}/MoveTests.cpp
-    ${MoveTest_Dir}/MoveListTests.cpp
-    ${MoveTest_Dir}/MoveIntentTests.cpp
-    ${MoveTest_Dir}/MoveGenerationTests.cpp
-    ${MoveTest_Dir}/MoveValidationTests.cpp
-    ${MoveTest_Dir}/MoveExecutionTests.cpp
-    ${MoveTest_Dir}/CastlingTests.cpp
-    ${MoveTest_Dir}/EnPassantTests.cpp
-    ${MoveTest_Dir}/MoveHistoryTests.cpp
-    ${MoveTest_Dir}/MoveNotationTests.cpp
-)
-
-set(MultiplayerTest_Files
-    ${MultiplayerTest_Dir}/DiscoveryEndpointTests.cpp
-    ${MultiplayerTest_Dir}/MultiplayerMessageTests.cpp
-    ${MultiplayerTest_Dir}/RemoteCommunicationTests.cpp
-    ${MultiplayerTest_Dir}/DiscoveryServiceTests.cpp
-    ${MultiplayerTest_Dir}/MultiplayerManagerTests.cpp
-    ${MultiplayerTest_Dir}/TCPClientAndServerTests.cpp
-    ${MultiplayerTest_Dir}/TCPSessionTests.cpp
-    ${MultiplayerTest_Dir}/MultiplayerIntegrationTests.cpp
+﻿set(MoveTest_Files
+    MoveTests/MoveTests.cpp
+    MoveTests/MoveListTests.cpp
+    MoveTests/MoveIntentTests.cpp
+    MoveTests/MoveGenerationTests.cpp
+    MoveTests/MoveValidationTests.cpp
+    MoveTests/MoveExecutionTests.cpp
+    MoveTests/CastlingTests.cpp
+    MoveTests/EnPassantTests.cpp
+    MoveTests/MoveHistoryTests.cpp
+    MoveTests/MoveNotationTests.cpp
 )
 
 set(PlayerTest_Files
-    ${PlayerTest_Dir}/PlayerTests.cpp
-    ${PlayerTest_Dir}/CPUPlayerTests.cpp
+    PlayerTests/PlayerTests.cpp
+    PlayerTests/CPUPlayerTests.cpp
 )
 
 set(BoardTest_Files
-    ${BoardTest_Dir}/ChessboardTests.cpp
+    BoardTests/ChessboardTests.cpp
 )
 
 set(Test_Files
     ${MoveTest_Files}
     ${BoardTest_Files}
     ${PlayerTest_Files}
-    ${MultiplayerTest_Files}
 )
 
-source_group(TREE ${Test_Dir} FILES ${Test_Files})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${Test_Files})
 
 
 #==========================================

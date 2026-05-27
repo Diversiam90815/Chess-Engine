@@ -18,9 +18,6 @@
 #include "Notation/MoveNotation.h"
 
 
-/// <summary>
-/// Enumerates the different types of messages that can be sent or received in the game.
-/// </summary>
 enum class MessageType
 {
 	EndGameState			= 1,
@@ -34,33 +31,25 @@ enum class MessageType
 	BoardStateChanged		= 9,
 	PawnPromotion			= 10,
 	LegalMovesCalculated	= 11,
+	OpponentDiscovered		= 12,
 };
 
 
-/// <summary>
-/// Represents an event where a player captures or uncaptures a piece.
-/// </summary>
 struct PlayerCapturedPieceEvent
 {
 	Side	  playerColor;
 	PieceType pieceType;
-	bool	  captured; // False if we undo the move and remove a piece
+	bool	  captured;
 };
 
 
-/// <summary>
-/// Represents an event in the move history, indicating whether a move was added or the history was cleared.
-/// </summary>
 struct MoveEvent
 {
 	uint16_t data;
-	char	 moveNotation[MAX_STRING_LENGTH]; // If move is being added, this is the move notation
+	char	 moveNotation[MAX_STRING_LENGTH];
 };
 
 
-/// <summary>
-/// Represents an event indicating the end state of a game, including the winner if applicable.
-/// </summary>
 struct EndgameStateEvent
 {
 	EndGameState state;
@@ -68,10 +57,7 @@ struct EndgameStateEvent
 };
 
 
-/// <summary>
-/// WinUIInputSource manages communication between the user interface and the game logic, observing and handling various game and connection events.
-/// </summary>
-class WinUIInputSource : public IInputSource, public IPlayerObserver, public IConnectionStatusObserver
+class WinUIInputSource : public IInputSource, public IPlayerObserver, public IMultiplayerObserver
 {
 public:
 	WinUIInputSource()	= default;
@@ -100,19 +86,18 @@ public:
 	void onRemoveLastCapturedPiece(Side player, PieceType captured) override;
 
 	//=========================================================================
-	// IConnectionStatusObserver (multiplayer)
+	// IMultiplayerObserver
 	//=========================================================================
 
-	void onConnectionStateChanged(const ConnectionStatusEvent event) override;
-	void onLocalPlayerChosen(const Side localPlayer) {}
-	void onRemotePlayerChosen(Side local) override; // This is already the local player. This is called if the remote chose the player so we set it to the opposite
-	void onLocalReadyFlagSet(const bool flag) {}
+	void onMultiplayerStateChanged(const MultiplayerEvent &event) override;
+	void onOpponentFound(const std::string &name) override;
+	void onRemotePlayerChosen(Side remotePlayer) override;
 
 
 private:
 	bool			   sendToUI(MessageType type, void *message) const;
 
-	CConnectionEvent   convertToCStyleConnectionStateEvent(const ConnectionStatusEvent state);
+	CConnectionEvent   convertToConnectionEvent(const MultiplayerEvent &event);
 
 	UIGamePhase		   mapToUIPhase(GameState state);
 

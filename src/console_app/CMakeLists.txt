@@ -1,7 +1,36 @@
 set(TARGET_NAME Chess.Engine.ConsoleApp)
 
-add_executable(${TARGET_NAME}
-    src/main.cpp
+set(PRINTING_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/Printing)
+set(SCENARIOS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Scenarios)
+
+set(PRINTING_FILES
+    ${PRINTING_DIR}/BoardPrinter.h      ${PRINTING_DIR}/BoardPrinter.cpp
+    ${PRINTING_DIR}/MovePrinter.h       ${PRINTING_DIR}/MovePrinter.cpp
+)
+
+set(SCENARIO_FILES
+    ${SCENARIOS_DIR}/IScenario.h
+    ${SCENARIOS_DIR}/AttackMapScenario.h        ${SCENARIOS_DIR}/AttackMapScenario.cpp
+    ${SCENARIOS_DIR}/MoveGenerationScenario.h   ${SCENARIOS_DIR}/MoveGenerationScenario.cpp
+    ${SCENARIOS_DIR}/PerftScenario.h            ${SCENARIOS_DIR}/PerftScenario.cpp
+)
+
+set(ALL_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConsoleApp.h     ${CMAKE_CURRENT_SOURCE_DIR}/ConsoleApp.cpp
+    ${PRINTING_FILES}
+    ${SCENARIO_FILES}
+)
+
+
+add_executable(${TARGET_NAME} ${ALL_FILES})
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ALL_FILES})
+
+target_include_directories(${TARGET_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PRINTING_DIR}
+    ${SCENARIOS_DIR}
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE Chess.Engine.Core)

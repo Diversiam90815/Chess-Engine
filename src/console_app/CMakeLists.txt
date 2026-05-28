@@ -1,7 +1,14 @@
 set(TARGET_NAME Chess.Engine.ConsoleApp)
 
+
+set(APP_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/App)
 set(PRINTING_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/Printing)
 set(SCENARIOS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Scenarios)
+
+
+set(APP_FILES
+    ${APP_DIR}/ConsoleApp.h       ${APP_DIR}/ConsoleApp.cpp
+)
 
 set(PRINTING_FILES
     ${PRINTING_DIR}/BoardPrinter.h      ${PRINTING_DIR}/BoardPrinter.cpp
@@ -17,13 +24,14 @@ set(SCENARIO_FILES
 
 set(ALL_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ConsoleApp.h     ${CMAKE_CURRENT_SOURCE_DIR}/ConsoleApp.cpp
+    ${APP_FILES}
     ${PRINTING_FILES}
     ${SCENARIO_FILES}
 )
 
 
 add_executable(${TARGET_NAME} ${ALL_FILES})
+
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ALL_FILES})
 

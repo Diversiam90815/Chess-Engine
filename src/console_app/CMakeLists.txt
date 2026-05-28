@@ -17,9 +17,11 @@ set(PRINTING_FILES
 
 set(SCENARIO_FILES
     ${SCENARIOS_DIR}/IScenario.h
-    ${SCENARIOS_DIR}/AttackMapScenario.h        ${SCENARIOS_DIR}/AttackMapScenario.cpp
-    ${SCENARIOS_DIR}/MoveGenerationScenario.h   ${SCENARIOS_DIR}/MoveGenerationScenario.cpp
-    ${SCENARIOS_DIR}/PerftScenario.h            ${SCENARIOS_DIR}/PerftScenario.cpp
+    ${SCENARIOS_DIR}/AttackMapScenario.h            ${SCENARIOS_DIR}/AttackMapScenario.cpp
+    ${SCENARIOS_DIR}/EvaluationScenario.h           ${SCENARIOS_DIR}/EvaluationScenario.cpp
+    ${SCENARIOS_DIR}/MoveGenerationScenario.h       ${SCENARIOS_DIR}/MoveGenerationScenario.cpp
+    ${SCENARIOS_DIR}/MoveOrderingScenario.h         ${SCENARIOS_DIR}/MoveOrderingScenario.cpp
+    ${SCENARIOS_DIR}/PerftScenario.h                ${SCENARIOS_DIR}/PerftScenario.cpp
 )
 
 set(ALL_FILES

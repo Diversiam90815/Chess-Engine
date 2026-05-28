@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include "GameEngine.h"
-#include "Scenarios/IScenario.h"
 #include <memory>
 #include <vector>
+
+#include "GameEngine.h"
+#include "Scenarios/IScenario.h"
 
 
 class ConsoleApp

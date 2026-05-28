@@ -23,6 +23,7 @@ void ConsoleApp::registerScenarios()
 {
 	mScenarios.push_back(std::make_unique<AttackMapScenario>());
 	mScenarios.push_back(std::make_unique<MoveGenerationScenario>());
+	mScenarios.push_back(std::make_unique<PerftScenario>(5));
 }
 
 

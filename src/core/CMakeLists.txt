@@ -148,7 +148,8 @@ include(cpm)
 CPMAddPackage(
   NAME Logger
   GITHUB_REPOSITORY Diversiam90815/Logger
-  VERSION 1.3.81
+  VERSION 2.0.86
+  GIT_TAG v2.0.86
 )
 
 CPMAddPackage(

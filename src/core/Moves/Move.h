@@ -13,9 +13,9 @@
 /*
 	Move encoding (16-bit):
 
-	0000 0000 0011 1111    source square       (6 bits, 0-63)
-	0000 1111 1100 0000    target square       (6 bits, 0-63)
-	1111 0000 0000 0000    flags               (4 bits)
+	0000 0000 0011 1111    source square	0x3F		(6 bits, 0-63)
+	0000 1111 1100 0000    target square	0xFC0		(6 bits, 0-63)
+	1111 0000 0000 0000    flags			0xF000		(4 bits)
 
 	Flags:
 	0000 = quiet move

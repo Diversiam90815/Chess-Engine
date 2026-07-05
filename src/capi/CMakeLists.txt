@@ -1,4 +1,4 @@
-set (API_FILES_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set (API_FILES_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/API)
 
 set (API_FILES			${API_FILES_DIR}/EngineAPI.h    
 						${API_FILES_DIR}/EngineAPI.cpp)

@@ -1,6 +1,6 @@
 set(TARGET_NAME Chess.Engine.Core)
 
-set (SOURCE_DIR						${CMAKE_CURRENT_SOURCE_DIR}/src)
+set (SOURCE_DIR						${CMAKE_CURRENT_SOURCE_DIR})
 set (SUBMODULES_DIR					${CMAKE_CURRENT_SOURCE_DIR}/submodule)
 	
 set (MOVE_DIR						${SOURCE_DIR}/Moves)

@@ -1,21 +1,38 @@
 /*
   ==============================================================================
-	Module:			WinUIInputSource
+	Module:			NativeInputSource
 	Description:    Communication layer for frontend updates from the backend
   ==============================================================================
 */
 
-#include "WinUIInputSource.h"
+#include "NativeInputSource.h"
+
+#include <cstring>
 
 
-void WinUIInputSource::setDelegate(PFN_CALLBACK pDelegate)
+namespace
+{
+
+void safeStringCopy(char *dest, size_t destSize, const std::string &src)
+{
+	if (!dest || destSize == 0)
+		return;
+
+	std::strncpy(dest, src.c_str(), destSize - 1);
+	dest[destSize - 1] = '\0';
+}
+
+} // namespace
+
+
+void NativeInputSource::setDelegate(PFN_CALLBACK pDelegate)
 {
 	std::lock_guard<std::mutex> lock(mDelegateMutex);
 	mDelegate = pDelegate;
 }
 
 
-void WinUIInputSource::onAddCapturedPiece(Side player, PieceType captured)
+void NativeInputSource::onAddCapturedPiece(Side player, PieceType captured)
 {
 	PlayerCapturedPieceEvent event{};
 	event.playerColor = player;
@@ -25,7 +42,7 @@ void WinUIInputSource::onAddCapturedPiece(Side player, PieceType captured)
 }
 
 
-void WinUIInputSource::onRemoveLastCapturedPiece(Side player, PieceType captured)
+void NativeInputSource::onRemoveLastCapturedPiece(Side player, PieceType captured)
 {
 	PlayerCapturedPieceEvent event{};
 	event.playerColor = player;
@@ -35,36 +52,36 @@ void WinUIInputSource::onRemoveLastCapturedPiece(Side player, PieceType captured
 }
 
 
-void WinUIInputSource::onLegalMovesAvailable(Square from, const MoveList &moves)
+void NativeInputSource::onLegalMovesAvailable(Square from, const MoveList &moves)
 {
 	sendToUI(MessageType::LegalMovesCalculated, nullptr);
 }
 
 
-void WinUIInputSource::onMoveExecuted(Move move, const std::string &notation)
+void NativeInputSource::onMoveExecuted(Move move, const std::string &notation)
 {
 	MoveEvent event{};
 
 	event.data = move.raw();
-	HRESULT hr = StringCbCopyA(event.moveNotation, MAX_STRING_LENGTH, notation.c_str());
+	safeStringCopy(event.moveNotation, MAX_STRING_LENGTH, notation);
 
 	sendToUI(MessageType::MoveExecuted, &event);
 }
 
 
-void WinUIInputSource::onMoveUndone()
+void NativeInputSource::onMoveUndone()
 {
 	sendToUI(MessageType::MoveUndone, nullptr);
 }
 
 
-void WinUIInputSource::onPromotionRequired()
+void NativeInputSource::onPromotionRequired()
 {
 	sendToUI(MessageType::PawnPromotion, nullptr);
 }
 
 
-void WinUIInputSource::onGameStateChanged(GameState state)
+void NativeInputSource::onGameStateChanged(GameState state)
 {
 	UIGamePhase uiPhase = mapToUIPhase(state);
 
@@ -72,7 +89,7 @@ void WinUIInputSource::onGameStateChanged(GameState state)
 }
 
 
-void WinUIInputSource::onGameEnded(EndGameState state, Side winner)
+void NativeInputSource::onGameEnded(EndGameState state, Side winner)
 {
 	EndgameStateEvent event;
 	event.state	 = state;
@@ -82,13 +99,13 @@ void WinUIInputSource::onGameEnded(EndGameState state, Side winner)
 }
 
 
-void WinUIInputSource::onBoardStateChanged()
+void NativeInputSource::onBoardStateChanged()
 {
 	sendToUI(MessageType::BoardStateChanged, nullptr);
 }
 
 
-void WinUIInputSource::onPlayerChanged(Side playersTurn)
+void NativeInputSource::onPlayerChanged(Side playersTurn)
 {
 	int currentPlayer = (int)playersTurn;
 
@@ -96,7 +113,7 @@ void WinUIInputSource::onPlayerChanged(Side playersTurn)
 }
 
 
-void WinUIInputSource::onMultiplayerStateChanged(const MultiplayerEvent &event)
+void NativeInputSource::onMultiplayerStateChanged(const MultiplayerEvent &event)
 {
 	CConnectionEvent cEvent = convertToConnectionEvent(event);
 
@@ -104,23 +121,23 @@ void WinUIInputSource::onMultiplayerStateChanged(const MultiplayerEvent &event)
 }
 
 
-void WinUIInputSource::onOpponentFound(const std::string &name)
+void NativeInputSource::onOpponentFound(const std::string &name)
 {
 	CConnectionEvent cEvent{};
 	cEvent.state = static_cast<int>(MultiplayerState::OpponentFound);
-	StringCbCopyA(cEvent.remoteName, MAX_STRING_LENGTH, name.c_str());
+	safeStringCopy(cEvent.remoteName, MAX_STRING_LENGTH, name);
 
 	sendToUI(MessageType::OpponentDiscovered, &cEvent);
 }
 
 
-void WinUIInputSource::onRemotePlayerChosen(Side remotePlayer)
+void NativeInputSource::onRemotePlayerChosen(Side remotePlayer)
 {
 	sendToUI(MessageType::MultiplayerPlayerChosen, &remotePlayer);
 }
 
 
-bool WinUIInputSource::sendToUI(MessageType type, void *message) const
+bool NativeInputSource::sendToUI(MessageType type, void *message) const
 {
 	std::lock_guard lock(mDelegateMutex);
 
@@ -132,26 +149,26 @@ bool WinUIInputSource::sendToUI(MessageType type, void *message) const
 }
 
 
-CConnectionEvent WinUIInputSource::convertToConnectionEvent(const MultiplayerEvent &event)
+CConnectionEvent NativeInputSource::convertToConnectionEvent(const MultiplayerEvent &event)
 {
 	CConnectionEvent cEvent{};
 	cEvent.state = static_cast<int>(event.state);
 
 	if (!event.errorMessage.empty())
 	{
-		StringCbCopyA(cEvent.errorMessage, MAX_STRING_LENGTH, event.errorMessage.c_str());
+		safeStringCopy(cEvent.errorMessage, MAX_STRING_LENGTH, event.errorMessage);
 	}
 
 	if (!event.remoteName.empty())
 	{
-		StringCbCopyA(cEvent.remoteName, MAX_STRING_LENGTH, event.remoteName.c_str());
+		safeStringCopy(cEvent.remoteName, MAX_STRING_LENGTH, event.remoteName);
 	}
 
 	return cEvent;
 }
 
 
-UIGamePhase WinUIInputSource::mapToUIPhase(GameState state)
+UIGamePhase NativeInputSource::mapToUIPhase(GameState state)
 {
 	switch (state)
 	{

@@ -111,9 +111,9 @@ set(USERSETTINGSCACHE_FILES
 )
 
 set(INPUTSOURCE_FILES
-	${INPUTSOURCE_DIR}/PlainCDefines.h   
+	${INPUTSOURCE_DIR}/PlainCDefines.h
 	${INPUTSOURCE_DIR}/IInputSource.h
-	${INPUTSOURCE_DIR}/WinUIInputSource.h    ${INPUTSOURCE_DIR}/WinUIInputSource.cpp
+	${INPUTSOURCE_DIR}/NativeInputSource.h    ${INPUTSOURCE_DIR}/NativeInputSource.cpp
 )
 
 set(EVALUATION_FILES

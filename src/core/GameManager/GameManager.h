@@ -11,7 +11,7 @@
 #include "Player.h"
 #include "Logging.h"
 #include "IObservable.h"
-#include "WinUIInputSource.h"
+#include "NativeInputSource.h"
 #include "MultiplayerManager.h"
 #include "PlayerName.h"
 #include "SystemInfo.h"
@@ -99,7 +99,7 @@ private:
 
 	std::unique_ptr<GameController>		mGameController;
 	std::unique_ptr<StateMachine>		mStateMachine;
-	std::shared_ptr<WinUIInputSource>	mInputSource;
+	std::shared_ptr<NativeInputSource>	mInputSource;
 
 	//=========================================================================
 	// Infrastructure

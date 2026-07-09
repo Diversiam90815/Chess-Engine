@@ -156,6 +156,7 @@ CPMAddPackage(
   NAME NetLink
   GITHUB_REPOSITORY Diversiam90815/NetLink
   GIT_TAG v0.1.0
+  SOURCE_DIR F:/SoftwareProjects/NetLink
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
@@ -179,29 +180,28 @@ endif()
 
 target_compile_definitions(${TARGET_NAME} PUBLIC
 	ENV_DEVELOPMENT
-	_CRT_SECURE_NO_WARNINGS
-	_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
-	_WINDOWS
-	WIN32_LEAN_AND_MEAN
-	_WINSOCK_DEPRECATED_NO_WARNING
-	_WIN32_WINNT=0x0A00
-	WINVER=0x0A00
-	NTDDI_VERSION=NTDDI_WIN10 
 )
 
-target_compile_options(${TARGET_NAME} PRIVATE
-	$<$<CONFIG:Release>:
-		/Oi
-		/Gy
-	>
-	$<$<CONFIG:Debug>:
-		/Od
-		/Z7
-	>
-	/sdl
-	/MP
-	/WX-        # Don't treat warnings as errors
-)
+if(MSVC)
+	target_compile_definitions(${TARGET_NAME} PUBLIC
+		_CRT_SECURE_NO_WARNINGS
+		_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+	)
+
+	target_compile_options(${TARGET_NAME} PRIVATE
+		$<$<CONFIG:Release>:
+			/Oi
+			/Gy
+		>
+		$<$<CONFIG:Debug>:
+			/Od
+			/Z7
+		>
+		/sdl
+		/MP
+		/WX-        # Don't treat warnings as errors
+	)
+endif()
 
 set(Include_Dirs 
 		${PROJECT_BINARY_DIR}
@@ -212,8 +212,6 @@ set(Include_Dirs
 target_include_directories(${TARGET_NAME} PUBLIC ${Include_Dirs})
 
 set(TARGET_LIBS		Logger
-					windowscodecs
-					WindowsApp
 					nlohmann_json::nlohmann_json
 					NetLink
 )

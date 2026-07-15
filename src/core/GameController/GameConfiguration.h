@@ -56,7 +56,9 @@ struct GameConfiguration
 	union
 	{
 		LocalCoopConfig	   localCoop;
+		// cppcheck-suppress uninitMemberVarNoCtor
 		SinglePlayerConfig singlePlayer;
+		// cppcheck-suppress uninitMemberVarNoCtor
 		MultiplayerConfig  multiPlayer;
 	};
 

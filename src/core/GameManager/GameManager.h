@@ -13,7 +13,6 @@
 #include "IObservable.h"
 #include "NativeInputSource.h"
 #include "MultiplayerManager.h"
-#include "PlayerName.h"
 #include "SystemInfo.h"
 #include "StateMachine.h"
 
@@ -106,7 +105,6 @@ private:
 	//=========================================================================
 
 	Logging								mLog;
-	PlayerName							mPlayerName;
 
 	std::shared_ptr<MultiplayerManager> mMultiplayerManager;
 

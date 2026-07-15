@@ -18,7 +18,7 @@ struct UserSettingsInit
 {
 	std::string playerName;
 	std::string appDataPath;
-	int			discoveryUDPPort;
+	int			discoveryUDPPort = 0;
 };
 
 

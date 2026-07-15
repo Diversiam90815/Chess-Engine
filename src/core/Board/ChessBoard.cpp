@@ -77,7 +77,7 @@ void Chessboard::parseFEN(std::string_view fen)
 	skipSpaces();
 
 	// 2 Side to move
-	if (i <= fen.size())
+	if (i < fen.size())
 	{
 		mSide = (fen[i] == 'w') ? Side::White : Side::Black;
 		++i;

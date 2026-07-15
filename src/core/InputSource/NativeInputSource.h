@@ -50,7 +50,7 @@ struct MoveEvent
 
 struct EndgameStateEvent
 {
-	EndGameState state;
+	EndGameState state	= EndGameState::OnGoing;
 	int			 winner = static_cast<int>(Side::None);
 };
 

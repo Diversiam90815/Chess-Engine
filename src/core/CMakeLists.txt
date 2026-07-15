@@ -199,6 +199,18 @@ if(MSVC)
 		/MP
 		/WX-        # Don't treat warnings as errors
 	)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+	target_compile_options(${TARGET_NAME} PRIVATE
+		$<$<CONFIG:Release>:
+			-O2
+		>
+		$<$<CONFIG:Debug>:
+			-Og
+			-g
+		>
+		-Wall
+		-Wextra
+	)
 endif()
 
 set(Include_Dirs 

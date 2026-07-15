@@ -83,7 +83,6 @@ set(GAME_MANAGER_FILES
 
 set(PLAYER_FILES
 	${PLAYER_DIR}/Player.h      		${PLAYER_DIR}/Player.cpp
-	${PLAYER_DIR}/PlayerName.h			${PLAYER_DIR}/PlayerName.cpp
 	${PLAYER_DIR}/CPUPlayer.h      		${PLAYER_DIR}/CPUPlayer.cpp
 )
 

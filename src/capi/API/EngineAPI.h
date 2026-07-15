@@ -9,9 +9,9 @@
 
 
 #if defined(_WIN32)
-	#define Engine_API __declspec(dllexport)
+#define Engine_API __declspec(dllexport)
 #else
-	#define Engine_API __attribute__((visibility("default")))
+#define Engine_API __attribute__((visibility("default")))
 #endif
 
 

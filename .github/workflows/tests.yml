@@ -29,11 +29,19 @@ jobs:
       - name: Install Ninja
         run: pip install ninja
 
-      - name: Install libnl (Linux NetLink WiFi backend dependency)
+      - name: Install libnl and dev tools (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnl-genl-3-dev libnl-3-dev
+          sudo apt-get install -y libnl-genl-3-dev libnl-3-dev cppcheck clang-format doxygen graphviz
+
+      - name: Install dev tools (Windows)
+        if: runner.os == 'Windows'
+        run: choco install cppcheck doxygen.install graphviz -y
+
+      - name: Install dev tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cppcheck clang-format doxygen graphviz
 
       - name: Configure, build and run tests
         run: python build.py --prepare --runtest True

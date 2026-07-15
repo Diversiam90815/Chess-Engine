@@ -154,8 +154,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME NetLink
   GITHUB_REPOSITORY Diversiam90815/NetLink
-  GIT_TAG v0.1.0
-  SOURCE_DIR F:/SoftwareProjects/NetLink
+  GIT_TAG v0.2.0
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})

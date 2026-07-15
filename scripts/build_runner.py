@@ -137,7 +137,7 @@ class BuildRunner:
             BuildUtils.execute_command(
                 [
                     "cmake",
-                    "--build", str(test_build_dir),
+                    "--build", str(self.build_dir),
                     "--config", str(configuration),
                     "--target", str(target),
                 ],

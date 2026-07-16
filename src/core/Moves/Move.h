@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "BitboardTypes.h"
 
 

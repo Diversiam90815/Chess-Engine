@@ -9,6 +9,7 @@
 #include "MoveEvaluation.h"
 
 #include <algorithm>
+#include <cstring>
 
 
 void MoveEvaluation::orderMoves(MoveList &moves, const Chessboard &board, Move ttMove, int ply) const

@@ -20,10 +20,10 @@ jobs:
       - name: Install Ninja
         run: pip install ninja
 
-      - name: Install libnl (NetLink WiFi backend dependency) and dev tools
+      - name: Install libnl (NetLink WiFi backend dependency) and cppcheck
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnl-genl-3-dev libnl-3-dev cppcheck clang-format doxygen graphviz
+          sudo apt-get install -y libnl-genl-3-dev libnl-3-dev cppcheck
 
       - name: Configure and build
         run: python build.py --prepare

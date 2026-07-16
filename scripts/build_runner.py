@@ -33,7 +33,7 @@ class BuildRunner:
             "-G", str(platform),
             "-S", str(self.root_dir),
             "-B", str(self.build_dir),
-        ]  
+        ]
         if platform == Platform.VS2022 or platform == Platform.VS2026:
             prepare_cmd += ["-A", str(architecture)]
 

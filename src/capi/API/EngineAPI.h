@@ -94,13 +94,6 @@ extern "C"
 	Engine_API void	 SetDiscoveryPort(int port);
 
 
-	//=========================================================================
-	// Utilities
-	//=========================================================================
-
-	Engine_API float GetWindowScalingFactor(HWND hwnd);
-
-
 #ifdef __cplusplus
 }
 #endif // __cplusplus

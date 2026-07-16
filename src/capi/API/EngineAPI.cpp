@@ -317,15 +317,3 @@ Engine_API void SetDiscoveryPort(int port)
 {
 	UserSettingsCache::GetInstance()->setDiscoveryPort(port);
 }
-
-
-//=========================================================================
-// Utilities
-//=========================================================================
-
-Engine_API float GetWindowScalingFactor(HWND hwnd)
-{
-	int	  dpi			= GetDpiForWindow(hwnd);
-	float scalingFactor = (float)dpi / 96;
-	return scalingFactor;
-}

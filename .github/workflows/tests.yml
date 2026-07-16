@@ -29,19 +29,11 @@ jobs:
       - name: Install Ninja
         run: pip install ninja
 
-      - name: Install libnl and cppcheck (Linux)
+      - name: Install libnl (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnl-genl-3-dev libnl-3-dev cppcheck
-
-      - name: Install cppcheck (Windows)
-        if: runner.os == 'Windows'
-        run: choco install cppcheck -y
-
-      - name: Install cppcheck (macOS)
-        if: runner.os == 'macOS'
-        run: brew install cppcheck
+          sudo apt-get install -y libnl-genl-3-dev libnl-3-dev
 
       - name: Configure, build and run tests
         run: python build.py --prepare --runtest True

@@ -6,7 +6,6 @@
 */
 
 #include "MoveExecution.h"
-#include <strsafe.h>
 
 
 MoveExecution::MoveExecution(Chessboard &board) : mChessBoard(board) {}

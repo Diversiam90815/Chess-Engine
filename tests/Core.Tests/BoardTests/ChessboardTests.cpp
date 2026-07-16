@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include "Chessboard.h"
+#include "ChessBoard.h"
 
 
 namespace BoardTests

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "BitboardTypes.h"
-#include "Chessboard.h"
+#include "ChessBoard.h"
 
 namespace BoardPrinter
 {

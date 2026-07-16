@@ -11,7 +11,7 @@
 
 #include "Move.h"
 #include "BitboardTypes.h"
-#include "Chessboard.h"
+#include "ChessBoard.h"
 
 /**
  * @brief	Utility for generating and formatting move notation strings.

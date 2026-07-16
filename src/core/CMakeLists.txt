@@ -60,7 +60,7 @@ set(GAMECONTROLLER_FILES
 set(BOARD_FILES
 	${BOARD_DIR}/BitboardUtils.h
 	${BOARD_DIR}/BitboardTypes.h
-	${BOARD_DIR}/Chessboard.h			${BOARD_DIR}/Chessboard.cpp
+	${BOARD_DIR}/ChessBoard.h			${BOARD_DIR}/ChessBoard.cpp
 	${BOARD_DIR}/ZobristHash.h			${BOARD_DIR}/ZobristHash.cpp
 )
 

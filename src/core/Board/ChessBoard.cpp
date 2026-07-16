@@ -5,7 +5,7 @@
   ==============================================================================
 */
 
-#include "Chessboard.h"
+#include "ChessBoard.h"
 #include <stdio.h>
 #include <string.h>
 

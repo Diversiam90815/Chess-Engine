@@ -91,7 +91,6 @@ set(HELPER_FILES
 	${HELPER_DIR}/PieceValues.h
 	${HELPER_DIR}/Parameters.h
 	${HELPER_DIR}/ThreadBase.h
-	${HELPER_DIR}/Conversion.h
 	${HELPER_DIR}/IObserver.h
 	${HELPER_DIR}/IObservable.h
 	${HELPER_DIR}/MagicGenerator.h

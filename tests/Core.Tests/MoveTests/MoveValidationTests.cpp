@@ -213,11 +213,11 @@ TEST_F(MoveValidationTest, PinnedPieceCannotMoveOffPinLine)
 {
 	mBoard.clear();
 
-	// White king at e1, white bishop at d2, black rook at c3
-	// Bishop is pinned to the king
+	// White king at e1, white bishop at d2, black bishop at c3
+	// c3-d2-e1 are on the same diagonal — black bishop pins the white bishop to the king
 	mBoard.addPiece(PieceType::WKing, Square::e1);
 	mBoard.addPiece(PieceType::WBishop, Square::d2);
-	mBoard.addPiece(PieceType::BRook, Square::c3);
+	mBoard.addPiece(PieceType::BBishop, Square::c3); // was BRook — rooks don't attack diagonally
 	mBoard.addPiece(PieceType::BKing, Square::h8);
 	mBoard.setSide(Side::White);
 	mBoard.updateOccupancies();

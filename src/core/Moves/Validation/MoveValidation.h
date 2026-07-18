@@ -5,7 +5,7 @@
   ==============================================================================
 */
 
-#include "Chessboard.h"
+#include "ChessBoard.h"
 #include "Move.h"
 #include "Generation/MoveGeneration.h"
 #include "Execution/MoveExecution.h"

@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Move.h"
-#include "Chessboard.h"
+#include "ChessBoard.h"
 #include "PieceValues.h"
 
 #include <array>

@@ -169,9 +169,6 @@ int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_toke
 		return ttScore;
 	}
 
-	if (depth <= 0)
-		return quiescence(alpha, beta, stopToken, 0);
-
 	MoveList moves;
 	mSearchEngine.generateLegalMoves(moves);
 
@@ -184,6 +181,9 @@ int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_toke
 		return 0;				  // stalemate
 	}
 
+	if (depth <= 0)
+		return quiescence(alpha, beta, stopToken, 0);
+	
 	// order moves
 	mMoveEvaluation.orderMoves(moves, mSearchEngine.getBoard(), ttMove, ply);
 

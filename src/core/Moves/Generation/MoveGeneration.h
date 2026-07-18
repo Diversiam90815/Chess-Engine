@@ -12,7 +12,7 @@
 #include <future>
 #include <memory>
 
-#include "Chessboard.h"
+#include "ChessBoard.h"
 #include "Logging.h"
 #include "Move.h"
 #include "Execution/MoveExecution.h"

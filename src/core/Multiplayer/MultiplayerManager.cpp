@@ -7,6 +7,8 @@
 
 #include "MultiplayerManager.h"
 
+#include <cstring>
+
 #include "UserSettingsCache.h"
 
 

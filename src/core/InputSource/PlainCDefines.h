@@ -9,6 +9,13 @@
 
 #include <stdint.h>
 
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
+
 #define BOARD_SIZE		  8
 #define MAX_STRING_LENGTH 250
 
@@ -22,7 +29,13 @@ extern "C"
 	// Callback Delegates
 	//=========================================================================
 
-	typedef void(CALLBACK *PFN_CALLBACK)(int messageId, void *pContext);
+#if defined(_WIN32)
+#define API_CALLBACK CALLBACK
+#else
+#define API_CALLBACK
+#endif
+
+	typedef void(API_CALLBACK *PFN_CALLBACK)(int messageId, void *pContext);
 
 
 	//=========================================================================

@@ -254,7 +254,7 @@ int GameManager::getCurrentNetworkAdapterID()
 
 void GameManager::initializeComponents()
 {
-	mInputSource		= std::make_shared<WinUIInputSource>();
+	mInputSource		= std::make_shared<NativeInputSource>();
 	mGameController		= std::make_unique<GameController>();
 	mStateMachine		= std::make_unique<StateMachine>();
 	mMultiplayerManager = std::make_shared<MultiplayerManager>();

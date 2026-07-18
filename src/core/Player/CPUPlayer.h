@@ -44,9 +44,9 @@ struct TranspositionEntry
 struct ScoredMove
 {
 	Move move;
-	int	 score;
+	int	 score = 0;
 
-	bool operator<(const ScoredMove &other) { return score < other.score; }
+	bool operator<(const ScoredMove &other) const { return score < other.score; }
 };
 
 

@@ -8,7 +8,11 @@
 #include "PlainCDefines.h"
 
 
+#if defined(_WIN32)
 #define Engine_API __declspec(dllexport)
+#else
+#define Engine_API __attribute__((visibility("default")))
+#endif
 
 
 #ifdef __cplusplus
@@ -88,13 +92,6 @@ extern "C"
 
 	Engine_API void	 SetLocalPlayerName(const char *name);
 	Engine_API void	 SetDiscoveryPort(int port);
-
-
-	//=========================================================================
-	// Utilities
-	//=========================================================================
-
-	Engine_API float GetWindowScalingFactor(HWND hwnd);
 
 
 #ifdef __cplusplus

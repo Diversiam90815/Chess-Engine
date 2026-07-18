@@ -50,12 +50,15 @@ enum class GameModeSelection
 
 struct GameConfiguration
 {
-	GameModeSelection mode;
+	GameModeSelection mode = GameModeSelection::None;
 
+	// Only one active member at a time; the factory methods below set it explicitly.
 	union
 	{
 		LocalCoopConfig	   localCoop;
+		// cppcheck-suppress uninitMemberVarNoCtor
 		SinglePlayerConfig singlePlayer;
+		// cppcheck-suppress uninitMemberVarNoCtor
 		MultiplayerConfig  multiPlayer;
 	};
 

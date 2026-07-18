@@ -9,7 +9,7 @@
 #include <thread>
 #include <chrono>
 
-#include "PLayer/CPUPlayer.h"
+#include "CPUPlayer.h"
 
 
 namespace PlayerTests

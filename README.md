@@ -1,8 +1,15 @@
 # Chess Engine
 
+[![Windows Build](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/windows.yml/badge.svg)](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/windows.yml)
+[![macOS Build](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/macos.yml/badge.svg)](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/macos.yml)
+[![Linux Build](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/linux.yml/badge.svg)](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/linux.yml)
+[![Tests](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/tests.yml/badge.svg)](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/tests.yml)
+[![Static Analysis](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/Diversiam90815/Chess-Engine/actions/workflows/static-analysis.yml)
+
 ## Overview
 
 A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation, and the core is exposed as a plain C API (DLL) for straightforward integration with non-C++ runtimes. The project is structured as a core static library, a C API wrapper, and a console application for testing. All built through a unified Python-driven CMake build system.
+
 
 ## Features
 
@@ -17,7 +24,7 @@ A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multi
 | Category | Technology |
 |---|---|
 | Language | C++20 |
-| Networking | [NetLink v0.1.0](https://github.com/Diversiam90815/NetLink) |
+| Networking | [NetLink v0.2.0](https://github.com/Diversiam90815/NetLink) |
 | Build System | CMake 4.0+, Python 3.x |
 | Dependency Management | [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) |
 | Testing | GoogleTest 1.15.2 + CTest |
@@ -44,20 +51,23 @@ Chess-Engine/
 
 ## Prerequisites
 
-- **C++ Compiler**: C++20 or higher (MSVC recommended on Windows)
+Chess Engine builds on **Windows, Linux, and macOS** — the C++ core has no platform-specific code. Providing a default local player name is entirely the host application's responsibility (via `UserSettingsCache`/`SetLocalPlayerName()` in the C API); the engine itself doesn't look one up.
+
+- **C++ Compiler**: C++20 or higher (MSVC on Windows, GCC or Clang on Linux/macOS)
 - **CMake**: Version 4.0 or higher
 - **Git**: Required — the build system derives the build number from commit history
 - **Python**: 3.x (for `build.py`)
+- **Linux only**: `libnl-genl-3-dev` / `libnl-3-dev` (NetLink's Linux WiFi backend dependency)
 
 ### Optional Developer Tools
 
 The following tools are CMake-integrated and entirely optional. Each is controlled by a CMake option (all default to `ON` except `ENABLE_MEMCHECK`); builds do not fail if a tool is absent and its option is explicitly set to `OFF`.
 
-| Tool | CMake Option | Purpose | Install (Windows) |
+| Tool | CMake Option | Purpose | Notes |
 |---|---|---|---|
 | Doxygen | `ENABLE_DOXYGEN` | HTML documentation | [doxygen.nl](https://www.doxygen.nl/download.html) + [Graphviz](https://graphviz.org/download/) for diagrams |
-| CppCheck | `ENABLE_CPPCHECK` | Static analysis | `winget install cppcheck` |
-| clang-format | `ENABLE_FORMAT` | Source formatting | `winget install llvm` |
+| CppCheck | `ENABLE_CPPCHECK` | Static analysis | Available via package managers on all platforms (e.g. `winget install cppcheck`, `apt install cppcheck`, `brew install cppcheck`) |
+| clang-format | `ENABLE_FORMAT` | Source formatting | Available via package managers on all platforms |
 | Valgrind | `ENABLE_MEMCHECK` | Memory checking (off by default) | Linux only |
 
 To disable a tool, set its option in the root `CMakeLists.txt` before configuring:
@@ -177,8 +187,8 @@ All dependencies are managed by CPM.cmake and downloaded automatically at config
 
 | Dependency | Version | Purpose |
 |---|---|---|
-| Logger | 1.3.81 | Logging infrastructure |
-| NetLink | 0.1.0 | Peer discovery, TCP/UDP networking (bundles ASIO and nlohmann_json) |
+| Logger | 2.0.86 | Logging infrastructure |
+| NetLink | 0.2.0 | Peer discovery, TCP/UDP networking (bundles ASIO and nlohmann_json) |
 | GoogleTest | 1.15.2 | Unit testing |
 | doxygen-awesome-css | 2.3.1 | Documentation theme |
 

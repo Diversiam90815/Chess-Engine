@@ -5,8 +5,7 @@
   ==============================================================================
 */
 
-#include <strsafe.h>
-#include <combaseapi.h>
+#include <cstring>
 
 #include "EngineAPI.h"
 
@@ -21,25 +20,15 @@
 //=============================================
 
 
-static char *StringToCharPtr(std::string string)
+static void copyStringToBuffer(char *dest, size_t destSize, const std::string &src)
 {
-	size_t len	   = string.length() + 1;
+	if (!dest || destSize == 0)
+		return;
 
-	char  *charPtr = (char *)CoTaskMemAlloc(len);
+	size_t len = src.size() < destSize - 1 ? src.size() : destSize - 1;
 
-	if (charPtr == nullptr)
-		return nullptr;
-
-
-	HRESULT hr = StringCbCopy(charPtr, len, string.c_str());
-
-	if (FAILED(hr))
-	{
-		CoTaskMemFree(charPtr);
-		return nullptr;
-	}
-
-	return charPtr;
+	std::memcpy(dest, src.data(), len);
+	dest[len] = '\0';
 }
 
 
@@ -222,7 +211,7 @@ Engine_API bool GetDiscoveredOpponentAtIndex(int index, char *name, int maxLen)
 	if (!name || maxLen <= 0)
 		return false;
 
-	StringCbCopyA(name, maxLen, opponents[index].c_str());
+	copyStringToBuffer(name, static_cast<size_t>(maxLen), opponents[index]);
 	return true;
 }
 
@@ -298,8 +287,8 @@ Engine_API bool GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInsta
 
 	adapter->ID		  = found.id;
 	adapter->priority = static_cast<int>(found.priority);
-	StringCbCopyA(adapter->adapterName, MAX_STRING_LENGTH, found.adapterName.c_str());
-	StringCbCopyA(adapter->networkName, MAX_STRING_LENGTH, found.networkName.c_str());
+	copyStringToBuffer(adapter->adapterName, MAX_STRING_LENGTH, found.adapterName);
+	copyStringToBuffer(adapter->networkName, MAX_STRING_LENGTH, found.networkName);
 	return true;
 }
 
@@ -327,16 +316,4 @@ Engine_API void SetLocalPlayerName(const char *name)
 Engine_API void SetDiscoveryPort(int port)
 {
 	UserSettingsCache::GetInstance()->setDiscoveryPort(port);
-}
-
-
-//=========================================================================
-// Utilities
-//=========================================================================
-
-Engine_API float GetWindowScalingFactor(HWND hwnd)
-{
-	int	  dpi			= GetDpiForWindow(hwnd);
-	float scalingFactor = (float)dpi / 96;
-	return scalingFactor;
 }

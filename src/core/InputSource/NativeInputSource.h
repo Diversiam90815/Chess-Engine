@@ -1,14 +1,12 @@
 /*
   ==============================================================================
-	Module:			WinUIInputSource
+	Module:			NativeInputSource
 	Description:    Communication layer for frontend updates from the backend
   ==============================================================================
 */
 
 #pragma once
 
-#include <combaseapi.h>
-#include <strsafe.h>
 #include <mutex>
 
 #include "IObserver.h"
@@ -52,16 +50,16 @@ struct MoveEvent
 
 struct EndgameStateEvent
 {
-	EndGameState state;
+	EndGameState state	= EndGameState::OnGoing;
 	int			 winner = static_cast<int>(Side::None);
 };
 
 
-class WinUIInputSource : public IInputSource, public IPlayerObserver, public IMultiplayerObserver
+class NativeInputSource : public IInputSource, public IPlayerObserver, public IMultiplayerObserver
 {
 public:
-	WinUIInputSource()	= default;
-	~WinUIInputSource() = default;
+	NativeInputSource()	 = default;
+	~NativeInputSource() = default;
 
 	void setDelegate(PFN_CALLBACK callback);
 

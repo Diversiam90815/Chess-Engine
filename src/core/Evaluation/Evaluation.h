@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Chessboard.h"
+#include "ChessBoard.h"
 #include "BitboardUtils.h"
 #include "PieceValues.h"
 

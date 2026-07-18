@@ -60,7 +60,7 @@ set(GAMECONTROLLER_FILES
 set(BOARD_FILES
 	${BOARD_DIR}/BitboardUtils.h
 	${BOARD_DIR}/BitboardTypes.h
-	${BOARD_DIR}/Chessboard.h			${BOARD_DIR}/Chessboard.cpp
+	${BOARD_DIR}/ChessBoard.h			${BOARD_DIR}/ChessBoard.cpp
 	${BOARD_DIR}/ZobristHash.h			${BOARD_DIR}/ZobristHash.cpp
 )
 
@@ -83,7 +83,6 @@ set(GAME_MANAGER_FILES
 
 set(PLAYER_FILES
 	${PLAYER_DIR}/Player.h      		${PLAYER_DIR}/Player.cpp
-	${PLAYER_DIR}/PlayerName.h			${PLAYER_DIR}/PlayerName.cpp
 	${PLAYER_DIR}/CPUPlayer.h      		${PLAYER_DIR}/CPUPlayer.cpp
 )
 
@@ -92,7 +91,6 @@ set(HELPER_FILES
 	${HELPER_DIR}/PieceValues.h
 	${HELPER_DIR}/Parameters.h
 	${HELPER_DIR}/ThreadBase.h
-	${HELPER_DIR}/Conversion.h
 	${HELPER_DIR}/IObserver.h
 	${HELPER_DIR}/IObservable.h
 	${HELPER_DIR}/MagicGenerator.h
@@ -111,9 +109,9 @@ set(USERSETTINGSCACHE_FILES
 )
 
 set(INPUTSOURCE_FILES
-	${INPUTSOURCE_DIR}/PlainCDefines.h   
+	${INPUTSOURCE_DIR}/PlainCDefines.h
 	${INPUTSOURCE_DIR}/IInputSource.h
-	${INPUTSOURCE_DIR}/WinUIInputSource.h    ${INPUTSOURCE_DIR}/WinUIInputSource.cpp
+	${INPUTSOURCE_DIR}/NativeInputSource.h    ${INPUTSOURCE_DIR}/NativeInputSource.cpp
 )
 
 set(EVALUATION_FILES
@@ -148,13 +146,14 @@ include(cpm)
 CPMAddPackage(
   NAME Logger
   GITHUB_REPOSITORY Diversiam90815/Logger
-  VERSION 1.3.81
+  VERSION 2.0.86
+  GIT_TAG v2.0.86
 )
 
 CPMAddPackage(
   NAME NetLink
   GITHUB_REPOSITORY Diversiam90815/NetLink
-  GIT_TAG v0.1.0
+  GIT_TAG v0.2.0
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
@@ -178,29 +177,33 @@ endif()
 
 target_compile_definitions(${TARGET_NAME} PUBLIC
 	ENV_DEVELOPMENT
-	_CRT_SECURE_NO_WARNINGS
-	_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
-	_WINDOWS
-	WIN32_LEAN_AND_MEAN
-	_WINSOCK_DEPRECATED_NO_WARNING
-	_WIN32_WINNT=0x0A00
-	WINVER=0x0A00
-	NTDDI_VERSION=NTDDI_WIN10 
 )
 
-target_compile_options(${TARGET_NAME} PRIVATE
-	$<$<CONFIG:Release>:
-		/Oi
-		/Gy
-	>
-	$<$<CONFIG:Debug>:
-		/Od
-		/Z7
-	>
-	/sdl
-	/MP
-	/WX-        # Don't treat warnings as errors
-)
+if(MSVC)
+	target_compile_definitions(${TARGET_NAME} PUBLIC
+		_CRT_SECURE_NO_WARNINGS
+		_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+	)
+
+	target_compile_options(${TARGET_NAME} PRIVATE
+		$<$<CONFIG:Release>:
+			/Oi
+			/Gy
+		>
+		$<$<CONFIG:Debug>:
+			/Od
+			/Z7
+		>
+		/sdl
+		/MP
+		/WX-        # Don't treat warnings as errors
+	)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+	target_compile_options(${TARGET_NAME} PRIVATE
+		-Wall
+		-Wextra
+	)
+endif()
 
 set(Include_Dirs 
 		${PROJECT_BINARY_DIR}
@@ -211,8 +214,6 @@ set(Include_Dirs
 target_include_directories(${TARGET_NAME} PUBLIC ${Include_Dirs})
 
 set(TARGET_LIBS		Logger
-					windowscodecs
-					WindowsApp
 					nlohmann_json::nlohmann_json
 					NetLink
 )

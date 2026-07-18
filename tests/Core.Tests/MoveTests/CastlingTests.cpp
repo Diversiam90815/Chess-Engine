@@ -186,11 +186,16 @@ TEST_F(CastlingTests, KingsideCastlingNotAvailableAfterRookMoves)
 	SetupCastlingPosition(Side::White);
 
 	// Move the kingside rook
-	mExecution.makeMove(Move(Square::h1, Square::h2, MoveFlag::Quiet));
+	mExecution.makeMove(Move(Square::h1, Square::h2, MoveFlag::Quiet)); // White
 
-	// Make a black move and move rook back
-	mExecution.makeMove(Move(Square::e8, Square::d8, MoveFlag::Quiet));
-	mExecution.makeMove(Move(Square::h2, Square::h1, MoveFlag::Quiet));
+	// Black move
+	mExecution.makeMove(Move(Square::e8, Square::d8, MoveFlag::Quiet)); // Black
+
+	// Move rook back
+	mExecution.makeMove(Move(Square::h2, Square::h1, MoveFlag::Quiet)); // White
+
+	// One more Black move to return the turn to White
+	mExecution.makeMove(Move(Square::d8, Square::e8, MoveFlag::Quiet)); // Black
 
 	MoveList moves;
 	mGeneration.generateAllMoves(moves);
@@ -205,11 +210,16 @@ TEST_F(CastlingTests, QueensideCastlingNotAvailableAfterRookMoves)
 	SetupCastlingPosition(Side::White);
 
 	// Move the queenside rook
-	mExecution.makeMove(Move(Square::a1, Square::a2, MoveFlag::Quiet));
+	mExecution.makeMove(Move(Square::a1, Square::a2, MoveFlag::Quiet)); // White
 
-	// Make a black move and move rook back
-	mExecution.makeMove(Move(Square::e8, Square::d8, MoveFlag::Quiet));
-	mExecution.makeMove(Move(Square::a2, Square::a1, MoveFlag::Quiet));
+	// Black move
+	mExecution.makeMove(Move(Square::e8, Square::d8, MoveFlag::Quiet)); // Black
+
+	// Move rook back
+	mExecution.makeMove(Move(Square::a2, Square::a1, MoveFlag::Quiet)); // White
+
+	// One more Black move to return the turn to White
+	mExecution.makeMove(Move(Square::d8, Square::e8, MoveFlag::Quiet)); // Black
 
 	MoveList moves;
 	mGeneration.generateAllMoves(moves);

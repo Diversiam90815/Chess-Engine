@@ -10,50 +10,52 @@
 
 std::string MoveNotation::toSAN(Move &move, const Chessboard &board, bool isCheck, bool isCheckmate)
 {
-	MoveFlag flags = move.flags();
-
-	// handle castling
-	if (flags == MoveFlag::KingCastle)
-		return "O-O";
-	else if (flags == MoveFlag::QueenCastle)
-		return "O-O-O";
+	MoveFlag	flags = move.flags();
 
 	std::string notation;
 
-	Square		from   = move.from();
-	Square		to	   = move.to();
-	PieceType	piece  = board.pieceAt(from);
-
-	bool		isPawn = (piece == WPawn || piece == BPawn);
-
-	if (!isPawn)
+	// handle castling
+	if (flags == MoveFlag::KingCastle)
+		notation = "O-O";
+	else if (flags == MoveFlag::QueenCastle)
+		notation = "O-O-O";
+	else
 	{
-		char pieceChar = pieceToSANChar(piece);
-		if (pieceChar != '\0')
-			notation += pieceChar;
+		Square	  from	 = move.from();
+		Square	  to	 = move.to();
+		PieceType piece	 = board.pieceAt(from);
 
-		// TODO: Handle disambiguation
-	}
+		bool	  isPawn = (piece == WPawn || piece == BPawn);
 
-	// capture notation
-	if (move.isCapture())
-	{
-		if (isPawn)
-			notation += getFile(from); // include starting file for pawn captures
+		if (!isPawn)
+		{
+			char pieceChar = pieceToSANChar(piece);
+			if (pieceChar != '\0')
+				notation += pieceChar;
 
-		notation += 'x';
-	}
+			// TODO: Handle disambiguation
+		}
 
-	// destination square
-	notation += squareToString(to);
+		// capture notation
+		if (move.isCapture())
+		{
+			if (isPawn)
+				notation += getFile(from); // include starting file for pawn captures
 
-	// promotion
-	if (move.isPromotion())
-	{
-		notation += '=';
-		int				  promoOffset  = move.promotionPieceOffset(); // 0 = Knight, 1 = Bishop, 2 = Rook, 3 = Queen
-		static const char promoChars[] = {'N', 'B', 'R', 'Q'};
-		notation += promoChars[promoOffset];
+			notation += 'x';
+		}
+
+		// destination square
+		notation += squareToString(to);
+
+		// promotion
+		if (move.isPromotion())
+		{
+			notation += '=';
+			int				  promoOffset  = move.promotionPieceOffset(); // 0 = Knight, 1 = Bishop, 2 = Rook, 3 = Queen
+			static const char promoChars[] = {'N', 'B', 'R', 'Q'};
+			notation += promoChars[promoOffset];
+		}
 	}
 
 	// check/mate indicators

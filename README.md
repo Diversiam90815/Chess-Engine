@@ -8,7 +8,8 @@
 
 ## Overview
 
-A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer, portable across Windows, Linux, and macOS. The board state is encoded entirely in 64-bit integers for fast move generation, and the core is exposed as a plain C API (shared library) for straightforward integration with non-C++ runtimes. The project is structured as a core static library, a C API wrapper, and a console application for testing — all built through a unified Python-driven CMake build system.
+A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation, and the core is exposed as a plain C API (DLL) for straightforward integration with non-C++ runtimes. The project is structured as a core static library, a C API wrapper, and a console application for testing. All built through a unified Python-driven CMake build system.
+
 
 ## Features
 

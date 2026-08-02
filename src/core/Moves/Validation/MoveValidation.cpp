@@ -75,7 +75,9 @@ bool MoveValidation::isDraw() const
 	if (hasInsufficientMaterial())
 		return true;
 
-	// TODO: Threefold repetition (Zobrist hashing)
+	// Threefold repetition
+	if (mExecution.isRepeatedPosition(3))
+		return true;
 
 	return false;
 }

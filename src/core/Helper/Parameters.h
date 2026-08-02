@@ -51,9 +51,14 @@ enum class GameState
 };
 
 
-//============================================================
-//			File Manager
-//============================================================
+enum class DrawReason
+{
+	None				 = 0,
+	FiftyMoveRule		 = 1,
+	InsufficientMaterial = 2,
+	ThreefoldRepetition	 = 3,
+};
+
 
 namespace FileName
 {

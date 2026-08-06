@@ -196,6 +196,7 @@ if(MSVC)
 		>
 		/sdl
 		/MP
+		/utf-8       
 		/WX-        # Don't treat warnings as errors
 	)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

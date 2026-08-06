@@ -151,6 +151,12 @@ bool GameEngine::isDraw() const
 }
 
 
+DrawReason GameEngine::getDrawReason() const
+{
+	return mMoveValidation.getDrawReason();
+}
+
+
 EndGameState GameEngine::checkForEndGameConditions()
 {
 	if (mMoveValidation.isCheckmate())
@@ -166,9 +172,10 @@ EndGameState GameEngine::checkForEndGameConditions()
 		return EndGameState::StaleMate;
 	}
 
-	if (mMoveValidation.isDraw())
+	DrawReason reason = mMoveValidation.getDrawReason();
+	if (reason != DrawReason::None)
 	{
-		LOG_INFO("Draw!");
+		LOG_INFO("Draw! Reason: {}", Logging::drawReasonToString(reason));
 		return EndGameState::Draw;
 	}
 

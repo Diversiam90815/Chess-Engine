@@ -92,3 +92,15 @@ std::string Logging::cpuDifficultyToString(const CPUDifficulty diff)
 	default: return "Unknown Difficulty";
 	}
 }
+
+
+std::string Logging::drawReasonToString(const DrawReason reason)
+{
+	switch (reason)
+	{
+	case DrawReason::FiftyMoveRule: return "Fifty-move rule";
+	case DrawReason::InsufficientMaterial: return "Insufficient material";
+	case DrawReason::ThreefoldRepetition: return "Threefold repetition";
+	default: return "None";
+	}
+}

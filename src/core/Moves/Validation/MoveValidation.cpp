@@ -67,19 +67,25 @@ bool MoveValidation::isStalemate()
 
 bool MoveValidation::isDraw() const
 {
+	return getDrawReason() != DrawReason::None;
+}
+
+
+DrawReason MoveValidation::getDrawReason() const
+{
 	// 50-move rule
 	if (mBoard.getHalfMoveClock() >= 100)
-		return true;
+		return DrawReason::FiftyMoveRule;
 
 	// Insufficient material
 	if (hasInsufficientMaterial())
-		return true;
+		return DrawReason::InsufficientMaterial;
 
 	// Threefold repetition
 	if (mExecution.isRepeatedPosition(3))
-		return true;
+		return DrawReason::ThreefoldRepetition;
 
-	return false;
+	return DrawReason::None;
 }
 
 

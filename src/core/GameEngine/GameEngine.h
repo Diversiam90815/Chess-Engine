@@ -102,6 +102,7 @@ public:
 	bool								 isCheckmate();
 	bool								 isStalemate();
 	bool								 isDraw() const;
+	DrawReason							 getDrawReason() const;
 	EndGameState						 checkForEndGameConditions();
 
 	//=========================================================================

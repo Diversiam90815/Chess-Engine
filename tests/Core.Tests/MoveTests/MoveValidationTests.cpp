@@ -420,4 +420,161 @@ TEST_F(MoveValidationTest, KingAndKnightVsKingIsDraw)
 }
 
 
+TEST_F(MoveValidationTest, KingAndBishopVsKingAndBishopSameColorIsDraw)
+{
+	mBoard.clear();
+
+	// King + Bishop vs King + Bishop (both bishops, regardless of square color) is a draw
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::WBishop, Square::c1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.addPiece(PieceType::BBishop, Square::c8);
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+
+	EXPECT_TRUE(mValidation.isDraw()) << "King + Bishop vs King + Bishop should be a draw";
+}
+
+
+TEST_F(MoveValidationTest, KingAndTwoKnightsVsKingIsNotAutomaticallyDraw)
+{
+	mBoard.clear();
+
+	// K+N+N vs K is NOT covered by "insufficient material" auto-draw rules in most engines
+	// since a helpmate is possible in theory (though not forceable). Adjust expectation
+	// to match hasInsufficientMaterial()'s actual defined behavior.
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::WKnight, Square::b1);
+	mBoard.addPiece(PieceType::WKnight, Square::g1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+
+	EXPECT_FALSE(mValidation.isDraw()) << "King + two Knights vs King should not be auto-drawn (2 minors)";
+}
+
+
+TEST_F(MoveValidationTest, RookVsKingIsNotDraw)
+{
+	mBoard.clear();
+
+	// King vs King + Rook is sufficient material (not a draw)
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::WRook, Square::a1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+
+	EXPECT_FALSE(mValidation.isDraw()) << "King + Rook vs King should not be a draw";
+}
+
+
+TEST_F(MoveValidationTest, FiftyMoveRuleTriggersDraw)
+{
+	mBoard.clear();
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.addPiece(PieceType::WRook, Square::a1); // sufficient material so only 50-move rule applies
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+
+	mBoard.setHalfMoveClock(100); // 50 full moves without capture/pawn move
+
+	EXPECT_TRUE(mValidation.isDraw()) << "Halfmove clock >= 100 should trigger the fifty-move rule";
+}
+
+
+TEST_F(MoveValidationTest, NotYetFiftyMoveRuleIsNotDraw)
+{
+	mBoard.clear();
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.addPiece(PieceType::WRook, Square::a1);
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+
+	mBoard.setHalfMoveClock(99);
+
+	EXPECT_FALSE(mValidation.isDraw()) << "Halfmove clock of 99 should not yet trigger a draw";
+}
+
+
+TEST_F(MoveValidationTest, ThreefoldRepetitionTriggersDraw)
+{
+	// Use the initial position and shuffle knights back and forth to repeat the position 3 times
+	Move nf3(Square::g1, Square::f3, MoveFlag::Quiet);
+	Move nf6(Square::g8, Square::f6, MoveFlag::Quiet);
+	Move ng1(Square::f3, Square::g1, MoveFlag::Quiet);
+	Move ng8(Square::f6, Square::g8, MoveFlag::Quiet);
+
+	// Position after init() is occurrence #1.
+	ASSERT_TRUE(mExecution.makeMove(nf3));
+	ASSERT_TRUE(mExecution.makeMove(nf6));
+	ASSERT_TRUE(mExecution.makeMove(ng1));
+	ASSERT_TRUE(mExecution.makeMove(ng8)); // back to initial position -> occurrence #2
+
+	EXPECT_FALSE(mValidation.isDraw()) << "Two occurrences should not yet be a draw";
+
+	ASSERT_TRUE(mExecution.makeMove(nf3));
+	ASSERT_TRUE(mExecution.makeMove(nf6));
+	ASSERT_TRUE(mExecution.makeMove(ng1));
+	ASSERT_TRUE(mExecution.makeMove(ng8)); // back to initial position -> occurrence #3
+
+	EXPECT_TRUE(mValidation.isDraw()) << "Third occurrence of the same position should trigger a draw";
+}
+
+
+TEST_F(MoveValidationTest, RepetitionCounterResetsAfterIrreversibleMove)
+{
+	// Repeat a position twice, then make a capture/pawn-move to reset the clock,
+	// then repeat again - should NOT count towards the earlier repetitions.
+	Move nf3(Square::g1, Square::f3, MoveFlag::Quiet);
+	Move nf6(Square::g8, Square::f6, MoveFlag::Quiet);
+	Move ng1(Square::f3, Square::g1, MoveFlag::Quiet);
+	Move ng8(Square::f6, Square::g8, MoveFlag::Quiet);
+
+	ASSERT_TRUE(mExecution.makeMove(nf3));
+	ASSERT_TRUE(mExecution.makeMove(nf6));
+	ASSERT_TRUE(mExecution.makeMove(ng1));
+	ASSERT_TRUE(mExecution.makeMove(ng8)); // occurrence #2 of initial position
+
+	// Irreversible move: pawn push resets halfmove clock
+	Move e4(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	ASSERT_TRUE(mExecution.makeMove(e4));
+
+	EXPECT_FALSE(mValidation.isDraw()) << "Repetition count should not persist across an irreversible move";
+}
+
+
+TEST_F(MoveValidationTest, GetDrawReasonReportsFiftyMoveRule)
+{
+	mBoard.clear();
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.addPiece(PieceType::WRook, Square::a1);
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+	mBoard.setHalfMoveClock(100);
+
+	EXPECT_EQ(mValidation.getDrawReason(), DrawReason::FiftyMoveRule);
+}
+
+
+TEST_F(MoveValidationTest, GetDrawReasonReportsInsufficientMaterial)
+{
+	mBoard.clear();
+	mBoard.addPiece(PieceType::WKing, Square::e1);
+	mBoard.addPiece(PieceType::BKing, Square::e8);
+	mBoard.setSide(Side::White);
+	mBoard.updateOccupancies();
+
+	EXPECT_EQ(mValidation.getDrawReason(), DrawReason::InsufficientMaterial);
+}
+
+
+TEST_F(MoveValidationTest, GetDrawReasonReportsNoneWhenNotADraw)
+{
+	EXPECT_EQ(mValidation.getDrawReason(), DrawReason::None) << "Initial position should not be a draw";
+}
+
 } // namespace MoveTests

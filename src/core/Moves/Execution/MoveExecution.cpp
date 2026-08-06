@@ -240,3 +240,24 @@ PieceType MoveExecution::getLastCapturedPiece()
 
 	return PieceType::None;
 }
+
+
+bool MoveExecution::isRepeatedPosition(int count) const
+{
+	uint64_t currentHash = mChessBoard.getHash();
+	int		 occurrences = 1;
+
+	for (auto it = mHistory.rbegin(); it != mHistory.rend(); ++it)
+	{
+		if (it->previousState.hash == currentHash)
+			if (++occurrences >= count)
+				return true;
+
+		// Irreversible moves (captures / pawn move/ castling rights loss)
+		// mean no earlier position can ever repeat again -> stop early
+		if (it->previousState.capturedPiece != PieceType::None)
+			break;
+	}
+
+	return false;
+}

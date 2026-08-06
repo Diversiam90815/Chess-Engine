@@ -29,6 +29,7 @@ public:
 	static std::string multiplayerStateToString(MultiplayerState state);
 	static std::string sideToString(const Side side);
 	static std::string cpuDifficultyToString(const CPUDifficulty diff);
+	static std::string drawReasonToString(const DrawReason reason);
 
 private:
 	FileManager fmg;

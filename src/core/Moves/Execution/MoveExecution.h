@@ -53,6 +53,9 @@ public:
 
 	PieceType										   getLastCapturedPiece();
 
+	[[nodiscard]] bool								   isRepeatedPosition(int count = 3) const;
+
+
 private:
 	Chessboard					 &mChessBoard;
 

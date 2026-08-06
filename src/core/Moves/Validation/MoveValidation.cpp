@@ -67,17 +67,25 @@ bool MoveValidation::isStalemate()
 
 bool MoveValidation::isDraw() const
 {
+	return getDrawReason() != DrawReason::None;
+}
+
+
+DrawReason MoveValidation::getDrawReason() const
+{
 	// 50-move rule
 	if (mBoard.getHalfMoveClock() >= 100)
-		return true;
+		return DrawReason::FiftyMoveRule;
 
 	// Insufficient material
 	if (hasInsufficientMaterial())
-		return true;
+		return DrawReason::InsufficientMaterial;
 
-	// TODO: Threefold repetition (Zobrist hashing)
+	// Threefold repetition
+	if (mExecution.isRepeatedPosition(3))
+		return DrawReason::ThreefoldRepetition;
 
-	return false;
+	return DrawReason::None;
 }
 
 
@@ -135,7 +143,25 @@ bool MoveValidation::hasInsufficientMaterial() const
 	if (pieces[WPawn] || pieces[BPawn] || pieces[WRook] || pieces[BRook] || pieces[WQueen] || pieces[BQueen])
 		return false;
 
-	// TODO: Check for insufficient material
+	int whiteBishops = BitUtils::popCount(pieces[WBishop]);
+	int blackBishops = BitUtils::popCount(pieces[BBishop]);
+	int whiteKnights = BitUtils::popCount(pieces[WKnight]);
+	int blackKnights = BitUtils::popCount(pieces[BKnight]);
+
+	int whiteMinors	 = whiteBishops + whiteKnights;
+	int blackMinors	 = blackBishops + blackKnights;
+
+	// K vs K
+	if (whiteMinors == 0 && blackMinors == 0)
+		return true;
+
+	// K + single minor vs K
+	if ((whiteMinors == 1 && blackMinors == 0) || (whiteMinors == 0 && blackMinors == 1))
+		return true;
+
+	// K + B vs K + B (treated as insufficient regardless of Bishop Color)
+	if (whiteMinors == 1 && blackMinors == 1 && whiteBishops == 1 && blackBishops == 1)
+		return true;
 
 	return false;
 }

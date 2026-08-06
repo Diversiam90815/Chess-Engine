@@ -9,6 +9,7 @@
 #include "Move.h"
 #include "Generation/MoveGeneration.h"
 #include "Execution/MoveExecution.h"
+#include "Parameters.h"
 
 
 class MoveValidation
@@ -20,42 +21,47 @@ public:
 	/**
 	 * @brief Check if the side to move is in check.
 	 */
-	[[nodiscard]] bool	 isInCheck() const;
+	[[nodiscard]] bool		 isInCheck() const;
 
 	/**
 	 * @brief Check if a specific side's king is attacked.
 	 */
-	[[nodiscard]] bool	 isKingAttacked(Side side) const;
+	[[nodiscard]] bool		 isKingAttacked(Side side) const;
 
 	/**
 	 * @brief Check if a move is legal (doesn't leave own king in check).
 	 */
-	[[nodiscard]] bool	 isMoveLegal(Move move);
+	[[nodiscard]] bool		 isMoveLegal(Move move);
 
 	/**
 	 * @brief Check if current position is checkmate.
 	 */
-	[[nodiscard]] bool	 isCheckmate();
+	[[nodiscard]] bool		 isCheckmate();
 
 	/**
 	 * @brief Check if current position is stalemate.
 	 */
-	[[nodiscard]] bool	 isStalemate();
+	[[nodiscard]] bool		 isStalemate();
 
 	/**
 	 * @brief Check for draw conditions (50-move, insufficient material).
 	 */
-	[[nodiscard]] bool	 isDraw() const;
+	[[nodiscard]] bool		 isDraw() const;
+
+	/**
+	 * @brief Get the specific reason the position is a draw (None if not a draw).
+	 */
+	[[nodiscard]] DrawReason getDrawReason() const;
 
 	/**
 	 * @brief Generate all legal moves for current side.
 	 */
-	void				 generateLegalMoves(MoveList &legalMoves);
+	void					 generateLegalMoves(MoveList &legalMoves);
 
 	/**
 	 * @brief Count legal moves (optimization: can early-exit for checkmate/stalemate).
 	 */
-	[[nodiscard]] size_t countLegalMoves();
+	[[nodiscard]] size_t	 countLegalMoves();
 
 
 private:

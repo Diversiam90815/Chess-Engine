@@ -1,13 +1,13 @@
 /*
   ==============================================================================
-	Module:         ConsoleApp
-	Description:    Console app shell: registers and runs scenarios
+	Module:         Perft
+	Description:    Perft app shell: registers and runs scenarios
   ==============================================================================
 */
 
 #include <cstdio>
 
-#include "ConsoleApp.h"
+#include "Perft.h"
 #include "Scenarios/AttackMapScenario.h"
 #include "Scenarios/MoveGenerationScenario.h"
 #include "Scenarios/MoveOrderingScenario.h"
@@ -15,14 +15,14 @@
 #include "Scenarios/PerftScenario.h"
 
 
-ConsoleApp::ConsoleApp()
+Perft::Perft()
 {
 	mEngine.init();
 	registerScenarios();
 }
 
 
-void ConsoleApp::registerScenarios()
+void Perft::registerScenarios()
 {
 	mScenarios.push_back(std::make_unique<AttackMapScenario>());
 	mScenarios.push_back(std::make_unique<MoveGenerationScenario>());
@@ -32,7 +32,7 @@ void ConsoleApp::registerScenarios()
 }
 
 
-void ConsoleApp::run()
+void Perft::run()
 {
 	printf("Chess Engine - Console App\n");
 	printf("==========================\n\n");

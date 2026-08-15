@@ -41,7 +41,7 @@ Chess-Engine/
 ├── src/
 │   ├── core/           # Core engine — game logic, move generation, AI (static library)
 │   ├── capi/           # Plain C wrapper around the core (shared library / DLL)
-│   └── console_app/    # Console application for manual testing
+│   └── perft/          # Perft application for measuring performance
 ├── tests/
 │   └── Core.Tests/     # GoogleTest unit tests
 ├── build/              # Generated build artifacts (not committed)

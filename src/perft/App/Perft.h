@@ -1,7 +1,7 @@
 /*
   ==============================================================================
-	Module:         ConsoleApp
-	Description:    Console app shell: registers and runs scenarios
+	Module:         Perft
+	Description:    Perft app shell: registers and runs scenarios
   ==============================================================================
 */
 
@@ -14,10 +14,10 @@
 #include "Scenarios/IScenario.h"
 
 
-class ConsoleApp
+class Perft
 {
 public:
-	ConsoleApp();
+	Perft();
 
 	void run();
 

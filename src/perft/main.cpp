@@ -1,16 +1,16 @@
 /*
   ==============================================================================
-	Module:         ConsoleApp - main
-	Description:    Console App for the Chess Engine for debugging
+	Module:         Perft - main
+	Description:    Perft App for the Chess Engine for debugging & measuring performance
   ==============================================================================
 */
 
-#include "ConsoleApp.h"
+#include "Perft.h"
 
 
 int main()
 {
-	ConsoleApp app;
+	Perft app;
 	app.run();
 	return 0;
 }

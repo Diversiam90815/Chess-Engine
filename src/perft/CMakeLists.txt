@@ -1,4 +1,4 @@
-set(TARGET_NAME Chess.Engine.ConsoleApp)
+set(TARGET_NAME Chess.Engine.Perft)
 
 
 set(APP_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/App)
@@ -7,7 +7,7 @@ set(SCENARIOS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Scenarios)
 
 
 set(APP_FILES
-    ${APP_DIR}/ConsoleApp.h       ${APP_DIR}/ConsoleApp.cpp
+    ${APP_DIR}/Perft.h       ${APP_DIR}/Perft.cpp
 )
 
 set(PRINTING_FILES

@@ -58,31 +58,44 @@ Command parseMove(const std::vector<std::string> &tokens)
 	for (const auto &token : tokens)
 		joined += toLower(token);
 
-	if (joined.size() < 4 || joined.size() > 5)
-		return invalid("Moves look like 'e2e4' or 'e7e8q'. Type 'help' for the full list.");
-
-	auto from = parseSquare(joined.substr(0, 2));
-	auto to	  = parseSquare(joined.substr(2, 2));
-
-	if (!from || !to)
-		return invalid("'" + joined + "' is not a pair of squares.");
-
-	Command command;
-	command.type = CommandType::Move;
-	command.from = *from;
-	command.to	 = *to;
-
-	if (joined.size() == 5)
+	// Coordinate notation: "e2e4", "e7e8q".
+	if (joined.size() >= 4 && joined.size() <= 5)
 	{
-		auto promotion = parsePromotion(joined[4]);
+		auto from = parseSquare(joined.substr(0, 2));
+		auto to	  = parseSquare(joined.substr(2, 2));
 
-		if (!promotion)
-			return invalid("Promote to one of q, r, b or n.");
+		if (from && to)
+		{
+			Command command;
+			command.type = CommandType::Move;
+			command.from = *from;
+			command.to	 = *to;
 
-		command.promotion = *promotion;
+			if (joined.size() == 5)
+			{
+				auto promotion = parsePromotion(joined[4]);
+
+				if (!promotion)
+					return invalid("Promote to one of q, r, b or n.");
+
+				command.promotion = *promotion;
+			}
+
+			return command;
+		}
 	}
 
-	return command;
+	// Not coordinate notation - treat a single token as algebraic notation
+	// ("Bb2", "Nxe5", "O-O", "e8=Q") and let the engine's move list resolve it.
+	if (tokens.size() == 1)
+	{
+		Command command;
+		command.type = CommandType::Move;
+		command.SAN	 = tokens[0];
+		return command;
+	}
+
+	return invalid("'" + joined + "' is not a move. Type 'help' for the full list.");
 }
 
 } // namespace

@@ -24,6 +24,36 @@
 
 using namespace std::chrono_literals;
 
+namespace
+{
+
+std::string stripCheckSuffix(std::string s)
+{
+	while (!s.empty() && (s.back() == '+' || s.back() == '#'))
+		s.pop_back();
+	return s;
+}
+
+std::string toLowerAscii(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	return s;
+}
+
+// Colour is irrelevant to move submission, mirrors CommandParser::parsePromotion.
+PieceType promotionFromOffset(int offset)
+{
+	switch (offset)
+	{
+	case 0: return PieceType::WKnight;
+	case 1: return PieceType::WBishop;
+	case 2: return PieceType::WRook;
+	default: return PieceType::WQueen;
+	}
+}
+
+} // namespace
+
 
 ConsoleApp::ConsoleApp() : mView(mEngine) {}
 
@@ -331,32 +361,66 @@ void ConsoleApp::submitMove(const Command &command)
 		return;
 	}
 
-	// Check the move here rather than posting a nonsense request: the state
-	// machine would otherwise reinterpret the squares as a fresh selection.
-	MoveList legal;
-	mEngine.getLegalMovesFromSquare(command.from, legal);
+	Square	  from		= command.from;
+	Square	  to		= command.to;
+	PieceType promotion = command.promotion;
 
-	bool matches = false;
-	for (const Move &move : legal)
+	if (!command.SAN.empty())
 	{
-		if (move.to() != command.to)
-			continue;
-
-		if (command.promotion == PieceType::None || move.isPromotion())
+		if (!resolveSan(command.SAN, from, to, promotion))
 		{
-			matches = true;
-			break;
+			mView.printError("'" + command.SAN + "' is not a legal move. Try 'moves' to see what is available.");
+			return;
+		}
+	}
+	else
+	{
+		MoveList legal;
+		mEngine.getLegalMovesFromSquare(from, legal);
+
+		bool matches = false;
+		for (const Move &move : legal)
+		{
+			if (move.to() != to)
+				continue;
+
+			if (promotion == PieceType::None || move.isPromotion())
+			{
+				matches = true;
+				break;
+			}
+		}
+
+		if (!matches)
+		{
+			mView.printError("Illegal move. Try 'moves' to see what is available.");
+			return;
 		}
 	}
 
-	if (!matches)
+	mEngine.submitMove(from, to, promotion);
+	pumpUntilIdle(2000ms);
+}
+
+
+bool ConsoleApp::resolveSan(const std::string &san, Square &from, Square &to, PieceType &promotion) const
+{
+	const std::string target = toLowerAscii(stripCheckSuffix(san));
+
+	for (const Move &move : mEngine.getLegalMoves())
 	{
-		mView.printError("Illegal move. Try 'moves' to see what is available.");
-		return;
+		const std::string notation = toLowerAscii(stripCheckSuffix(mEngine.getMoveNotation(move)));
+
+		if (notation != target)
+			continue;
+
+		from	  = move.from();
+		to		  = move.to();
+		promotion = move.isPromotion() ? promotionFromOffset(move.promotionPieceOffset()) : PieceType::None;
+		return true;
 	}
 
-	mEngine.submitMove(command.from, command.to, command.promotion);
-	pumpUntilIdle(2000ms);
+	return false;
 }
 
 

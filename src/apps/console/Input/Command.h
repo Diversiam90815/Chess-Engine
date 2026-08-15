@@ -36,8 +36,8 @@ struct Command
 	Square		to		  = Square::None;
 	PieceType	promotion = PieceType::None;
 
-	/// Target of `moves <square>`; None means "the whole position".
 	Square		square	  = Square::None;
+	std::string SAN;
 
 	std::string error;
 };

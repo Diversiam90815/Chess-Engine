@@ -148,7 +148,7 @@ enum PieceType
 // (capital letters for white, small letters for black)
 constexpr char		  asciiPieces[13]	= "KQPNBRkqpnbr";
 
-constexpr const char *unicodePieces[12] = {"♚", "♛", "♟", "♞", "♝", "♜", "♔", "♕", "♙", "♘", "♗", "♖"};
+constexpr const char *unicodePieces[12] = {"♚", "♛", "♟︎", "♞", "♝", "♜", "♔", "♕", "♙", "♘", "♗", "♖"};
 
 // convert ASCII character pieces to encoded constants
 inline int			  GetPieceTypeFromChar(char c)

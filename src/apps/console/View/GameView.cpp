@@ -152,7 +152,7 @@ void GameView::printHelp() const
 
 void GameView::printMovePlayed(const engine::MoveExecuted &event, Side mover) const
 {
-	printf("  %s plays %s\n", sideName(mover).c_str(), event.notation.c_str());
+	printf("\n  %s plays %s\n", sideName(mover).c_str(), event.notation.c_str());
 }
 
 

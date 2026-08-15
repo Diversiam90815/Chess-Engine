@@ -86,7 +86,7 @@ EngineSettings ConsoleApp::defaultSettings()
 		settings.logFolder = std::filesystem::path(localAppData) / "ChessEngine";
 #else
 	if (const char *home = std::getenv("HOME"))
-		settings.appDataPath = std::filesystem::path(home) / ".chessengine";
+		settings.logFolder = std::filesystem::path(home) / ".chessengine";
 #endif
 
 	return settings;

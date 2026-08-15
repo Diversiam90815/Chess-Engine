@@ -21,7 +21,7 @@ bool GameManager::init(EngineSettings settings)
 
 	mSettings = std::move(settings);
 
-	mLog.initLogging(mSettings.appDataPath);
+	mLog.initLogging(mSettings.logFolder);
 
 	SystemInfo::logSystemInfo();
 

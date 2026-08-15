@@ -46,6 +46,8 @@ public:
 	bool								 isPromotionMove(Square from, Square to) const override;
 	Move								 findMove(Square from, Square to, PieceType promotion = PieceType::None) const override;
 	EndGameState						 checkEndGame() override;
+	DrawReason							 getDrawReason() const override;
+	bool								 isInCheck() const;
 
 	//=========================================================================
 	// Turn Management
@@ -70,10 +72,19 @@ public:
 
 	const Chessboard					&getBoard() const { return mEngine.getBoard(); }
 	const std::vector<MoveHistoryEntry> &getMoveHistory() const { return mEngine.getMoveHistory(); }
-	const MoveList						&getCachedLegalMoves() { return mCachedLegalMoves; }
+
+	/// Legal moves of the most recently selected square (drives UI highlighting).
+	const MoveList						&getSelectionMoves() const { return mSelectionMoves; }
+
+	/// Every legal move in the current position.
+	const MoveList						&getAllLegalMoves() const;
+
+	std::string							 getMoveNotation(Move move) const { return mEngine.getMoveNotation(move); }
+
 	Player								&getWhitePlayer() { return mWhitePlayer; }
 	Player								&getBlackPlayer() { return mBlackPlayer; }
 
+	void								 setEventQueue(EventQueue *events);
 	void								 setCPUMoveCallback(std::function<void(Move)> callback);
 
 private:
@@ -83,9 +94,13 @@ private:
 	Side					  mLocalPlayer{Side::White};
 	GameConfiguration		  mConfig{};
 
-	// Cached legal moves for current position (for findMove)
+	// Every legal move in the current position (backs findMove / isPromotionMove).
 	mutable MoveList		  mCachedLegalMoves;
 	mutable bool			  mCacheValid{false};
+
+	// Legal moves of the last square the user selected. Kept apart from the
+	// position cache so a selection query cannot narrow what findMove searches.
+	MoveList				  mSelectionMoves;
 
 	// Players
 	Player					  mWhitePlayer;

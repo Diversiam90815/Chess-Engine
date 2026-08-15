@@ -20,9 +20,16 @@ void StateMachine::setGameController(IGameController *controller)
 }
 
 
-void StateMachine::setInputSource(IInputSource *source)
+void StateMachine::setEventQueue(EventQueue *events)
 {
-	mInputSource = source;
+	mEvents = events;
+}
+
+
+void StateMachine::publish(engine::EngineEvent event)
+{
+	if (mEvents)
+		mEvents->push(std::move(event));
 }
 
 
@@ -39,6 +46,12 @@ void StateMachine::postEvent(InputEvent event)
 void StateMachine::onSquareSelected(Square sq)
 {
 	postEvent(InputEvent::SquareSelected(sq));
+}
+
+
+void StateMachine::onMoveRequested(Square from, Square to, PieceType promotion)
+{
+	postEvent(InputEvent::MoveRequested(from, to, promotion));
 }
 
 
@@ -102,9 +115,9 @@ void StateMachine::run()
 
 void StateMachine::processEvent(const InputEvent &event)
 {
-	if (!mController || !mInputSource)
+	if (!mController || !mEvents)
 	{
-		LOG_ERROR("Controller or InputSource not set!");
+		LOG_ERROR("Controller or event queue not set!");
 		return;
 	}
 
@@ -166,17 +179,28 @@ GameState StateMachine::handleWaitingForInput(const InputEvent &event)
 			mMoveIntent.fromSquare = event.square;
 			mMoveIntent.legalMoves = moves;
 
-			mInputSource->onLegalMovesAvailable(event.square, moves);
+			publish(engine::LegalMovesAvailable{event.square});
 			return GameState::WaitingForTarget;
 		}
 		break;
+	}
+	case InputEvent::Type::MoveRequested:
+	{
+		mMoveIntent.clear();
+		mMoveIntent.fromSquare = event.square;
+
+		return resolveAndPlay(event.square, event.toSquare, event.promotion);
 	}
 	case InputEvent::Type::UndoRequested:
 	{
 		if (mController->undoLastMove())
 		{
-			mInputSource->onMoveUndone();
-			mInputSource->onBoardStateChanged();
+			publish(engine::MoveUndone{});
+			publish(engine::BoardStateChanged{});
+
+			// The move is off the board, so the turn has to go back with it.
+			mController->switchTurns();
+			publish(engine::PlayerChanged{mController->getCurrentSide()});
 		}
 		break;
 	}
@@ -204,7 +228,7 @@ GameState StateMachine::handleWaitingForTarget(const InputEvent &event)
 	if (sq == mMoveIntent.fromSquare)
 	{
 		mMoveIntent.clear();
-		mInputSource->onBoardStateChanged(); // Notify UI to render a new board
+		publish(engine::BoardStateChanged{}); // Notify host to render a new board
 		return GameState::WaitingForInput;
 	}
 
@@ -218,29 +242,34 @@ GameState StateMachine::handleWaitingForTarget(const InputEvent &event)
 		mMoveIntent.fromSquare = sq;
 		mMoveIntent.legalMoves = newMoves;
 
-		mInputSource->onLegalMovesAvailable(sq, newMoves);
+		publish(engine::LegalMovesAvailable{sq});
 		return GameState::WaitingForTarget;
 	}
 
-	// try target square
-	mMoveIntent.toSquare = sq;
+	return resolveAndPlay(mMoveIntent.fromSquare, sq, PieceType::None);
+}
 
-	// Check if promotion is needed
-	if (mController->isPromotionMove(mMoveIntent.fromSquare, mMoveIntent.toSquare))
+
+GameState StateMachine::resolveAndPlay(Square from, Square to, PieceType promotion)
+{
+	mMoveIntent.toSquare  = to;
+	mMoveIntent.promotion = promotion;
+
+	// Promotion without a piece choice: ask the host and park until it answers.
+	if (promotion == PieceType::None && mController->isPromotionMove(from, to))
 	{
-		mInputSource->onPromotionRequired();
+		publish(engine::PromotionRequired{from, to});
 		return GameState::PawnPromotion;
 	}
 
-	// Find and execute move
-	Move move = mController->findMove(mMoveIntent.fromSquare, mMoveIntent.toSquare);
+	Move move = mController->findMove(from, to, promotion);
 
 	if (move.isValid() && tryExecuteMove(move))
 		return determineNextTurnState();
 
 	// invalid move
 	mMoveIntent.clear();
-	mInputSource->onBoardStateChanged(); // Notify UI to render a new board
+	publish(engine::BoardStateChanged{}); // Notify host to render a new board
 	return GameState::WaitingForInput;
 }
 
@@ -257,6 +286,7 @@ GameState StateMachine::handlePawnPromotion(const InputEvent &event)
 			return determineNextTurnState();
 
 		mMoveIntent.clear();
+		publish(engine::BoardStateChanged{});
 		return GameState::WaitingForInput;
 	}
 
@@ -311,8 +341,7 @@ void StateMachine::transitionTo(GameState newState)
 
 	LOG_INFO("State transition: {} -> {}", Logging::gameStateToString(oldState), Logging::gameStateToString(newState));
 
-	if (mInputSource)
-		mInputSource->onGameStateChanged(newState);
+	publish(engine::GameStateChanged{newState});
 
 	onStateEnter(newState);
 }
@@ -336,10 +365,10 @@ GameState StateMachine::determineNextTurnState()
 {
 	if (mEndgameState != EndGameState::OnGoing)
 	{
-		Side winner = (mEndgameState == EndGameState::Checkmate) ? (mController->getCurrentSide() == Side::White ? Side::Black : Side::White) : Side::None;
+		Side	   winner = (mEndgameState == EndGameState::Checkmate) ? (mController->getCurrentSide() == Side::White ? Side::Black : Side::White) : Side::None;
+		DrawReason reason = (mEndgameState == EndGameState::Draw) ? mController->getDrawReason() : DrawReason::None;
 
-		if (mInputSource)
-			mInputSource->onGameEnded(mEndgameState, winner);
+		publish(engine::GameEnded{mEndgameState, winner, reason});
 
 		return GameState::GameOver;
 	}
@@ -361,12 +390,12 @@ bool StateMachine::tryExecuteMove(Move move)
 	if (!executionResult)
 		return false;
 
-	mInputSource->onMoveExecuted(move, executionResult.notation);
-	mInputSource->onBoardStateChanged();
+	publish(engine::MoveExecuted{move, executionResult.notation});
+	publish(engine::BoardStateChanged{});
 
 	mController->switchTurns();
 	Side currentSide = mController->getCurrentSide();
-	mInputSource->onPlayerChanged(currentSide);
+	publish(engine::PlayerChanged{currentSide});
 
 	mEndgameState = mController->checkEndGame();
 

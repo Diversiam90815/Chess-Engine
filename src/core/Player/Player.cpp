@@ -31,13 +31,8 @@ void Player::addCapturedPiece(const PieceType piece)
 {
 	mCapturedPieces.push_back(piece);
 
-	for (auto &observer : mObservers)
-	{
-		auto obs = observer.lock();
-
-		if (obs)
-			obs->onAddCapturedPiece(getPlayerColor(), piece);
-	}
+	if (mEvents)
+		mEvents->push(engine::PieceCaptured{getPlayerColor(), piece, true});
 }
 
 
@@ -54,13 +49,8 @@ void Player::removeLastCapturedPiece()
 	PieceType lastCapture = mCapturedPieces.back();
 	mCapturedPieces.pop_back();
 
-	for (auto &observer : mObservers)
-	{
-		auto obs = observer.lock();
-
-		if (obs)
-			obs->onRemoveLastCapturedPiece(getPlayerColor(), lastCapture);
-	}
+	if (mEvents)
+		mEvents->push(engine::PieceCaptured{getPlayerColor(), lastCapture, false});
 }
 
 

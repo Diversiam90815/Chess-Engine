@@ -17,14 +17,14 @@
 #include "Move.h"
 #include "ThreadBase.h"
 #include "IGameController.h"
-#include "IInputSource.h"
+#include "EventQueue.h"
 #include "InputEvent.h"
 
 
 /**
  * @brief	Pure state machine - only manages transitions.
  *			All game logic delegated to IGameController.
- *			All UI notifications delegated to IInputSource.
+ *			All host notifications published to the EventQueue.
  */
 class StateMachine : public ThreadBase
 {
@@ -41,7 +41,7 @@ public:
 	//=========================================================================
 
 	void					setGameController(IGameController *controller);
-	void					setInputSource(IInputSource *source);
+	void					setEventQueue(EventQueue *events);
 
 	//=========================================================================
 	// Configuration
@@ -58,6 +58,7 @@ public:
 
 	// Convenience methods
 	void					onSquareSelected(Square sq);
+	void					onMoveRequested(Square from, Square to, PieceType promotion = PieceType::None);
 	void					onPromotionChosen(PieceType piece);
 	void					onRemoteMoveReceived(Move move);
 	void					onCPUMoveCalculated(Move move);
@@ -101,6 +102,10 @@ private:
 	GameState			   determineNextTurnState();
 	bool				   tryExecuteMove(Move move);
 
+	GameState			   resolveAndPlay(Square from, Square to, PieceType promotion);
+
+	void				   publish(engine::EngineEvent event);
+
 	//=========================================================================
 	// State
 	//=========================================================================
@@ -121,7 +126,7 @@ private:
 	//=========================================================================
 
 	IGameController		  *mController{nullptr};
-	IInputSource		  *mInputSource{nullptr};
+	EventQueue			  *mEvents{nullptr};
 
 	//=========================================================================
 	// Thread-Safe Event Queue

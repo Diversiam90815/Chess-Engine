@@ -10,7 +10,6 @@
 #include "Execution/MoveExecution.h"
 #include "Generation/MoveGeneration.h"
 #include "Validation/MoveValidation.h"
-#include "IObservable.h"
 #include "Parameters.h"
 #include "Player.h"
 

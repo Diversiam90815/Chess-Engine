@@ -18,6 +18,35 @@ A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multi
 - **Adjustable Sides**: Choose whether to play as White or Black when starting a game against the CPU.
 - **LAN Multiplayer**: Both players discover each other automatically on the local network. On machines with multiple network interfaces, a specific adapter can be selected for a stable connection.
 - **Plain C API (DLL)**: The entire engine is accessible through a plain C API exported as a DLL, making it straightforward to drive from C#, Python, or any runtime with C FFI support.
+- **Console App**: Play a full game in the terminal (local co-op or against the CPU) with legal-move listing, undo, move history and board flipping.
+
+## Architecture
+
+The engine is a self-contained brain that doesn't know or care who's asking it to play chess. It has no idea whether it's talking to a Windows app, a terminal, or a test — it just plays the game and reports what happened.
+
+```
+              ┌───────────────────┐
+              │   Chess Engine    │   plays the game, knows the rules,
+              │   (the "brain")   │   reports every move and state change
+              └─────────┬─────────┘
+                        │
+              one stream of events
+                        │
+        ┌───────────────┴───────────────┐
+        │                               │
+┌───────▼────────┐             ┌────────▼────────┐
+│  C API (DLL)    │             │  Console App     │
+│  used by the    │             │  play a game     │
+│  WinUI3 app     │             │  in the terminal │
+└─────────────────┘             └──────────────────┘
+```
+
+Two ideas make this work:
+
+- **One event stream, many listeners.** Whenever something happens — a move is played, a piece is captured, the game ends — the engine writes it to a single ordered list. Each host reads that list at its own pace: the console app reads it between prompts so it never interrupts you mid-command, and the Windows app's DLL reads it and forwards each event to the C# side. Neither host waits on the other, and neither needs to know how the other works.
+- **Swappable front ends.** Because the engine doesn't depend on any particular host, new ways to play (a web UI, a different CLI, an AI-vs-AI runner) can be added without touching the engine itself — they just read the same event stream and ask the engine to do things ("play this move", "what are the legal moves here?").
+
+The [Perft app](src/apps/perft) is a third, developer-only front end used for performance testing rather than play.
 
 ## Technology Stack
 

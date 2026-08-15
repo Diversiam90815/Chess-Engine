@@ -1,7 +1,6 @@
 set(TARGET_NAME Chess.Engine.Core)
 
 set (SOURCE_DIR						${CMAKE_CURRENT_SOURCE_DIR})
-set (SUBMODULES_DIR					${CMAKE_CURRENT_SOURCE_DIR}/submodule)
 	
 set (MOVE_DIR						${SOURCE_DIR}/Moves)
 set (GAME_MANAGER_DIR				${SOURCE_DIR}/GameManager)
@@ -38,8 +37,6 @@ set(ALL_PROJECT_DIRS
 			${EVALUATION_DIR}
 			${MULTIPLAYER_DIR}
 )
-
-include_directories(${ALL_PROJECT_DIRS})
 
 
 set(STATEMACHINE_FILES

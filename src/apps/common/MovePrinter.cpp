@@ -7,6 +7,8 @@
 
 #include "MovePrinter.h"
 #include "Moves/Notation/MoveNotation.h"
+
+#include <algorithm>
 #include <cstdio>
 
 
@@ -37,6 +39,39 @@ void printMoveList(const MoveList &moves)
 	for (size_t i = 0; i < moves.size(); ++i)
 		printf("  %3zu. %s\n", i + 1, MoveNotation::toUCI(moves[i]).c_str());
 	printf("\n");
+}
+
+
+void printMoveTable(const std::vector<std::string> &labels, int columns)
+{
+	if (labels.empty())
+	{
+		printf("  (none)\n");
+		return;
+	}
+
+	if (columns < 1)
+		columns = 1;
+
+	size_t widest = 0;
+	for (const auto &label : labels)
+		widest = std::max(widest, label.size());
+
+	const int width = static_cast<int>(widest);
+
+	for (size_t i = 0; i < labels.size(); ++i)
+	{
+		if (i % columns == 0)
+			printf("  ");
+
+		printf("%-*s  ", width, labels[i].c_str());
+
+		if ((i + 1) % columns == 0)
+			printf("\n");
+	}
+
+	if (labels.size() % columns != 0)
+		printf("\n");
 }
 
 } // namespace MovePrinter

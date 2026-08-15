@@ -9,12 +9,9 @@
 #include "Logging.h"
 
 
-void Logging::initLogging()
+void Logging::initLogging(const fs::path &loggingFolder)
 {
-	auto		logPath	 = fmg.getLoggingPath();
-	auto		log		 = logPath / FileName::LogFile;
-
-	std::string fileName = log.string();
+	std::string fileName = getNewLogFilePath(loggingFolder);
 
 	logging::addFileOutput()
 		.setFilename(fileName)
@@ -103,4 +100,20 @@ std::string Logging::drawReasonToString(const DrawReason reason)
 	case DrawReason::ThreefoldRepetition: return "Threefold repetition";
 	default: return "None";
 	}
+}
+
+
+std::string Logging::getNewLogFilePath(fs::path logFolder)
+{
+	std::error_code ec;
+	fs::path		root = logFolder.empty() ? fs::current_path(ec) : logFolder;
+	fs::path		path = root / FileName::LoggingFolder;
+
+	if (!fs::exists(path) && !fs::create_directories(path, ec))
+		return "";
+
+	auto		log		 = path / FileName::LogFile;
+	std::string fileName = log.string();
+
+	return fileName;
 }

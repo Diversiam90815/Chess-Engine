@@ -8,7 +8,7 @@
 
 ## Overview
 
-A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation, and the core is exposed as a plain C API (DLL) for straightforward integration with non-C++ runtimes. The project is structured as a core static library, a C API wrapper, and a console application for testing. All built through a unified Python-driven CMake build system.
+A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation. The core is pure C++ and knows nothing about its hosts: it publishes an ordered stream of engine events that a host drains on its own thread. Two hosts ship in this repo: a plain C API (DLL) for non-C++ runtimes, and a console app you can play in the terminal. All built through a unified Python-driven CMake build system.
 
 
 ## Features
@@ -18,6 +18,35 @@ A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multi
 - **Adjustable Sides**: Choose whether to play as White or Black when starting a game against the CPU.
 - **LAN Multiplayer**: Both players discover each other automatically on the local network. On machines with multiple network interfaces, a specific adapter can be selected for a stable connection.
 - **Plain C API (DLL)**: The entire engine is accessible through a plain C API exported as a DLL, making it straightforward to drive from C#, Python, or any runtime with C FFI support.
+- **Console App**: Play a full game in the terminal (local co-op or against the CPU) with legal-move listing, undo, move history and board flipping.
+
+## Architecture
+
+The engine is a self-contained brain that doesn't know or care who's asking it to play chess. It has no idea whether it's talking to a Windows app, a terminal, or a test — it just plays the game and reports what happened.
+
+```
+              ┌───────────────────┐
+              │   Chess Engine    │   plays the game, knows the rules,
+              │   (the "brain")   │   reports every move and state change
+              └─────────┬─────────┘
+                        │
+              one stream of events
+                        │
+        ┌───────────────┴───────────────┐
+        │                               │
+┌───────▼────────┐             ┌────────▼────────┐
+│  C API (DLL)    │             │  Console App     │
+│  used by the    │             │  play a game     │
+│  WinUI3 app     │             │  in the terminal │
+└─────────────────┘             └──────────────────┘
+```
+
+Two ideas make this work:
+
+- **One event stream, many listeners.** Whenever something happens — a move is played, a piece is captured, the game ends — the engine writes it to a single ordered list. Each host reads that list at its own pace: the console app reads it between prompts so it never interrupts you mid-command, and the Windows app's DLL reads it and forwards each event to the C# side. Neither host waits on the other, and neither needs to know how the other works.
+- **Swappable front ends.** Because the engine doesn't depend on any particular host, new ways to play (a web UI, a different CLI, an AI-vs-AI runner) can be added without touching the engine itself — they just read the same event stream and ask the engine to do things ("play this move", "what are the legal moves here?").
+
+The [Perft app](src/apps/perft) is a third, developer-only front end used for performance testing rather than play.
 
 ## Technology Stack
 
@@ -41,7 +70,10 @@ Chess-Engine/
 ├── src/
 │   ├── core/           # Core engine — game logic, move generation, AI (static library)
 │   ├── capi/           # Plain C wrapper around the core (shared library / DLL)
-│   └── perft/          # Perft application for measuring performance
+│   └── apps/
+│       ├── common/     # Board and move rendering shared by the executables
+│       ├── console/    # Play a game in the terminal
+│       └── perft/      # Perft application for measuring performance
 ├── tests/
 │   └── Core.Tests/     # GoogleTest unit tests
 ├── build/              # Generated build artifacts (not committed)
@@ -51,7 +83,7 @@ Chess-Engine/
 
 ## Prerequisites
 
-Chess Engine builds on **Windows, Linux, and macOS** — the C++ core has no platform-specific code. Providing a default local player name is entirely the host application's responsibility (via `UserSettingsCache`/`SetLocalPlayerName()` in the C API); the engine itself doesn't look one up.
+Chess Engine builds on **Windows, Linux, and macOS**. Providing a default local player name and an log file path is entirely the host application's responsibility (it fills in `EngineSettings`, or `Init()`/`SetLocalPlayerName()` in the C API); the engine itself doesn't look either up.
 
 - **C++ Compiler**: C++20 or higher (MSVC on Windows, GCC or Clang on Linux/macOS)
 - **CMake**: Version 4.0 or higher
@@ -133,10 +165,32 @@ python build.py --docs
 |---|---|
 | Core static library | `build/<arch>/src/core/` |
 | C API DLL | `build/<arch>/src/capi/` |
-| Console application | `build/<arch>/src/console_app/` |
+| Console application | `build/<arch>/src/apps/console/` |
+| Perft application | `build/<arch>/src/apps/perft/` |
 | Test executable | `build/<arch>/tests/` |
 | Installed headers / libs | `install/` |
 | Doxygen HTML docs | `build/doxygen/html/index.html` |
+
+### Playing in the Console
+
+```bash
+./build/x64/src/apps/console/Debug/Chess.Engine.Console
+```
+
+The app asks for a mode first — local co-op, or against the CPU (your colour and a difficulty). Then it draws the board each turn and takes commands:
+
+| Command | Effect |
+|---|---|
+| `e2e4`, `e2 e4` | Play a move |
+| `e7e8q` | Play a move, promoting to `q`, `r`, `b` or `n` (omit it and you'll be asked) |
+| `moves` | List every legal move in the position |
+| `moves e2` | List the moves leaving one square, highlighted on the board |
+| `board` | Re-draw the board |
+| `undo` | Take back the last move (both plies when playing the CPU) |
+| `history` | Show the moves played so far |
+| `flip` | Switch the board orientation |
+| `new` | Start a new game |
+| `help` / `quit` | Show the command list / leave |
 
 ### Running Tests
 

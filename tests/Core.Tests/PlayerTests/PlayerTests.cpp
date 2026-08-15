@@ -6,36 +6,48 @@
 */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
+#include <optional>
+#include <vector>
+
+#include "EventQueue.h"
 #include "Player/Player.h"
-#include "IObserver.h"
 
 
 namespace PlayerTests
 {
-
-class MockPlayerObserver : public IPlayerObserver
-{
-public:
-	MOCK_METHOD(void, onAddCapturedPiece, (Side player, PieceType piece), (override));
-	MOCK_METHOD(void, onRemoveLastCapturedPiece, (Side player, PieceType piece), (override));
-};
-
 
 class PlayerTests : public ::testing::Test
 {
 protected:
 	void SetUp() override
 	{
-		mWhitePlayer  = std::make_unique<Player>(Side::White);
-		mBlackPlayer  = std::make_unique<Player>(Side::Black);
-		mMockObserver = std::make_shared<MockPlayerObserver>();
+		mEvents		 = std::make_unique<EventQueue>();
+		mWhitePlayer = std::make_unique<Player>(Side::White);
+		mBlackPlayer = std::make_unique<Player>(Side::Black);
+
+		mWhitePlayer->setEventQueue(mEvents.get());
+		mBlackPlayer->setEventQueue(mEvents.get());
 	}
 
-	std::unique_ptr<Player>				mWhitePlayer;
-	std::unique_ptr<Player>				mBlackPlayer;
-	std::shared_ptr<MockPlayerObserver> mMockObserver;
+	/// Everything the players published since the last call.
+	std::vector<engine::PieceCaptured> drainCaptures()
+	{
+		std::vector<engine::PieceCaptured> captures;
+		engine::EngineEvent				   event;
+
+		while (mEvents->poll(event))
+		{
+			if (const auto *capture = std::get_if<engine::PieceCaptured>(&event))
+				captures.push_back(*capture);
+		}
+
+		return captures;
+	}
+
+	std::unique_ptr<EventQueue> mEvents;
+	std::unique_ptr<Player>		mWhitePlayer;
+	std::unique_ptr<Player>		mBlackPlayer;
 };
 
 
@@ -104,119 +116,99 @@ TEST_F(PlayerTests, SetPlayerColorToNone)
 
 TEST_F(PlayerTests, AddCapturedPiece)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
-
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
+
+	const auto captures = drainCaptures();
+
+	ASSERT_EQ(captures.size(), 1u) << "One capture should publish one event";
+	EXPECT_EQ(captures[0].player, Side::White);
+	EXPECT_EQ(captures[0].piece, PieceType::BPawn);
+	EXPECT_TRUE(captures[0].captured) << "Adding a piece should report captured = true";
+
+	ASSERT_EQ(mWhitePlayer->getCapturedPieces().size(), 1u);
+	EXPECT_EQ(mWhitePlayer->getCapturedPieces().front(), PieceType::BPawn);
 }
 
 
 TEST_F(PlayerTests, AddMultipleCapturedPieces)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BKnight)).Times(1);
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BRook)).Times(1);
-
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
+
+	const auto captures = drainCaptures();
+
+	ASSERT_EQ(captures.size(), 3u) << "Each capture should publish its own event";
+	EXPECT_EQ(captures[0].piece, PieceType::BPawn);
+	EXPECT_EQ(captures[1].piece, PieceType::BKnight);
+	EXPECT_EQ(captures[2].piece, PieceType::BRook) << "Events should arrive in the order they happened";
 }
 
 
 TEST_F(PlayerTests, AddCapturedPieceSameTypeMultipleTimes)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
 	// Should notify each time, even for the same piece type
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(3);
-
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
-}
 
-
-TEST_F(PlayerTests, AddCapturedPieceNotifiesAllObservers)
-{
-	auto observer2 = std::make_shared<MockPlayerObserver>();
-
-	mWhitePlayer->attachObserver(mMockObserver);
-	mWhitePlayer->attachObserver(observer2);
-
-	// Both observers should be notified
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-	EXPECT_CALL(*observer2, onAddCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-
-	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
+	EXPECT_EQ(drainCaptures().size(), 3u);
 }
 
 
 TEST_F(PlayerTests, RemoveLastCapturedPiece)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	// Add pieces
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
-
-	// Remove last piece (rook)
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BRook)).Times(1);
+	drainCaptures();
 
 	mWhitePlayer->removeLastCapturedPiece();
+
+	const auto captures = drainCaptures();
+
+	ASSERT_EQ(captures.size(), 1u);
+	EXPECT_EQ(captures[0].piece, PieceType::BRook) << "The most recent capture should be the one removed";
+	EXPECT_FALSE(captures[0].captured) << "Removing a piece should report captured = false";
 }
 
 
 TEST_F(PlayerTests, RemoveLastCapturedPieceFromEmpty)
 {
-	// Try to remove from empty captured pieces list
-	// Should log warning but not crash or notify observers
-
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(::testing::_, ::testing::_)).Times(0);
-
-	mWhitePlayer->attachObserver(mMockObserver);
+	// Should log a warning but neither crash nor publish anything.
 	EXPECT_NO_THROW(mWhitePlayer->removeLastCapturedPiece()) << "Removing from empty list should not throw";
+
+	EXPECT_TRUE(drainCaptures().empty()) << "Nothing was removed, so nothing should be published";
 }
 
 
 TEST_F(PlayerTests, RemoveLastCapturedPieceSequence)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	// Add pieces
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
+	drainCaptures();
 
-	// Remove in reverse order
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BRook)).Times(1);
+	mWhitePlayer->removeLastCapturedPiece();
+	mWhitePlayer->removeLastCapturedPiece();
 	mWhitePlayer->removeLastCapturedPiece();
 
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BKnight)).Times(1);
-	mWhitePlayer->removeLastCapturedPiece();
+	const auto captures = drainCaptures();
 
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
-	mWhitePlayer->removeLastCapturedPiece();
+	ASSERT_EQ(captures.size(), 3u);
+	EXPECT_EQ(captures[0].piece, PieceType::BRook);
+	EXPECT_EQ(captures[1].piece, PieceType::BKnight);
+	EXPECT_EQ(captures[2].piece, PieceType::BPawn) << "Pieces should come off in reverse order";
 }
 
 
-TEST_F(PlayerTests, RemoveLastCapturedPieceNotifiesAllObservers)
+TEST_F(PlayerTests, NoEventQueueIsHarmless)
 {
-	auto observer2 = std::make_shared<MockPlayerObserver>();
+	Player detached(Side::White);
 
-	mWhitePlayer->attachObserver(mMockObserver);
-	mWhitePlayer->attachObserver(observer2);
-
-	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
-
-	// Both observers should be notified
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-	EXPECT_CALL(*observer2, onRemoveLastCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-
-	mWhitePlayer->removeLastCapturedPiece();
+	EXPECT_NO_THROW(detached.addCapturedPiece(PieceType::BPawn)) << "A player without a queue should still work";
+	EXPECT_NO_THROW(detached.removeLastCapturedPiece());
+	EXPECT_TRUE(detached.getCapturedPieces().empty());
 }
 
 
@@ -226,19 +218,17 @@ TEST_F(PlayerTests, RemoveLastCapturedPieceNotifiesAllObservers)
 
 TEST_F(PlayerTests, Reset)
 {
-	// Add some captured pieces
 	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
 
-	// Reset the player
 	mWhitePlayer->reset();
+	drainCaptures();
 
-	// Try to remove a piece - should fail since list is empty
-	mWhitePlayer->attachObserver(mMockObserver);
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(::testing::_, ::testing::_)).Times(0);
+	EXPECT_TRUE(mWhitePlayer->getCapturedPieces().empty()) << "Reset should clear the captured pieces";
 
 	EXPECT_NO_THROW(mWhitePlayer->removeLastCapturedPiece()) << "Should not crash when removing from empty list after reset";
+	EXPECT_TRUE(drainCaptures().empty()) << "There is nothing left to remove after a reset";
 }
 
 
@@ -267,30 +257,23 @@ TEST_F(PlayerTests, ResetPreservesLocalPlayerStatus)
 
 TEST_F(PlayerTests, ResetAfterMultipleOperations)
 {
-	// Perform multiple operations
 	mWhitePlayer->setPlayerColor(Side::Black);
 	mWhitePlayer->setIsLocalPlayer(false);
 	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
 
-	// Reset
 	mWhitePlayer->reset();
+	drainCaptures();
 
-	// Verify state
 	EXPECT_EQ(mWhitePlayer->getPlayerColor(), Side::Black) << "Color should be preserved";
 	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Local status should be preserved";
-
-	// Verify captured pieces are cleared
-	mWhitePlayer->attachObserver(mMockObserver);
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(::testing::_, ::testing::_)).Times(0);
-	EXPECT_NO_THROW(mWhitePlayer->removeLastCapturedPiece());
+	EXPECT_TRUE(mWhitePlayer->getCapturedPieces().empty()) << "Captured pieces should be cleared";
 }
 
 
 TEST_F(PlayerTests, ResetMultipleTimes)
 {
-	// Reset multiple times should work
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	mWhitePlayer->reset();
 
@@ -299,11 +282,14 @@ TEST_F(PlayerTests, ResetMultipleTimes)
 
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
 	mWhitePlayer->reset();
+	drainCaptures();
 
-	// Should still work after multiple resets
-	mWhitePlayer->attachObserver(mMockObserver);
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
+	// Should still publish normally after repeated resets
 	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
+
+	const auto captures = drainCaptures();
+	ASSERT_EQ(captures.size(), 1u);
+	EXPECT_EQ(captures[0].piece, PieceType::BQueen);
 }
 
 
@@ -330,7 +316,6 @@ TEST_F(PlayerTests, SetIsLocalPlayer)
 
 TEST_F(PlayerTests, SetIsLocalPlayerMultipleTimes)
 {
-	// Toggle multiple times
 	mWhitePlayer->setIsLocalPlayer(false);
 	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Should be remote";
 
@@ -347,7 +332,6 @@ TEST_F(PlayerTests, SetIsLocalPlayerMultipleTimes)
 
 TEST_F(PlayerTests, LocalPlayerStatusIndependentOfOtherProperties)
 {
-	// Test that local player status is independent of other properties
 	mWhitePlayer->setIsLocalPlayer(false);
 	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
 	mWhitePlayer->setPlayerColor(Side::Black);
@@ -358,7 +342,6 @@ TEST_F(PlayerTests, LocalPlayerStatusIndependentOfOtherProperties)
 
 TEST_F(PlayerTests, LocalPlayerStatusForBothPlayers)
 {
-	// Test that both players can have different local status
 	mWhitePlayer->setIsLocalPlayer(true);
 	mBlackPlayer->setIsLocalPlayer(false);
 
@@ -368,63 +351,21 @@ TEST_F(PlayerTests, LocalPlayerStatusForBothPlayers)
 
 
 //=============================================================================
-// OBSERVER PATTERN TESTS
+// SHARED QUEUE
 //=============================================================================
 
-TEST_F(PlayerTests, AttachObserver)
+TEST_F(PlayerTests, BothPlayersShareOneOrderedStream)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
-
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
-}
+	mBlackPlayer->addCapturedPiece(PieceType::WKnight);
+	mWhitePlayer->addCapturedPiece(PieceType::BBishop);
 
+	const auto captures = drainCaptures();
 
-TEST_F(PlayerTests, DetachObserver)
-{
-	mWhitePlayer->attachObserver(mMockObserver);
-	mWhitePlayer->addCapturedPiece(PieceType::BPawn); // Should notify
-
-	mWhitePlayer->detachObserver(mMockObserver);
-
-	// Should not notify after detach
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(::testing::_, ::testing::_)).Times(0);
-
-	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
-}
-
-
-TEST_F(PlayerTests, MultipleObservers)
-{
-	auto observer2 = std::make_shared<MockPlayerObserver>();
-	auto observer3 = std::make_shared<MockPlayerObserver>();
-
-	mWhitePlayer->attachObserver(mMockObserver);
-	mWhitePlayer->attachObserver(observer2);
-	mWhitePlayer->attachObserver(observer3);
-
-	// All should be notified
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-	EXPECT_CALL(*observer2, onAddCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-	EXPECT_CALL(*observer3, onAddCapturedPiece(Side::White, PieceType::BQueen)).Times(1);
-
-	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
-}
-
-
-TEST_F(PlayerTests, WeakPtrObserverCleanup)
-{
-	{
-		auto tempObserver = std::make_shared<MockPlayerObserver>();
-		mWhitePlayer->attachObserver(tempObserver);
-
-		EXPECT_CALL(*tempObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
-		mWhitePlayer->addCapturedPiece(PieceType::BPawn);
-	} // tempObserver goes out of scope
-
-	// Should not crash even though observer was destroyed
-	EXPECT_NO_THROW(mWhitePlayer->addCapturedPiece(PieceType::BKnight));
+	ASSERT_EQ(captures.size(), 3u) << "Both players publish into the same queue";
+	EXPECT_EQ(captures[0].player, Side::White);
+	EXPECT_EQ(captures[1].player, Side::Black);
+	EXPECT_EQ(captures[2].player, Side::White) << "Interleaved captures should keep their order";
 }
 
 
@@ -434,57 +375,60 @@ TEST_F(PlayerTests, WeakPtrObserverCleanup)
 
 TEST_F(PlayerTests, AddCapturedPieceNone)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::None)).Times(1);
-
 	mWhitePlayer->addCapturedPiece(PieceType::None);
+
+	const auto captures = drainCaptures();
+
+	ASSERT_EQ(captures.size(), 1u);
+	EXPECT_EQ(captures[0].piece, PieceType::None);
 }
 
 
 TEST_F(PlayerTests, LargeNumberOfCapturedPieces)
 {
-	// Test with many captured pieces
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(100);
-
 	for (int i = 0; i < 100; ++i)
 	{
 		mWhitePlayer->addCapturedPiece(PieceType::BPawn);
 	}
+
+	EXPECT_EQ(drainCaptures().size(), 100u);
+	EXPECT_EQ(mWhitePlayer->getCapturedPieces().size(), 100u);
 }
 
 
 TEST_F(PlayerTests, AddAndRemoveSequence)
 {
-	mWhitePlayer->attachObserver(mMockObserver);
-
-	// Add and remove sequence
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
 	mWhitePlayer->addCapturedPiece(PieceType::BPawn);
-
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BPawn)).Times(1);
 	mWhitePlayer->removeLastCapturedPiece();
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::White, PieceType::BKnight)).Times(1);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
-
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::White, PieceType::BKnight)).Times(1);
 	mWhitePlayer->removeLastCapturedPiece();
+
+	const auto captures = drainCaptures();
+
+	ASSERT_EQ(captures.size(), 4u);
+	EXPECT_EQ(captures[0].piece, PieceType::BPawn);
+	EXPECT_TRUE(captures[0].captured);
+	EXPECT_EQ(captures[1].piece, PieceType::BPawn);
+	EXPECT_FALSE(captures[1].captured);
+	EXPECT_EQ(captures[2].piece, PieceType::BKnight);
+	EXPECT_TRUE(captures[2].captured);
+	EXPECT_EQ(captures[3].piece, PieceType::BKnight);
+	EXPECT_FALSE(captures[3].captured);
 }
 
 
 TEST_F(PlayerTests, BlackPlayerOperations)
 {
-	// Test that black player works the same way
-	mBlackPlayer->attachObserver(mMockObserver);
-
-	EXPECT_CALL(*mMockObserver, onAddCapturedPiece(Side::Black, PieceType::WPawn)).Times(1);
 	mBlackPlayer->addCapturedPiece(PieceType::WPawn);
-
-	EXPECT_CALL(*mMockObserver, onRemoveLastCapturedPiece(Side::Black, PieceType::WPawn)).Times(1);
 	mBlackPlayer->removeLastCapturedPiece();
+
+	const auto captures = drainCaptures();
+
+	ASSERT_EQ(captures.size(), 2u);
+	EXPECT_EQ(captures[0].player, Side::Black);
+	EXPECT_EQ(captures[0].piece, PieceType::WPawn);
+	EXPECT_EQ(captures[1].player, Side::Black);
+	EXPECT_FALSE(captures[1].captured);
 }
 
 } // namespace PlayerTests

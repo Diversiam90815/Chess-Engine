@@ -1,7 +1,10 @@
 set (API_FILES_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/API)
 
-set (API_FILES			${API_FILES_DIR}/EngineAPI.h    
-						${API_FILES_DIR}/EngineAPI.cpp)
+set (API_FILES			${API_FILES_DIR}/EngineTypes.h
+						${API_FILES_DIR}/EngineAPI.h			${API_FILES_DIR}/EngineAPI.cpp
+						${API_FILES_DIR}/EngineInstance.h		${API_FILES_DIR}/EngineInstance.cpp
+						${API_FILES_DIR}/CallbackBridge.h		${API_FILES_DIR}/CallbackBridge.cpp
+						${API_FILES_DIR}/TypeConversion.h		${API_FILES_DIR}/TypeConversion.cpp)
 
 set (Include_Dirs 		${PROJECT_BINARY_DIR}			
 						${API_FILES_DIR})

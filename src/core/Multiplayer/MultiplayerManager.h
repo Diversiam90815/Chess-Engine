@@ -14,13 +14,13 @@
 
 #include <NetLink/NetLink.h>
 
-#include "IObservable.h"
+#include "EventQueue.h"
 #include "MultiplayerTypes.h"
 #include "Move.h"
 #include "Logging.h"
 
 
-class MultiplayerManager : public IMultiplayerObservable
+class MultiplayerManager
 {
 public:
 	MultiplayerManager() = default;
@@ -33,8 +33,11 @@ public:
 	// Lifecycle
 	//=========================================================================
 
-	void								 init();
+	void								 init(const std::string &localPlayerName, int discoveryPort);
 	void								 shutdown();
+
+	/// Destination for connection/discovery notifications. May be null.
+	void								 setEventQueue(EventQueue *events) { mEvents = events; }
 
 	//=========================================================================
 	// Opponent Discovery & Connection
@@ -79,15 +82,15 @@ public:
 
 	MultiplayerState					 getState() const;
 
-	//=========================================================================
-	// IMultiplayerObservable
-	//=========================================================================
-
-	void								 multiplayerStateChanged(const MultiplayerEvent &event) override;
-	void								 opponentFound(const std::string &name) override;
-	void								 remotePlayerChosen(Side remotePlayer) override;
-
 private:
+	//=========================================================================
+	// Event Publishing
+	//=========================================================================
+
+	void					  publishStateChanged(const MultiplayerEvent &event);
+	void					  publishOpponentFound(const std::string &name);
+	void					  publishRemotePlayerChosen(Side remotePlayer);
+
 	//=========================================================================
 	// NetLink Callbacks
 	//=========================================================================
@@ -137,4 +140,6 @@ private:
 	bool							mInitialized{false};
 	bool							mLocalPlayerReady{false};
 	bool							mRemotePlayerReady{false};
+
+	EventQueue					   *mEvents{nullptr};
 };

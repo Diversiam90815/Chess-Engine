@@ -79,6 +79,7 @@ void GameController::resetGame()
 	mBlackPlayer.reset();
 	mCurrentPlayer = Side::None;
 
+	mSelectionMoves.clear();
 	invalidateCache();
 }
 
@@ -88,10 +89,14 @@ void GameController::getLegalMovesFromSquare(Square sq, MoveList &moves)
 	mEngine.getMovesFromSquare(sq, moves);
 
 	if (moves.size() > 0)
-	{
-		mCachedLegalMoves = moves;
-		mCacheValid		  = true;
-	}
+		mSelectionMoves = moves;
+}
+
+
+const MoveList &GameController::getAllLegalMoves() const
+{
+	ensureCacheValid();
+	return mCachedLegalMoves;
 }
 
 
@@ -207,6 +212,18 @@ EndGameState GameController::checkEndGame()
 }
 
 
+DrawReason GameController::getDrawReason() const
+{
+	return mEngine.getDrawReason();
+}
+
+
+bool GameController::isInCheck() const
+{
+	return mEngine.isInCheck();
+}
+
+
 Side GameController::getCurrentSide() const
 {
 	return mCurrentPlayer;
@@ -267,6 +284,13 @@ void GameController::requestCPUMoveAsync()
 void GameController::cancelCPUCalculation()
 {
 	// TODO
+}
+
+
+void GameController::setEventQueue(EventQueue *events)
+{
+	mWhitePlayer.setEventQueue(events);
+	mBlackPlayer.setEventQueue(events);
 }
 
 

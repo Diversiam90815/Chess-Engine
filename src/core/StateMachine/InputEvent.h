@@ -26,11 +26,13 @@ struct InputEvent
 		UndoRequested	= 5,
 		GameStart		= 6,
 		GameReset		= 7,
+		MoveRequested	= 8,
 	};
 
-	Type			  type		= Type::None;
-	Square			  square	= Square::None;
-	PieceType		  promotion = PieceType::None;
+	Type			  type		 = Type::None;
+	Square			  square	 = Square::None;
+	Square			  toSquare	 = Square::None;
+	PieceType		  promotion	 = PieceType::None;
 	Move			  move;
 	GameConfiguration config{};
 
@@ -40,6 +42,17 @@ struct InputEvent
 		InputEvent e;
 		e.type	 = Type::SquareSelected;
 		e.square = sq;
+		return e;
+	}
+
+
+	static InputEvent MoveRequested(Square from, Square to, PieceType promotion = PieceType::None)
+	{
+		InputEvent e;
+		e.type		= Type::MoveRequested;
+		e.square	= from;
+		e.toSquare	= to;
+		e.promotion = promotion;
 		return e;
 	}
 

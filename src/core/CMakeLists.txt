@@ -10,10 +10,9 @@ set (BOARD_DIR						${SOURCE_DIR}/Board)
 set (ATTACKTABLES_DIR				${SOURCE_DIR}/AttackTables)
 set (PLAYER_DIR						${SOURCE_DIR}/Player)
 set (HELPER_DIR						${SOURCE_DIR}/Helper)
-set (FILEMANAGER_DIR				${SOURCE_DIR}/FileManager)
 set (LOGGER_DIR						${SOURCE_DIR}/Logger)
-set (USERSETTINGSCACHE_DIR			${SOURCE_DIR}/UserSettingsCache)
-set (INPUTSOURCE_DIR				${SOURCE_DIR}/InputSource)
+set (SETTINGS_DIR					${SOURCE_DIR}/Settings)
+set (EVENTS_DIR						${SOURCE_DIR}/Events)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
 set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
@@ -30,9 +29,8 @@ set(ALL_PROJECT_DIRS
 			${PLAYER_DIR}
 			${HELPER_DIR}
 			${LOGGER_DIR}
-			${FILEMANAGER_DIR}
-			${USERSETTINGSCACHE_DIR}
-			${INPUTSOURCE_DIR}
+			${SETTINGS_DIR}
+			${EVENTS_DIR}
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
 			${MULTIPLAYER_DIR}
@@ -88,8 +86,6 @@ set(HELPER_FILES
 	${HELPER_DIR}/PieceValues.h
 	${HELPER_DIR}/Parameters.h
 	${HELPER_DIR}/ThreadBase.h
-	${HELPER_DIR}/IObserver.h
-	${HELPER_DIR}/IObservable.h
 	${HELPER_DIR}/MagicGenerator.h
 )
 
@@ -97,18 +93,13 @@ set(LOGGER_FILES
 	${LOGGER_DIR}/Logging.h             ${LOGGER_DIR}/Logging.cpp
 )
 
-set(FILEMANAGER_FILES
-	${FILEMANAGER_DIR}/FileManager.h    ${FILEMANAGER_DIR}/FileManager.cpp
+set(SETTINGS_FILES
+	${SETTINGS_DIR}/EngineSettings.h
 )
 
-set(USERSETTINGSCACHE_FILES
-	${USERSETTINGSCACHE_DIR}/UserSettingsCache.h	${USERSETTINGSCACHE_DIR}/UserSettingsCache.cpp
-)
-
-set(INPUTSOURCE_FILES
-	${INPUTSOURCE_DIR}/PlainCDefines.h
-	${INPUTSOURCE_DIR}/IInputSource.h
-	${INPUTSOURCE_DIR}/NativeInputSource.h    ${INPUTSOURCE_DIR}/NativeInputSource.cpp
+set(EVENTS_FILES
+	${EVENTS_DIR}/EngineEvent.h
+	${EVENTS_DIR}/EventQueue.h		${EVENTS_DIR}/EventQueue.cpp
 )
 
 set(EVALUATION_FILES
@@ -130,9 +121,8 @@ set(ALL_FILES
 	${PLAYER_FILES}
 	${HELPER_FILES}
 	${LOGGER_FILES}
-	${FILEMANAGER_FILES}
-	${USERSETTINGSCACHE_FILES}
-	${INPUTSOURCE_FILES}
+	${SETTINGS_FILES}
+	${EVENTS_FILES}
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
 	${MULTIPLAYER_FILES}

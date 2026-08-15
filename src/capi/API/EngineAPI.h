@@ -5,7 +5,9 @@
   ==============================================================================
 */
 
-#include "PlainCDefines.h"
+#pragma once
+
+#include "EngineTypes.h"
 
 
 #if defined(_WIN32)
@@ -38,6 +40,15 @@ extern "C"
 	Engine_API void	 UndoMove();
 	Engine_API bool	 GetBoardState(int *boardstate);
 
+	// Current GameState value, or 0 if the engine is not running.
+	Engine_API int	 GetGameState();
+
+	// Current Side value (0 = White, 1 = Black, -1 = None).
+	Engine_API int	 GetCurrentSide();
+
+	// True if the side to move is in check.
+	Engine_API bool	 IsInCheck();
+
 
 	//=========================================================================
 	// Move Input & Generation
@@ -45,8 +56,12 @@ extern "C"
 
 	Engine_API void	 OnSquareSelected(int square);
 	Engine_API void	 OnPawnPromotionChosen(int pieceType);
+
+	Engine_API void	 SubmitMove(int from, int to, int promotion);
+
 	Engine_API int	 GetNumLegalMoves();
 	Engine_API bool	 GetLegalMoveAtIndex(int index, MoveInstance *move);
+	Engine_API int	 GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMoves);
 
 
 	//=========================================================================

@@ -6,7 +6,6 @@
 */
 
 #include "GameManager.h"
-#include "UserSettingsCache.h"
 
 
 GameManager::~GameManager()
@@ -15,38 +14,26 @@ GameManager::~GameManager()
 }
 
 
-GameManager *GameManager::GetInstance()
-{
-	static GameManager *sInstance = nullptr;
-	if (nullptr == sInstance)
-	{
-		sInstance = new GameManager();
-	}
-	return sInstance;
-}
-
-
-void GameManager::ReleaseInstance()
-{
-	GameManager *sInstance = GetInstance();
-	if (sInstance)
-	{
-		delete sInstance;
-	}
-}
-
-
-bool GameManager::init()
+bool GameManager::init(EngineSettings settings)
 {
 	if (mInitialized)
 		return true;
 
-	mLog.initLogging();
+	mSettings = std::move(settings);
+
+	mLog.initLogging(mSettings.logFolder);
 
 	SystemInfo::logSystemInfo();
 
-	initializeComponents();
-	wireComponents();
+	mGameController = std::make_unique<GameController>();
+	mStateMachine	= std::make_unique<StateMachine>();
+
+	mGameController->setEventQueue(&mEvents);
+	mGameController->setCPUMoveCallback([this](Move move) { mStateMachine->onCPUMoveCalculated(move); });
+
+	mStateMachine->setGameController(mGameController.get());
+	mStateMachine->setEventQueue(&mEvents);
+	mStateMachine->start();
 
 	mInitialized = true;
 	LOG_INFO("GameManager initialized!");
@@ -71,9 +58,15 @@ void GameManager::shutDown()
 	if (mMultiplayerManager)
 		mMultiplayerManager->shutdown();
 
+	mEvents.close();
+
 	mInitialized = false;
 }
 
+
+//=========================================================================
+// Game Control
+//=========================================================================
 
 void GameManager::startGame(GameConfiguration config)
 {
@@ -82,9 +75,63 @@ void GameManager::startGame(GameConfiguration config)
 }
 
 
-void GameManager::setDelegate(PFN_CALLBACK pDelegate)
+void GameManager::resetGame()
 {
-	mInputSource->setDelegate(pDelegate);
+	mStateMachine->onGameReset();
+}
+
+
+void GameManager::undoMove()
+{
+	mStateMachine->onUndoRequested();
+}
+
+
+//=========================================================================
+// Input Events
+//=========================================================================
+
+void GameManager::submitMove(Square from, Square to, PieceType promotion)
+{
+	LOG_INFO("Move submitted: {} -> {}", square_to_coordinates[to_index(from)], square_to_coordinates[to_index(to)]);
+
+	mStateMachine->onMoveRequested(from, to, promotion);
+}
+
+
+void GameManager::onSquareSelected(Square sq)
+{
+	LOG_INFO("Square {} selected", square_to_coordinates[to_index(sq)]);
+
+	mStateMachine->onSquareSelected(sq);
+}
+
+
+void GameManager::onPromotionChosen(PieceType piece)
+{
+	mStateMachine->onPromotionChosen(piece);
+}
+
+
+//=========================================================================
+// Board & Game State Queries
+//=========================================================================
+
+GameState GameManager::getGameState() const
+{
+	return mStateMachine ? mStateMachine->getState() : GameState::Init;
+}
+
+
+Side GameManager::getCurrentSide() const
+{
+	return mGameController->getCurrentSide();
+}
+
+
+bool GameManager::isInCheck() const
+{
+	return mGameController->isInCheck();
 }
 
 
@@ -103,42 +150,59 @@ std::array<PieceType, 64> GameManager::getBoardPieces() const
 }
 
 
-const MoveList &GameManager::getCachedLegalMoves() const
-{
-	return mGameController->getCachedLegalMoves();
-}
-
-
 PieceType GameManager::getPieceAt(Square sq) const
 {
 	return mGameController->getBoard().pieceAt(sq);
 }
 
 
-void GameManager::undoMove()
+const Chessboard &GameManager::getBoard() const
 {
-	mStateMachine->onUndoRequested();
+	return mGameController->getBoard();
 }
 
 
-void GameManager::onSquareSelected(Square sq)
+const MoveList &GameManager::getLegalMoves() const
 {
-	LOG_INFO("Square {} selected", to_index(sq));
-	LOG_INFO("Square {} selected", square_to_coordinates[to_index(sq)]);
-
-	mStateMachine->onSquareSelected(sq);
+	return mGameController->getAllLegalMoves();
 }
 
 
-void GameManager::onPromotionChosen(PieceType piece)
+void GameManager::getLegalMovesFromSquare(Square from, MoveList &out) const
 {
-	mStateMachine->onPromotionChosen(piece);
+	out.clear();
+
+	const MoveList &all = mGameController->getAllLegalMoves();
+
+	for (const Move &move : all)
+	{
+		if (move.from() == from)
+			out.push(move);
+	}
 }
 
 
-void GameManager::resetGame()
+const MoveList &GameManager::getSelectionMoves() const
 {
-	mStateMachine->onGameReset();
+	return mGameController->getSelectionMoves();
+}
+
+
+std::string GameManager::getMoveNotation(Move move) const
+{
+	return mGameController->getMoveNotation(move);
+}
+
+
+const std::vector<MoveHistoryEntry> &GameManager::getMoveHistory() const
+{
+	return mGameController->getMoveHistory();
+}
+
+
+const std::vector<PieceType> &GameManager::getCapturedPieces(Side player) const
+{
+	return (player == Side::White) ? mGameController->getWhitePlayer().getCapturedPieces() : mGameController->getBlackPlayer().getCapturedPieces();
 }
 
 
@@ -146,12 +210,23 @@ void GameManager::resetGame()
 // Multiplayer
 //=========================================================================
 
+void GameManager::ensureMultiplayerManager()
+{
+	if (mMultiplayerManager)
+		return;
+
+	mMultiplayerManager = std::make_unique<MultiplayerManager>();
+	mMultiplayerManager->setEventQueue(&mEvents);
+	mMultiplayerManager->setRemoteMoveCallback([this](Move move) { mStateMachine->onRemoteMoveReceived(move); });
+}
+
+
 void GameManager::startMultiplayer()
 {
 	LOG_INFO("Multiplayer started");
 
-	mMultiplayerManager->init();
-	mMultiplayerManager->setRemoteMoveCallback([this](Move move) { mStateMachine->onRemoteMoveReceived(move); });
+	ensureMultiplayerManager();
+	mMultiplayerManager->init(mSettings.playerName, mSettings.discoveryPort);
 
 	mIsMultiplayerMode = true;
 }
@@ -223,58 +298,20 @@ void GameManager::setLocalPlayerReady(bool ready)
 
 std::vector<netlink::NetworkAdapter> GameManager::getNetworkAdapters()
 {
-	if (!mMultiplayerManager)
-		return {};
-
+	ensureMultiplayerManager();
 	return mMultiplayerManager->getAvailableAdapters();
 }
 
 
 bool GameManager::changeCurrentNetworkAdapter(int ID)
 {
-	if (!mMultiplayerManager)
-		return false;
-
+	ensureMultiplayerManager();
 	return mMultiplayerManager->setActiveAdapter(ID);
 }
 
 
 int GameManager::getCurrentNetworkAdapterID()
 {
-	if (!mMultiplayerManager)
-		return 0;
-
+	ensureMultiplayerManager();
 	return mMultiplayerManager->getActiveAdapterID();
-}
-
-
-//=========================================================================
-// Initialization
-//=========================================================================
-
-void GameManager::initializeComponents()
-{
-	mInputSource		= std::make_shared<NativeInputSource>();
-	mGameController		= std::make_unique<GameController>();
-	mStateMachine		= std::make_unique<StateMachine>();
-	mMultiplayerManager = std::make_shared<MultiplayerManager>();
-}
-
-
-void GameManager::wireComponents()
-{
-	mStateMachine->setGameController(mGameController.get());
-	mStateMachine->setInputSource(mInputSource.get());
-
-	auto &whitePlayer = mGameController->getWhitePlayer();
-	whitePlayer.attachObserver(mInputSource);
-
-	auto &blackPlayer = mGameController->getBlackPlayer();
-	blackPlayer.attachObserver(mInputSource);
-
-	mGameController->setCPUMoveCallback([this](Move move) { mStateMachine->onCPUMoveCalculated(move); });
-
-	mMultiplayerManager->attachObserver(mInputSource);
-
-	mStateMachine->start();
 }

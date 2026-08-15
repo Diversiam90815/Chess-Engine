@@ -2,17 +2,11 @@ set(TARGET_NAME Chess.Engine.Perft)
 
 
 set(APP_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/App)
-set(PRINTING_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/Printing)
 set(SCENARIOS_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Scenarios)
 
 
 set(APP_FILES
     ${APP_DIR}/Perft.h       ${APP_DIR}/Perft.cpp
-)
-
-set(PRINTING_FILES
-    ${PRINTING_DIR}/BoardPrinter.h      ${PRINTING_DIR}/BoardPrinter.cpp
-    ${PRINTING_DIR}/MovePrinter.h       ${PRINTING_DIR}/MovePrinter.cpp
 )
 
 set(SCENARIO_FILES
@@ -27,7 +21,6 @@ set(SCENARIO_FILES
 set(ALL_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${APP_FILES}
-    ${PRINTING_FILES}
     ${SCENARIO_FILES}
 )
 
@@ -40,11 +33,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ALL_FILES})
 target_include_directories(${TARGET_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${APP_DIR}
-    ${PRINTING_DIR}
     ${SCENARIOS_DIR}
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Chess.Engine.Core)
+target_link_libraries(${TARGET_NAME} PRIVATE Chess.Engine.Core Chess.Engine.AppCommon)
 
 if(WIN32)
     target_compile_definitions(${TARGET_NAME} PRIVATE

@@ -1,20 +1,13 @@
 /*
   ==============================================================================
-	Module:         ChessLogicAPIDefines
-	Description:    Definitions for the Chess Logic API
+	Module:         EngineTypes
+	Description:    Plain C types shared across the Chess engine's C ABI
   ==============================================================================
 */
 
 #pragma once
 
 #include <stdint.h>
-
-#if defined(_WIN32)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#endif
 
 #define BOARD_SIZE		  8
 #define MAX_STRING_LENGTH 250
@@ -29,8 +22,10 @@ extern "C"
 	// Callback Delegates
 	//=========================================================================
 
+	// Same calling convention as the Win32 CALLBACK macro, without dragging
+	// windows.h into a header that managed hosts also consume.
 #if defined(_WIN32)
-#define API_CALLBACK CALLBACK
+#define API_CALLBACK __stdcall
 #else
 #define API_CALLBACK
 #endif
@@ -123,7 +118,7 @@ extern "C"
 	{
 		char playerName[MAX_STRING_LENGTH];
 		int	 discoveryUDPPort;
-		char appDataPath[512];
+		char logFolder[512];
 	} CUserSettingsInit;
 
 

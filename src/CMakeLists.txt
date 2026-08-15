@@ -12,4 +12,4 @@ endif()
 
 add_subdirectory(core)
 add_subdirectory(capi)
-add_subdirectory(perft)
+add_subdirectory(apps)

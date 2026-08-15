@@ -20,10 +20,15 @@ set(BoardTest_Files
     BoardTests/ChessboardTests.cpp
 )
 
+set(EventTest_Files
+    EventTests/EventQueueTests.cpp
+)
+
 set(Test_Files
     ${MoveTest_Files}
     ${BoardTest_Files}
     ${PlayerTest_Files}
+    ${EventTest_Files}
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${Test_Files})

@@ -9,8 +9,6 @@
 
 #include <cstring>
 
-#include "UserSettingsCache.h"
-
 
 MultiplayerManager::~MultiplayerManager()
 {
@@ -18,14 +16,14 @@ MultiplayerManager::~MultiplayerManager()
 }
 
 
-void MultiplayerManager::init()
+void MultiplayerManager::init(const std::string &localPlayerName, int discoveryPort)
 {
 	if (mInitialized)
 		return;
 
 	netlink::NetLinkConfig config;
-	config.localDisplayName = UserSettingsCache::GetInstance()->getLocalPlayerName();
-	config.discoveryPort	= UserSettingsCache::GetInstance()->getDiscoveryPort();
+	config.localDisplayName = localPlayerName;
+	config.discoveryPort	= discoveryPort;
 	config.secret			= mSecret;
 
 	netlink::NetLinkCallbacks callbacks;
@@ -209,36 +207,27 @@ MultiplayerState MultiplayerManager::getState() const
 
 
 //=========================================================================
-// IMultiplayerObservable
+// Event Publishing
 //=========================================================================
 
-void MultiplayerManager::multiplayerStateChanged(const MultiplayerEvent &event)
+void MultiplayerManager::publishStateChanged(const MultiplayerEvent &event)
 {
-	for (auto &weakObs : mObservers)
-	{
-		if (auto obs = weakObs.lock())
-			obs->onMultiplayerStateChanged(event);
-	}
+	if (mEvents)
+		mEvents->push(engine::ConnectionChanged{event.state, event.remoteName, event.errorMessage});
 }
 
 
-void MultiplayerManager::opponentFound(const std::string &name)
+void MultiplayerManager::publishOpponentFound(const std::string &name)
 {
-	for (auto &weakObs : mObservers)
-	{
-		if (auto obs = weakObs.lock())
-			obs->onOpponentFound(name);
-	}
+	if (mEvents)
+		mEvents->push(engine::OpponentDiscovered{name});
 }
 
 
-void MultiplayerManager::remotePlayerChosen(Side remotePlayer)
+void MultiplayerManager::publishRemotePlayerChosen(Side remotePlayer)
 {
-	for (auto &weakObs : mObservers)
-	{
-		if (auto obs = weakObs.lock())
-			obs->onRemotePlayerChosen(remotePlayer);
-	}
+	if (mEvents)
+		mEvents->push(engine::RemotePlayerChosen{remotePlayer});
 }
 
 
@@ -263,7 +252,7 @@ void MultiplayerManager::onRemoteDiscovered(const netlink::Endpoint &remote)
 	LOG_INFO("Opponent found: {}", remote.displayName);
 
 	transitionTo(MultiplayerState::OpponentFound, remote.displayName);
-	opponentFound(remote.displayName);
+	publishOpponentFound(remote.displayName);
 }
 
 
@@ -310,7 +299,7 @@ void MultiplayerManager::onMessageReceived(const netlink::Message &message)
 	{
 		Side remoteSide = deserializePlayerChosen(message);
 		LOG_DEBUG("Remote player chose side: {}", static_cast<int>(remoteSide));
-		remotePlayerChosen(remoteSide);
+		publishRemotePlayerChosen(remoteSide);
 		break;
 	}
 
@@ -349,7 +338,7 @@ void MultiplayerManager::transitionTo(MultiplayerState newState, const std::stri
 	event.remoteName   = remoteName;
 	event.errorMessage = error;
 
-	multiplayerStateChanged(event);
+	publishStateChanged(event);
 }
 
 

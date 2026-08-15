@@ -10,10 +10,13 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
 
+#include "Parameters.h"
 #include "Logger.h"
 #include "MultiplayerTypes.h"
-#include "FileManager.h"
+
+namespace fs = std::filesystem;
 
 
 class Logging
@@ -22,7 +25,7 @@ public:
 	Logging()  = default;
 	~Logging() = default;
 
-	void			   initLogging();
+	void			   initLogging(const fs::path &loggingFolder);
 
 	static std::string gameStateToString(GameState state);
 	static std::string boolToString(const bool value);
@@ -32,7 +35,7 @@ public:
 	static std::string drawReasonToString(const DrawReason reason);
 
 private:
-	FileManager fmg;
+	std::string getNewLogFilePath(fs::path logFolder);
 
 	std::string mLoggerName;
 	const int	mSlowLogTimeMS = 500;

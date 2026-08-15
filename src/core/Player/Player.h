@@ -8,17 +8,18 @@
 
 #pragma once
 
-#include "Parameters.h"
-#include "Logging.h"
+#include <vector>
 
-#include "IObservable.h"
+#include "EventQueue.h"
+#include "Logging.h"
+#include "Parameters.h"
 
 
 /**
  * @brief	Lightweight aggregation of per-player state (material score, captured pieces,
  *			color assignment, local/remote designation).
  */
-class Player : public IPlayerObservable
+class Player
 {
 public:
 	Player() = default;
@@ -29,22 +30,29 @@ public:
 	void setPlayerColor(Side value);
 
 	/**
+	 * @brief	Destination for PieceCaptured notifications. May be null.
+	 */
+	void setEventQueue(EventQueue *events) { mEvents = events; }
+
+	/**
 	 * @brief	Record a newly captured opponent piece.
 	 */
-	void addCapturedPiece(const PieceType piece) override;
+	void addCapturedPiece(const PieceType piece);
 
 	/**
 	 * @brief	Remove the most recently captured piece (undo support).
 	 */
-	void removeLastCapturedPiece() override;
+	void removeLastCapturedPiece();
 
 	/**
 	 * @brief	Reset player state to initial (fresh game).
 	 */
 	void reset();
 
-	bool isLocalPlayer() const { return mIsLocalPlayer; }
-	void setIsLocalPlayer(const bool isLocal) { mIsLocalPlayer = isLocal; }
+	const std::vector<PieceType> &getCapturedPieces() const { return mCapturedPieces; }
+
+	bool						  isLocalPlayer() const { return mIsLocalPlayer; }
+	void						  setIsLocalPlayer(const bool isLocal) { mIsLocalPlayer = isLocal; }
 
 private:
 	Side				   mSide = Side::None;
@@ -54,4 +62,6 @@ private:
 	bool				   mIsCurrentTurn = false;
 
 	bool				   mIsLocalPlayer{true}; // Default to local player in single-player mode
+
+	EventQueue			  *mEvents{nullptr};
 };

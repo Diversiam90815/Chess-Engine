@@ -7,30 +7,46 @@
 
 #pragma once
 
+#include <array>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "EngineSettings.h"
+#include "EventQueue.h"
 #include "GameController.h"
-#include "Player.h"
 #include "Logging.h"
-#include "IObservable.h"
-#include "NativeInputSource.h"
 #include "MultiplayerManager.h"
-#include "SystemInfo.h"
+#include "Player.h"
 #include "StateMachine.h"
+#include "SystemInfo.h"
 
 
+/**
+ * @brief	Facade over the engine: commands go in, EngineEvents come out.
+ */
 class GameManager
 {
 public:
+	GameManager() = default;
 	~GameManager();
-
-	static GameManager					*GetInstance();
-	static void							 ReleaseInstance();
+	GameManager(const GameManager &)									= delete;
+	GameManager							&operator=(const GameManager &) = delete;
 
 	//=========================================================================
 	// Lifecycle
 	//=========================================================================
 
-	bool								 init();
+	bool								 init(EngineSettings settings);
 	void								 shutDown();
+	[[nodiscard]] bool					 isInitialized() const { return mInitialized; }
+
+	//=========================================================================
+	// Host Notification Channel
+	//=========================================================================
+
+	EventQueue							&events() { return mEvents; }
+	const EventQueue					&events() const { return mEvents; }
 
 	//=========================================================================
 	// Game Control
@@ -44,22 +60,50 @@ public:
 	// Input Events
 	//=========================================================================
 
+	/**
+	 * @brief	Submit a fully specified move. Preferred by hosts that already know
+	 *			both squares (console, tests, engine protocols).
+	 *			Leave @p promotion as None to be asked via a PromotionRequired event.
+	 */
+	void								 submitMove(Square from, Square to, PieceType promotion = PieceType::None);
+
+	/// Click-driven path: first call selects, second call targets.
 	void								 onSquareSelected(Square sq);
 	void								 onPromotionChosen(PieceType piece);
 
 	//=========================================================================
-	// UI Integration
+	// Board & Game State Queries
 	//=========================================================================
 
-	void								 setDelegate(PFN_CALLBACK delegate);
-
-	//=========================================================================
-	// Board State Queries
-	//=========================================================================
+	[[nodiscard]] GameState				 getGameState() const;
+	[[nodiscard]] Side					 getCurrentSide() const;
+	[[nodiscard]] bool					 isInCheck() const;
 
 	std::array<PieceType, 64>			 getBoardPieces() const;
-	const MoveList						&getCachedLegalMoves() const;
 	PieceType							 getPieceAt(Square sq) const;
+	const Chessboard					&getBoard() const;
+
+	/// Every legal move in the current position.
+	const MoveList						&getLegalMoves() const;
+
+	/// Legal moves leaving a single square. Pure query - does not change engine state.
+	void								 getLegalMovesFromSquare(Square from, MoveList &out) const;
+
+	/// Legal moves of the most recently selected square (drives UI highlighting).
+	const MoveList						&getSelectionMoves() const;
+
+	std::string							 getMoveNotation(Move move) const;
+	const std::vector<MoveHistoryEntry> &getMoveHistory() const;
+
+	const std::vector<PieceType>		&getCapturedPieces(Side player) const;
+
+	//=========================================================================
+	// Settings
+	//=========================================================================
+
+	const EngineSettings				&settings() const { return mSettings; }
+	void								 setLocalPlayerName(const std::string &name) { mSettings.playerName = name; }
+	void								 setDiscoveryPort(int port) { mSettings.discoveryPort = port; }
 
 	//=========================================================================
 	// Multiplayer
@@ -87,26 +131,25 @@ public:
 
 
 private:
-	GameManager() = default;
-
-	void								initializeComponents();
-	void								wireComponents();
+	void								ensureMultiplayerManager();
 
 	//=========================================================================
 	// Core Components
 	//=========================================================================
 
+	EventQueue							mEvents;
 	std::unique_ptr<GameController>		mGameController;
 	std::unique_ptr<StateMachine>		mStateMachine;
-	std::shared_ptr<NativeInputSource>	mInputSource;
 
 	//=========================================================================
 	// Infrastructure
 	//=========================================================================
 
 	Logging								mLog;
+	EngineSettings						mSettings;
 
-	std::shared_ptr<MultiplayerManager> mMultiplayerManager;
+	/// Created on first use so hosts that never go online do not spin up NetLink.
+	std::unique_ptr<MultiplayerManager> mMultiplayerManager;
 
 	//=========================================================================
 	// State

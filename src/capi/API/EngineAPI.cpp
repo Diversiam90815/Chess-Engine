@@ -5,61 +5,11 @@
   ==============================================================================
 */
 
-#include <cstring>
-
 #include "EngineAPI.h"
 
-#include "GameManager.h"
-#include "FileManager.h"
+#include "EngineInstance.h"
 #include "Logging.h"
-#include "UserSettingsCache.h"
-
-
-//=============================================
-//			API Helper Functions
-//=============================================
-
-
-static void copyStringToBuffer(char *dest, size_t destSize, const std::string &src)
-{
-	if (!dest || destSize == 0)
-		return;
-
-	size_t len = src.size() < destSize - 1 ? src.size() : destSize - 1;
-
-	std::memcpy(dest, src.data(), len);
-	dest[len] = '\0';
-}
-
-
-static GameConfiguration ConvertCConfig(CGameConfiguration cConfig)
-{
-	GameModeSelection mode		 = static_cast<GameModeSelection>(cConfig.mode);
-	Side			  playerSide = static_cast<Side>(cConfig.playerColor);
-	CPUDifficulty	  difficulty = static_cast<CPUDifficulty>(cConfig.cpuDifficulty);
-
-	switch (mode)
-	{
-	case GameModeSelection::LocalCoop: return GameConfiguration::createLocalCoop();
-	case GameModeSelection::SinglePlayer: return GameConfiguration::createSinglePlayer(playerSide, difficulty);
-	case GameModeSelection::Multiplayer: return GameConfiguration::createMultiplayer(playerSide);
-	default: LOG_ERROR("Invalid game mode received from C API: {}", cConfig.mode); break;
-	}
-
-	// fallback: local coop
-	return GameConfiguration::createLocalCoop();
-}
-
-
-static UserSettingsInit ConvertCSettings(CUserSettingsInit cSettings)
-{
-	UserSettingsInit init;
-	init.playerName		  = cSettings.playerName;
-	init.discoveryUDPPort = cSettings.discoveryUDPPort;
-	init.appDataPath	  = cSettings.appDataPath;
-	return init;
-}
-
+#include "TypeConversion.h"
 
 
 //=============================================
@@ -69,23 +19,20 @@ static UserSettingsInit ConvertCSettings(CUserSettingsInit cSettings)
 
 Engine_API void Init(CUserSettingsInit settings)
 {
-	UserSettingsInit init = ConvertCSettings(settings);
-
-	UserSettingsCache::GetInstance()->initialize(init);
-	GameManager::GetInstance()->init();
+	EngineInstance::Startup(ToEngineSettings(settings));
 }
 
 
 Engine_API void Deinit()
 {
-	GameManager::ReleaseInstance();
-	UserSettingsCache::ReleaseInstance();
+	EngineInstance::Shutdown();
 }
 
 
 Engine_API void SetDelegate(PFN_CALLBACK pDelegate)
 {
-	GameManager::GetInstance()->setDelegate(pDelegate);
+	if (auto *bridge = EngineInstance::Bridge())
+		bridge->setDelegate(pDelegate);
 }
 
 
@@ -95,20 +42,22 @@ Engine_API void SetDelegate(PFN_CALLBACK pDelegate)
 
 Engine_API void StartGame(CGameConfiguration config)
 {
-	GameConfiguration cppConfig = ConvertCConfig(config);
-	GameManager::GetInstance()->startGame(cppConfig);
+	if (auto *engine = EngineInstance::Engine())
+		engine->startGame(ToGameConfiguration(config));
 }
 
 
 Engine_API void ResetGame()
 {
-	GameManager::GetInstance()->resetGame();
+	if (auto *engine = EngineInstance::Engine())
+		engine->resetGame();
 }
 
 
 Engine_API void UndoMove()
 {
-	GameManager::GetInstance()->undoMove();
+	if (auto *engine = EngineInstance::Engine())
+		engine->undoMove();
 }
 
 
@@ -117,11 +66,11 @@ Engine_API bool GetBoardState(int *boardState)
 	if (!boardState)
 		return false;
 
-	GameManager *manager = GameManager::GetInstance();
-	if (!manager)
+	auto *engine = EngineInstance::Engine();
+	if (!engine)
 		return false;
 
-	std::array<PieceType, 64> pieces = manager->getBoardPieces();
+	std::array<PieceType, 64> pieces = engine->getBoardPieces();
 
 	for (int sq = 0; sq < 64; ++sq)
 	{
@@ -129,6 +78,27 @@ Engine_API bool GetBoardState(int *boardState)
 	}
 
 	return true;
+}
+
+
+Engine_API int GetGameState()
+{
+	auto *engine = EngineInstance::Engine();
+	return engine ? static_cast<int>(engine->getGameState()) : 0;
+}
+
+
+Engine_API int GetCurrentSide()
+{
+	auto *engine = EngineInstance::Engine();
+	return engine ? static_cast<int>(engine->getCurrentSide()) : static_cast<int>(Side::None);
+}
+
+
+Engine_API bool IsInCheck()
+{
+	auto *engine = EngineInstance::Engine();
+	return engine ? engine->isInCheck() : false;
 }
 
 
@@ -141,28 +111,45 @@ Engine_API void OnSquareSelected(int square)
 	if (square < 0 || square >= 64)
 		return;
 
-	Square sq = static_cast<Square>(square);
-	GameManager::GetInstance()->onSquareSelected(sq);
+	if (auto *engine = EngineInstance::Engine())
+		engine->onSquareSelected(static_cast<Square>(square));
 }
 
 
 Engine_API void OnPawnPromotionChosen(int pieceType)
 {
-	PieceType promotion = static_cast<PieceType>(pieceType);
-	GameManager::GetInstance()->onPromotionChosen(promotion);
+	if (auto *engine = EngineInstance::Engine())
+		engine->onPromotionChosen(static_cast<PieceType>(pieceType));
+}
+
+
+Engine_API void SubmitMove(int from, int to, int promotion)
+{
+	if (from < 0 || from >= 64 || to < 0 || to >= 64)
+		return;
+
+	if (auto *engine = EngineInstance::Engine())
+		engine->submitMove(static_cast<Square>(from), static_cast<Square>(to), static_cast<PieceType>(promotion));
 }
 
 
 Engine_API int GetNumLegalMoves()
 {
-	const MoveList &moves = GameManager::GetInstance()->getCachedLegalMoves();
-	return static_cast<int>(moves.size());
+	auto *engine = EngineInstance::Engine();
+	if (!engine)
+		return 0;
+
+	return static_cast<int>(engine->getSelectionMoves().size());
 }
 
 
 Engine_API bool GetLegalMoveAtIndex(int index, MoveInstance *move)
 {
-	const MoveList &moves = GameManager::GetInstance()->getCachedLegalMoves();
+	auto *engine = EngineInstance::Engine();
+	if (!engine || !move)
+		return false;
+
+	const MoveList &moves = engine->getSelectionMoves();
 
 	if (index < 0 || index >= static_cast<int>(moves.size()))
 		return false;
@@ -172,72 +159,107 @@ Engine_API bool GetLegalMoveAtIndex(int index, MoveInstance *move)
 }
 
 
+Engine_API int GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMoves)
+{
+	auto *engine = EngineInstance::Engine();
+	if (!engine || !moves || maxMoves <= 0)
+		return -1;
+
+	if (square < 0 || square >= 64)
+		return -1;
+
+	MoveList found;
+	engine->getLegalMovesFromSquare(static_cast<Square>(square), found);
+
+	int count = static_cast<int>(found.size());
+	if (count > maxMoves)
+		count = maxMoves;
+
+	for (int i = 0; i < count; ++i)
+	{
+		moves[i].data = found[i].raw();
+	}
+
+	return count;
+}
+
+
 //=========================================================================
 // Multiplayer
 //=========================================================================
 
 Engine_API void StartMultiplayer()
 {
-	GameManager::GetInstance()->startMultiplayer();
+	if (auto *engine = EngineInstance::Engine())
+		engine->startMultiplayer();
 }
 
 
 Engine_API void StopMultiplayer()
 {
-	GameManager::GetInstance()->stopMultiplayer();
+	if (auto *engine = EngineInstance::Engine())
+		engine->stopMultiplayer();
 }
 
 
 Engine_API void FindOpponent()
 {
-	GameManager::GetInstance()->findOpponent();
+	if (auto *engine = EngineInstance::Engine())
+		engine->findOpponent();
 }
 
 
 Engine_API int GetDiscoveredOpponentCount()
 {
-	auto opponents = GameManager::GetInstance()->getDiscoveredOpponents();
-	return static_cast<int>(opponents.size());
+	auto *engine = EngineInstance::Engine();
+	if (!engine)
+		return 0;
+
+	return static_cast<int>(engine->getDiscoveredOpponents().size());
 }
 
 
 Engine_API bool GetDiscoveredOpponentAtIndex(int index, char *name, int maxLen)
 {
-	auto opponents = GameManager::GetInstance()->getDiscoveredOpponents();
+	auto *engine = EngineInstance::Engine();
+	if (!engine || !name || maxLen <= 0)
+		return false;
+
+	auto opponents = engine->getDiscoveredOpponents();
 
 	if (index < 0 || index >= static_cast<int>(opponents.size()))
 		return false;
 
-	if (!name || maxLen <= 0)
-		return false;
-
-	copyStringToBuffer(name, static_cast<size_t>(maxLen), opponents[index]);
+	CopyStringToBuffer(name, static_cast<size_t>(maxLen), opponents[index]);
 	return true;
 }
 
 
 Engine_API void ConnectToOpponent(int index)
 {
-	GameManager::GetInstance()->connectToOpponent(index);
+	if (auto *engine = EngineInstance::Engine())
+		engine->connectToOpponent(index);
 }
 
 
 Engine_API void RespondToConnectionRequest(bool accept)
 {
-	GameManager::GetInstance()->respondToConnectionRequest(accept);
+	if (auto *engine = EngineInstance::Engine())
+		engine->respondToConnectionRequest(accept);
 }
 
 
 Engine_API void SetLocalPlayer(int iLocalPlayer)
 {
-	Side local = static_cast<Side>(iLocalPlayer);
-	GameManager::GetInstance()->setLocalPlayerColor(local);
+	if (auto *engine = EngineInstance::Engine())
+		engine->setLocalPlayerColor(static_cast<Side>(iLocalPlayer));
 }
 
 
 Engine_API void SetLocalPlayerReady(bool ready)
 {
-	GameManager::GetInstance()->setLocalPlayerReady(ready);
+	if (auto *engine = EngineInstance::Engine())
+		engine->setLocalPlayerReady(ready);
 }
 
 
@@ -272,13 +294,20 @@ Engine_API void LogDebugWithCaller(const char *message, const char *method, cons
 
 Engine_API int GetNetworkAdapterCount()
 {
-	auto adapters = GameManager::GetInstance()->getNetworkAdapters();
-	return static_cast<int>(adapters.size());
+	auto *engine = EngineInstance::Engine();
+	if (!engine)
+		return 0;
+
+	return static_cast<int>(engine->getNetworkAdapters().size());
 }
 
 Engine_API bool GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInstance *adapter)
 {
-	auto adapters = GameManager::GetInstance()->getNetworkAdapters();
+	auto *engine = EngineInstance::Engine();
+	if (!engine || !adapter)
+		return false;
+
+	auto adapters = engine->getNetworkAdapters();
 
 	if (index >= adapters.size())
 		return false;
@@ -287,19 +316,21 @@ Engine_API bool GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInsta
 
 	adapter->ID		  = found.id;
 	adapter->priority = static_cast<int>(found.priority);
-	copyStringToBuffer(adapter->adapterName, MAX_STRING_LENGTH, found.adapterName);
-	copyStringToBuffer(adapter->networkName, MAX_STRING_LENGTH, found.networkName);
+	CopyStringToBuffer(adapter->adapterName, MAX_STRING_LENGTH, found.adapterName);
+	CopyStringToBuffer(adapter->networkName, MAX_STRING_LENGTH, found.networkName);
 	return true;
 }
 
 Engine_API bool ChangeCurrentAdapter(int ID)
 {
-	return GameManager::GetInstance()->changeCurrentNetworkAdapter(ID);
+	auto *engine = EngineInstance::Engine();
+	return engine ? engine->changeCurrentNetworkAdapter(ID) : false;
 }
 
 Engine_API int GetCurrentNetworkAdapterID()
 {
-	return GameManager::GetInstance()->getCurrentNetworkAdapterID();
+	auto *engine = EngineInstance::Engine();
+	return engine ? engine->getCurrentNetworkAdapterID() : 0;
 }
 
 
@@ -309,11 +340,13 @@ Engine_API int GetCurrentNetworkAdapterID()
 
 Engine_API void SetLocalPlayerName(const char *name)
 {
-	UserSettingsCache::GetInstance()->setLocalPlayerName(name ? name : "");
+	if (auto *engine = EngineInstance::Engine())
+		engine->setLocalPlayerName(name ? name : "");
 }
 
 
 Engine_API void SetDiscoveryPort(int port)
 {
-	UserSettingsCache::GetInstance()->setDiscoveryPort(port);
+	if (auto *engine = EngineInstance::Engine())
+		engine->setDiscoveryPort(port);
 }

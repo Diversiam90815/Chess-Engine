@@ -43,6 +43,7 @@ public:
 	virtual bool				isPromotionMove(Square from, Square to) const								  = 0;
 	virtual Move				findMove(Square from, Square to, PieceType promotion = PieceType::None) const = 0;
 	virtual EndGameState		checkEndGame()																  = 0;
+	virtual DrawReason			getDrawReason() const														  = 0;
 
 	//=========================================================================
 	// Turn Management

@@ -8,7 +8,7 @@
 
 ## Overview
 
-A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation, and the core is exposed as a plain C API (DLL) for straightforward integration with non-C++ runtimes. The project is structured as a core static library, a C API wrapper, and a console application for testing. All built through a unified Python-driven CMake build system.
+A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation. The core is pure C++ and knows nothing about its hosts: it publishes an ordered stream of engine events that a host drains on its own thread. Two hosts ship in this repo: a plain C API (DLL) for non-C++ runtimes, and a console app you can play in the terminal. All built through a unified Python-driven CMake build system.
 
 
 ## Features
@@ -41,7 +41,10 @@ Chess-Engine/
 ├── src/
 │   ├── core/           # Core engine — game logic, move generation, AI (static library)
 │   ├── capi/           # Plain C wrapper around the core (shared library / DLL)
-│   └── perft/          # Perft application for measuring performance
+│   └── apps/
+│       ├── common/     # Board and move rendering shared by the executables
+│       ├── console/    # Play a game in the terminal
+│       └── perft/      # Perft application for measuring performance
 ├── tests/
 │   └── Core.Tests/     # GoogleTest unit tests
 ├── build/              # Generated build artifacts (not committed)
@@ -51,7 +54,7 @@ Chess-Engine/
 
 ## Prerequisites
 
-Chess Engine builds on **Windows, Linux, and macOS** — the C++ core has no platform-specific code. Providing a default local player name is entirely the host application's responsibility (via `UserSettingsCache`/`SetLocalPlayerName()` in the C API); the engine itself doesn't look one up.
+Chess Engine builds on **Windows, Linux, and macOS**. Providing a default local player name and an log file path is entirely the host application's responsibility (it fills in `EngineSettings`, or `Init()`/`SetLocalPlayerName()` in the C API); the engine itself doesn't look either up.
 
 - **C++ Compiler**: C++20 or higher (MSVC on Windows, GCC or Clang on Linux/macOS)
 - **CMake**: Version 4.0 or higher
@@ -133,10 +136,32 @@ python build.py --docs
 |---|---|
 | Core static library | `build/<arch>/src/core/` |
 | C API DLL | `build/<arch>/src/capi/` |
-| Console application | `build/<arch>/src/console_app/` |
+| Console application | `build/<arch>/src/apps/console/` |
+| Perft application | `build/<arch>/src/apps/perft/` |
 | Test executable | `build/<arch>/tests/` |
 | Installed headers / libs | `install/` |
 | Doxygen HTML docs | `build/doxygen/html/index.html` |
+
+### Playing in the Console
+
+```bash
+./build/x64/src/apps/console/Debug/Chess.Engine.Console
+```
+
+The app asks for a mode first — local co-op, or against the CPU (your colour and a difficulty). Then it draws the board each turn and takes commands:
+
+| Command | Effect |
+|---|---|
+| `e2e4`, `e2 e4` | Play a move |
+| `e7e8q` | Play a move, promoting to `q`, `r`, `b` or `n` (omit it and you'll be asked) |
+| `moves` | List every legal move in the position |
+| `moves e2` | List the moves leaving one square, highlighted on the board |
+| `board` | Re-draw the board |
+| `undo` | Take back the last move (both plies when playing the CPU) |
+| `history` | Show the moves played so far |
+| `flip` | Switch the board orientation |
+| `new` | Start a new game |
+| `help` / `quit` | Show the command list / leave |
 
 ### Running Tests
 

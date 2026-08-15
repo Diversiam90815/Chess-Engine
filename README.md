@@ -34,11 +34,11 @@ The engine is a self-contained brain that doesn't know or care who's asking it t
                         │
         ┌───────────────┴───────────────┐
         │                               │
-┌───────▼────────┐             ┌────────▼────────┐
-│  C API (DLL)    │             │  Console App     │
-│  used by the    │             │  play a game     │
-│  WinUI3 app     │             │  in the terminal │
-└─────────────────┘             └──────────────────┘
+┌───────▼────────┐             ┌────────▼─────────┐
+│  C API (DLL)   │             │  Console App     │
+│  used by the   │             │  play a game     │
+│  WinUI3 app    │             │  in the terminal │
+└────────────────┘             └──────────────────┘
 ```
 
 Two ideas make this work:

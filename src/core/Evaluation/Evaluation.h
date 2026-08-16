@@ -13,11 +13,6 @@
 #include "PieceValues.h"
 
 
-/**
- * @brief	Static board evaluation.
- *			Returns score relative to the side to move (positive = good).
- *			Designed as a stateless utility — all methods are static.
- */
 class Evaluation
 {
 public:
@@ -32,57 +27,14 @@ public:
 	[[nodiscard]] static int evaluate(const Chessboard &board);
 
 private:
-	//=========================================================================
-	// Evaluation Components
-	//=========================================================================
-
-	/**
-	 * @brief	Count raw material balance (white - black).
-	 */
 	[[nodiscard]] static int		   evaluateMaterial(const Chessboard &board);
-
-	/**
-	 * @brief	Evaluate piece placement using piece-square tables.
-	 */
 	[[nodiscard]] static int		   evaluatePieceSquareTables(const Chessboard &board);
-
-	/**
-	 * @brief	Evaluate pawn structure (doubled, isolated, passed).
-	 */
 	[[nodiscard]] static int		   evaluatePawnStructure(const Chessboard &board);
-
-	/**
-	 * @brief	Evaluate king safety.
-	 */
 	[[nodiscard]] static int		   evaluateKingSafety(const Chessboard &board);
-
-	/**
-	 * @brief	Evaluate mobility (number of legal moves available).
-	 */
 	[[nodiscard]] static int		   evaluateMobility(const Chessboard &board);
 
-
-	//=========================================================================
-	// Helpers
-	//=========================================================================
-
-	/**
-	 * @brief	Sum piece-square values for a given piece bitboard.
-	 * @param	bitboard	Bitboard of the piece.
-	 * @param	table		Piece-square table (from white's perspective).
-	 * @param	isWhite		If false, the square index is mirrored.
-	 */
 	[[nodiscard]] static int		   scorePieceSquare(U64 bitboard, const int table[64], bool isWhite);
-
-	/**
-	 * @brief	Mirror a square index vertically (for black's perspective).
-	 */
 	[[nodiscard]] static constexpr int mirrorSquare(int sq) { return sq ^ 56; }
-
-
-	//=========================================================================
-	// Piece-Square Tables (from white's perspective, a8 = index 0)
-	//=========================================================================
 
 	// clang-format off
 	static constexpr int PST_PAWN[64] =

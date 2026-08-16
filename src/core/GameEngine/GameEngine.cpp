@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 	Module:         GameEngine
-	Description:    Engine of the chess game
+	Description:    Core chess engine orchestrating board state and game flow.
   ==============================================================================
 */
 

@@ -39,8 +39,8 @@ public:
 	// Queries
 	//=========================================================================
 
-	/// Converts a PieceType to the promotion offset used by Move::promotionPieceOffset()
-	/// Returns: 0=Knight, 1=Bishop, 2=Rook, 3=Queen, -1=invalid
+	// Converts a PieceType to the promotion offset used by Move::promotionPieceOffset()
+	// Returns: 0=Knight, 1=Bishop, 2=Rook, 3=Queen, -1=invalid
 	static constexpr int				 promotionPieceToOffset(PieceType pt);
 
 	bool								 isPromotionMove(Square from, Square to) const override;
@@ -67,7 +67,7 @@ public:
 	void								 cancelCPUCalculation();
 
 	//=========================================================================
-	// Accessors (for UI board state queries)
+	// Accessors
 	//=========================================================================
 
 	const Chessboard					&getBoard() const { return mEngine.getBoard(); }

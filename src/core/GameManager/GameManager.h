@@ -22,9 +22,6 @@
 #include "SystemInfo.h"
 
 
-/**
- * @brief	Facade over the engine: commands go in, EngineEvents come out.
- */
 class GameManager
 {
 public:
@@ -83,13 +80,13 @@ public:
 	PieceType							 getPieceAt(Square sq) const;
 	const Chessboard					&getBoard() const;
 
-	/// Every legal move in the current position.
+	// Every legal move in the current position.
 	const MoveList						&getLegalMoves() const;
 
-	/// Legal moves leaving a single square. Pure query - does not change engine state.
+	// Legal moves leaving a single square. Pure query - does not change engine state.
 	void								 getLegalMovesFromSquare(Square from, MoveList &out) const;
 
-	/// Legal moves of the most recently selected square (drives UI highlighting).
+	// Legal moves of the most recently selected square (drives UI highlighting).
 	const MoveList						&getSelectionMoves() const;
 
 	std::string							 getMoveNotation(Move move) const;

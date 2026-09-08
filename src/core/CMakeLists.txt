@@ -16,6 +16,7 @@ set (EVENTS_DIR						${SOURCE_DIR}/Events)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
 set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
+set (CLOCK_DIR						${SOURCE_DIR}/Clock)
 
 
 set(ALL_PROJECT_DIRS 
@@ -34,6 +35,7 @@ set(ALL_PROJECT_DIRS
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
 			${MULTIPLAYER_DIR}
+			${CLOCK_DIR}
 )
 
 
@@ -111,6 +113,13 @@ set(MULTIPLAYER_FILES
 	${MULTIPLAYER_DIR}/MultiplayerManager.h		${MULTIPLAYER_DIR}/MultiplayerManager.cpp
 )
 
+set(CLOCK_FILES
+	${CLOCK_DIR}/TimeControl.h
+	${CLOCK_DIR}/ClockSnapshot.h
+	${CLOCK_DIR}/GameClock.h
+	${CLOCK_DIR}/GameClock.cpp
+)
+
 set(ALL_FILES
 	${GAMEENGINE_FILES}
 	${GAMECONTROLLER_FILES}
@@ -126,6 +135,7 @@ set(ALL_FILES
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
 	${MULTIPLAYER_FILES}
+	${CLOCK_FILES}
 )
 
 include(cpm)

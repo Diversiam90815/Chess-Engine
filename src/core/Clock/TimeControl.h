@@ -9,6 +9,7 @@
 
 #include <chrono>
 
+
 struct TimeControl
 {
 	using Duration = std::chrono::milliseconds;
@@ -23,11 +24,11 @@ struct TimeControl
 	{
 	}
 
-	static constexpr TimeControl	disabled() { return {}; }
+	static constexpr TimeControl disabled() { return {}; }
 
-	static constexpr TimeoutControl suddenDeath(Duration initial) { return TimeControl(initial, Duration::zero()); }
+	static constexpr TimeControl suddenDeath(Duration initial) { return TimeControl(initial, Duration::zero()); }
 
-	static constexpr TimeControl	withIncrement(Duration initial, Duration increment) { return TimeControl(initial, increment); }
+	static constexpr TimeControl withIncrement(Duration initial, Duration increment) { return TimeControl(initial, increment); }
 
-	constexpr bool					isEnabled() const noexcept { return enabled && initialTime > Duration::zero(); }
+	constexpr bool				 isEnabled() const noexcept { return enabled && initialTime > Duration::zero(); }
 };

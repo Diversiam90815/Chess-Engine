@@ -9,6 +9,7 @@
 
 #include <chrono>
 
+
 struct ClockSnapshot
 {
 	using Duration = std::chrono::milliseconds;

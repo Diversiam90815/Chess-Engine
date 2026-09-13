@@ -92,24 +92,23 @@ public:
 	// Game Clock Management
 	//=========================================================================
 
-	void								 configureClock(TimeControl control);
-	void								 configureClock(TimeControl white, TimeControl black);
-	void								 resetClock();
-	void								 startClock(Side side);
-	void								 stopClock();
-	void								 pauseClock();
-	void								 resumeClock(Side side);
-	bool								 completeClockMove(Side side);
-	bool								 completeMoveAndSwitchClock(Side mover);
+	void								 configureClock(TimeControl control) override;
+	void								 configureClock(TimeControl white, TimeControl black) override;
+	void								 resetClock() override;
+	void								 startClock(Side side) override;
+	void								 stopClock() override;
+	void								 pauseClock() override;
+	void								 resumeClock(Side side) override;
+	bool								 completeClockMove(Side side) override;
 
-	std::chrono::milliseconds			 getRemainingTime(Side side) const;
-	bool								 isClockRunning() const;
-	bool								 isClockExpired(Side side) const;
+	std::chrono::milliseconds			 getRemainingTime(Side side) const override;
+	bool								 isClockRunning() const override;
+	bool								 isClockExpired(Side side) const override;
 
-	ClockSnapshot						 snapshotClock() const;
-	void								 restoreClock(const ClockSnapshot &snapshot);
+	ClockSnapshot						 snapshotClock() const override;
+	void								 restoreClock(const ClockSnapshot &snapshot) override;
 
-	void								 setTimeoutCallback(GameClock::TimeoutCallback callback);
+	void								 setTimeoutCallback(GameClock::TimeoutCallback callback) override;
 
 private:
 	GameConfiguration		  mConfig{};

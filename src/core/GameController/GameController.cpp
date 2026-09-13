@@ -357,21 +357,7 @@ void GameController::resumeClock(Side side)
 
 bool GameController::completeClockMove(Side side)
 {
-	mClock.completeMove(side);
-}
-
-
-bool GameController::completeMoveAndSwitchClock(Side mover)
-{
-	if (!mClock.completeMove(mover))
-		return false;
-
-	switchTurns();
-
-	if (checkEndGame() == EndGameState::OnGoing)
-		mClock.start(mCurrentPlayer);
-
-	return true;
+	return mClock.completeMove(side);
 }
 
 

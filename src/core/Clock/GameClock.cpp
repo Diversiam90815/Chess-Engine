@@ -21,7 +21,7 @@ GameClock::~GameClock()
 		++mGeneration;
 	}
 
-	mCondition.notify_one();
+	notifyWorker();
 
 	if (mWorker.joinable())
 		mWorker.join();
@@ -53,33 +53,155 @@ void GameClock::reset()
 
 	mRunning		= false;
 	mRunningSide	= Side::None;
-	++mGeneration;
+	++mGeneration; // invalidate any previous timer
 
-	mCondition.notify_all();
+	notifyWorker();
 }
 
 
-void GameClock::stop() {}
+void GameClock::stop()
+{
+	{
+		std::lock_guard<std::mutex> lock(mMutex);
+
+		if (mRunning && isPlayerSide(mRunningSide))
+		{
+			const Duration remaining	   = std::chrono::duration_cast<Duration>(mDeadline - Clock::now());
+			remainingForSide(mRunningSide) = clampNonNegative(remaining);
+		}
+
+		mRunning	 = false;
+		mRunningSide = Side::None;
+
+		++mGeneration;
+	}
+
+	notifyWorker();
+}
 
 
-void GameClock::start(Side sie) {}
+void GameClock::start(Side side)
+{
+	if (!isPlayerSide(side))
+		return;
+
+	{
+		std::lock_guard<std::mutex> lock(mMutex);
+
+		if (mRunning)
+			return;
+
+		if (remainingForSide(side) <= Duration::zero())
+			return;
+
+		mRunning	 = true;
+		mRunningSide = side;
+		mDeadline	 = Clock::now() + remainingForSide(side);
+
+		++mGeneration;
+	}
+
+	notifyWorker();
+}
 
 
-void GameClock::pause() {}
+void GameClock::pause()
+{
+	{
+		std::lock_guard<std::mutex> lock(mMutex);
+
+		if (!mRunning || !isPlayerSide(mRunningSide))
+			return;
+
+		const Duration remaining	   = std::chrono::duration_cast<Duration>(mDeadline - Clock::now());
+		remainingForSide(mRunningSide) = clampNonNegative(remaining);
+
+		mRunning					   = false;
+		mRunningSide				   = Side::None;
+
+		++mGeneration;
+	}
+
+	notifyWorker();
+}
 
 
-void GameClock::resume(Side side) {}
+void GameClock::resume(Side side)
+{
+	if (!isPlayerSide(side))
+		return;
+
+	{
+		std::lock_guard<std::mutex> lock(mMutex);
+
+		if (mRunning)
+			return;
+
+		if (remainingForSide(side) <= Duration::zero())
+			return;
+
+		mRunning	 = true;
+		mRunningSide = side;
+		mDeadline	 = Clock::now() + remainingForSide(side);
+
+		++mGeneration;
+	}
+
+	notifyWorker();
+}
 
 
 bool GameClock::completeMove(Side mover)
 {
-	return false;
+	if (!isPlayerSide(mover))
+		return false;
+
+	{
+		std::lock_guard<std::mutex> lock(mMutex);
+
+		if (!mRunning || mRunningSide != mover)
+			return false;
+
+		const Duration remaining	  = std::chrono::duration_cast<Duration>(mDeadline - Clock::now());
+
+		auto		  &moverRemaining = remainingForSide(mover);
+		moverRemaining				  = clampNonNegative(remaining);
+
+		if (moverRemaining <= Duration::zero())
+		{
+			mRunning	 = false;
+			mRunningSide = Side::None;
+			++mGeneration;
+			notifyWorker();
+			return false;
+		}
+
+		const TimeControl &control = mover == Side::White ? mWhiteControl : mBlackControl;
+		moverRemaining += control.increment;
+
+		mRunning	 = false;
+		mRunningSide = Side::None;
+		++mGeneration;
+	}
+
+	notifyWorker();
+	return true;
 }
 
 
 GameClock::Duration GameClock::getRemaining(Side side) const
 {
-	return Duration();
+	if (!isPlayerSide(side))
+		return Duration::zero();
+
+	std::lock_guard<std::mutex> lock(mMutex);
+
+	Duration					remaining = remainingForSide(side);
+
+	if (mRunning && mRunningSide == side)
+		remaining = std::chrono::duration_cast<Duration>(mDeadline - Clock::now());
+
+	return clampNonNegative(remaining);
 }
 
 
@@ -105,11 +227,39 @@ bool GameClock::isExpired(Side side) const
 
 ClockSnapshot GameClock::snapshot() const
 {
-	return ClockSnapshot();
+	std::lock_guard<std::mutex> lock(mMutex);
+
+	ClockSnapshot				result;
+	result.enabled		  = mWhiteControl.isEnabled() || mBlackControl.isEnabled();
+
+	result.whiteRemaining = mWhiteRemaining;
+	result.blackRemaining = mBlackRemaining;
+
+	if (mRunning && mRunningSide == Side::White)
+		result.whiteRemaining = clampNonNegative(std::chrono::duration_cast<Duration>(mDeadline - Clock::now()));
+	else if (mRunning && mRunningSide == Side::Black)
+		result.blackRemaining = clampNonNegative(std::chrono::duration_cast<Duration>(mDeadline - Clock::now()));
+
+	return result;
 }
 
 
-void GameClock::restore(const ClockSnapshot &snapshot) {}
+void GameClock::restore(const ClockSnapshot &snapshot)
+{
+	{
+		std::lock_guard<std::mutex> lock(mMutex);
+
+		mWhiteRemaining = clampNonNegative(snapshot.whiteRemaining);
+		mBlackRemaining = clampNonNegative(snapshot.blackRemaining);
+
+		mRunning		= false;
+		mRunningSide	= Side::None;
+
+		++mGeneration;
+	}
+
+	notifyWorker();
+}
 
 
 void GameClock::setTimeoutCallback(TimeoutCallback callback)
@@ -119,7 +269,50 @@ void GameClock::setTimeoutCallback(TimeoutCallback callback)
 }
 
 
-void GameClock::workerLoop() {}
+void GameClock::workerLoop()
+{
+	std::unique_lock<std::mutex> lock(mMutex);
+
+	while (!mStopping)
+	{
+		mCondition.wait(lock, [this] { return mStopping || mRunning; });
+
+		if (mStopping)
+			break;
+
+		const uint64_t			generation	= mGeneration;
+		const Side				side		= mRunningSide;
+		const Clock::time_point deadline	= mDeadline;
+
+		const bool				interrupted = mCondition.wait_until(lock, deadline, [this, generation] { return mStopping || !mRunning || mGeneration != generation; });
+
+		if (mStopping)
+			break;
+
+		// Stopped, reset, restarted, or otherwise changed
+		if (interrupted)
+			continue;
+
+		if (!mRunning || mGeneration != generation || mRunningSide != side)
+			continue;
+
+		// deadline has been reached
+		remainingForSide(side) = Duration::zero();
+		mRunning			   = false;
+		mRunningSide		   = Side::None;
+
+		++mGeneration;
+
+		TimeoutCallback callback = mTimeoutCallback;
+
+		lock.unlock();
+
+		if (callback)
+			callback(side);
+
+		lock.lock();
+	}
+}
 
 
 void GameClock::notifyWorker()

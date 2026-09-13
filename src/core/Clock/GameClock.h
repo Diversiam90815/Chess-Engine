@@ -37,7 +37,7 @@ public:
 	void		  stop();
 
 	// Turn control
-	void		  start(Side sie);
+	void		  start(Side side);
 	void		  pause();
 	void		  resume(Side side);
 
@@ -82,8 +82,8 @@ private:
 	Duration				mWhiteRemaining{0};
 	Duration				mBlackRemaining{0};
 
-	Clock::time_point		mDeadLine{};
-	std::uint64_t			mGeneration{0};
+	Clock::time_point		mDeadline{};
+	uint64_t				mGeneration{0};
 
 	TimeoutCallback			mTimeoutCallback;
 };

@@ -300,6 +300,117 @@ void GameController::setCPUMoveCallback(std::function<void(Move)> callback)
 }
 
 
+void GameController::configureClock(TimeControl control)
+{
+	mClock.configure(control, control);
+	LOG_INFO("Clock has been configured:");
+	LOG_INFO("\tEnabled: {}", Logging::boolToString(control.enabled));
+	LOG_INFO("\tInitial: {}", control.initialTime.count());
+	LOG_INFO("\tIncrement: {}", control.increment.count());
+}
+
+
+void GameController::configureClock(TimeControl white, TimeControl black)
+{
+	mClock.configure(white, black);
+
+	LOG_INFO("Clock has been configured:");
+	LOG_INFO("White: Enabled: {}, Initial: {} ms, Increment: {} ms", Logging::boolToString(white.isEnabled()), white.initialTime.count(), white.increment.count());
+	LOG_INFO("Black: Enabled: {}, Initial: {} ms, Increment: {} ms", Logging::boolToString(black.isEnabled()), black.initialTime.count(), black.increment.count());
+}
+
+
+void GameController::resetClock()
+{
+	mClock.reset();
+	LOG_INFO("Clock has been reset");
+}
+
+
+void GameController::startClock(Side side)
+{
+	mClock.start(side);
+	LOG_INFO("Clock has been started for {}", Logging::sideToString(side));
+}
+
+
+void GameController::stopClock()
+{
+	mClock.stop();
+	LOG_INFO("Clock has been stopped");
+}
+
+
+void GameController::pauseClock()
+{
+	mClock.pause();
+	LOG_INFO("Clock has been paused");
+}
+
+
+void GameController::resumeClock(Side side)
+{
+	mClock.resume(side);
+	LOG_INFO("Clock has been resumed for {}", Logging::sideToString(side));
+}
+
+
+bool GameController::completeClockMove(Side side)
+{
+	mClock.completeMove(side);
+}
+
+
+bool GameController::completeMoveAndSwitchClock(Side mover)
+{
+	if (!mClock.completeMove(mover))
+		return false;
+
+	switchTurns();
+
+	if (checkEndGame() == EndGameState::OnGoing)
+		mClock.start(mCurrentPlayer);
+
+	return true;
+}
+
+
+std::chrono::milliseconds GameController::getRemainingTime(Side side) const
+{
+	return mClock.getRemaining(side);
+}
+
+
+bool GameController::isClockRunning() const
+{
+	return mClock.isRunning();
+}
+
+
+bool GameController::isClockExpired(Side side) const
+{
+	return mClock.isExpired(side);
+}
+
+
+ClockSnapshot GameController::snapshotClock() const
+{
+	return mClock.snapshot();
+}
+
+
+void GameController::restoreClock(const ClockSnapshot &snapshot)
+{
+	mClock.restore(snapshot);
+}
+
+
+void GameController::setTimeoutCallback(GameClock::TimeoutCallback callback)
+{
+	mClock.setTimeoutCallback(std::move(callback));
+}
+
+
 void GameController::ensureCacheValid() const
 {
 	if (!mCacheValid)

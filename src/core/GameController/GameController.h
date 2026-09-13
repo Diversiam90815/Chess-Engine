@@ -12,6 +12,7 @@
 #include "CPUPlayer.h"
 #include "GameConfiguration.h"
 #include "Player.h"
+#include "GameClock.h"
 
 
 class GameController : public IGameController
@@ -73,10 +74,10 @@ public:
 	const Chessboard					&getBoard() const { return mEngine.getBoard(); }
 	const std::vector<MoveHistoryEntry> &getMoveHistory() const { return mEngine.getMoveHistory(); }
 
-	/// Legal moves of the most recently selected square (drives UI highlighting).
+	// Legal moves of the most recently selected square (drives UI highlighting).
 	const MoveList						&getSelectionMoves() const { return mSelectionMoves; }
 
-	/// Every legal move in the current position.
+	// Every legal move in the current position.
 	const MoveList						&getAllLegalMoves() const;
 
 	std::string							 getMoveNotation(Move move) const { return mEngine.getMoveNotation(move); }
@@ -87,19 +88,43 @@ public:
 	void								 setEventQueue(EventQueue *events);
 	void								 setCPUMoveCallback(std::function<void(Move)> callback);
 
+	//=========================================================================
+	// Game Clock Management
+	//=========================================================================
+
+	void								 configureClock(TimeControl control);
+	void								 configureClock(TimeControl white, TimeControl black);
+	void								 resetClock();
+	void								 startClock(Side side);
+	void								 stopClock();
+	void								 pauseClock();
+	void								 resumeClock(Side side);
+	bool								 completeClockMove(Side side);
+	bool								 completeMoveAndSwitchClock(Side mover);
+
+	std::chrono::milliseconds			 getRemainingTime(Side side) const;
+	bool								 isClockRunning() const;
+	bool								 isClockExpired(Side side) const;
+
+	ClockSnapshot						 snapshotClock() const;
+	void								 restoreClock(const ClockSnapshot &snapshot);
+
+	void								 setTimeoutCallback(GameClock::TimeoutCallback callback);
+
 private:
+	GameConfiguration		  mConfig{};
+
 	GameEngine				  mEngine;
 	CPUPlayer				  mCPUPlayer;
-
 	Side					  mLocalPlayer{Side::White};
-	GameConfiguration		  mConfig{};
+	GameClock				  mClock;
 
 	// Every legal move in the current position (backs findMove / isPromotionMove).
 	mutable MoveList		  mCachedLegalMoves;
 	mutable bool			  mCacheValid{false};
 
-	// Legal moves of the last square the user selected. Kept apart from the
-	// position cache so a selection query cannot narrow what findMove searches.
+	// Legal moves of the last square the user selected
+	// Legal moves of the last square the user selected
 	MoveList				  mSelectionMoves;
 
 	// Players

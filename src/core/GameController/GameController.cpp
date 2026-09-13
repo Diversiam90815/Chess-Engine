@@ -21,6 +21,8 @@ bool GameController::initializeGame(GameConfiguration config)
 	mWhitePlayer.setPlayerColor(Side::White);
 	mBlackPlayer.setPlayerColor(Side::Black);
 
+	configureClock(TimeControl::disabled());
+
 	switch (config.mode)
 	{
 	case GameModeSelection::LocalCoop:

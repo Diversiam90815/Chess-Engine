@@ -32,6 +32,17 @@ extern "C"
 
 
 	//=========================================================================
+	// Logging: the engine writes no log file, its lines go to the host
+	//=========================================================================
+
+	// Works before Init. Null stops the lines; it returns once no line is being passed to the previous callback.
+	Engine_API void	 SetLogCallback(PFN_LOG_CALLBACK callback, void *context);
+
+	// Lines below this level are dropped (see PFN_LOG_CALLBACK). Default: 2 (Info).
+	Engine_API void	 SetLogLevel(int level);
+
+
+	//=========================================================================
 	// Game Management
 	//=========================================================================
 

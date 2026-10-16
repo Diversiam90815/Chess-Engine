@@ -37,6 +37,35 @@ Engine_API void SetDelegate(PFN_CALLBACK pDelegate)
 
 
 //=============================================
+//			Logging
+//=============================================
+
+Engine_API void SetLogCallback(PFN_LOG_CALLBACK callback, void *context)
+{
+	if (!callback)
+	{
+		engine::setLogSink({});
+		return;
+	}
+
+	engine::setLogSink([callback, context](const engine::LogRecord &record)
+					   { callback(static_cast<int>(record.level), record.file, record.line, record.function, record.message.c_str(), context); });
+}
+
+
+Engine_API void SetLogLevel(int level)
+{
+	if (level < static_cast<int>(engine::LogLevel::Trace))
+		level = static_cast<int>(engine::LogLevel::Trace);
+
+	if (level > static_cast<int>(engine::LogLevel::Critical))
+		level = static_cast<int>(engine::LogLevel::Critical);
+
+	engine::setLogLevel(static_cast<engine::LogLevel>(level));
+}
+
+
+//=============================================
 //			Game Management
 //=============================================
 

@@ -88,7 +88,6 @@ set(HELPER_FILES
 set(LOGGER_FILES
 	${LOGGER_DIR}/LogSink.h             ${LOGGER_DIR}/LogSink.cpp
 	${LOGGER_DIR}/EngineLog.h
-	${LOGGER_DIR}/Logging.h             ${LOGGER_DIR}/Logging.cpp
 )
 
 

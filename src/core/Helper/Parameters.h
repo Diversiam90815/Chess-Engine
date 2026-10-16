@@ -35,6 +35,17 @@ enum class CPUDifficulty
 	Hard   = 3
 };
 
+constexpr auto cpuDifficultyToString(const CPUDifficulty diff)
+{
+	switch (diff)
+	{
+	case CPUDifficulty::Easy: return "Easy";
+	case CPUDifficulty::Medium: return "Medium";
+	case CPUDifficulty::Hard: return "Hard";
+	default: return "Unknown Difficulty";
+	}
+}
+
 
 // <summary>
 // Represents the various states of a game used in the StateMachine.
@@ -49,6 +60,20 @@ enum class GameState
 	GameOver			 = 7,
 };
 
+constexpr auto gameStateToString(GameState state)
+{
+	switch (state)
+	{
+	case GameState::Init: return "Init";
+	case GameState::WaitingForInput: return "Waiting For Input";
+	case GameState::WaitingForTarget: return "Waiting For Target";
+	case GameState::GameOver: return "Game Over";
+	case GameState::PawnPromotion: return "Pawn Promotion";
+	case GameState::WaitingForCPUMove: return "Waiting for CPU move";
+	default: return "Unknown GameState";
+	}
+}
+
 
 enum class DrawReason
 {
@@ -57,4 +82,15 @@ enum class DrawReason
 	InsufficientMaterial = 2,
 	ThreefoldRepetition	 = 3,
 };
+
+constexpr auto drawReasonToString(const DrawReason reason)
+{
+	switch (reason)
+	{
+	case DrawReason::FiftyMoveRule: return "Fifty-move rule";
+	case DrawReason::InsufficientMaterial: return "Insufficient material";
+	case DrawReason::ThreefoldRepetition: return "Threefold repetition";
+	default: return "None";
+	}
+}
 

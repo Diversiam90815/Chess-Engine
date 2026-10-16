@@ -190,6 +190,17 @@ constexpr int to_index(Side s) noexcept
 	return static_cast<int>(s);
 }
 
+constexpr auto sideToString(const Side side)
+{
+	switch (side)
+	{
+	case Side::None: return "None";
+	case Side::White: return "White";
+	case Side::Black: return "Black";
+	case Side::Both: return "Both";
+	default: return "Unknown Side";
+	}
+}
 
 /*
 =========================================

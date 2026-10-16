@@ -50,7 +50,6 @@ public:
 	//=========================================================================
 
 	virtual Side				getCurrentSide() const														  = 0;
-	virtual bool				isLocalPlayerTurn() const													  = 0;
 	virtual void				switchTurns()																  = 0;
 
 	//=========================================================================

@@ -45,7 +45,6 @@ enum class GameState
 	WaitingForInput		 = 2,
 	WaitingForTarget	 = 3,
 	PawnPromotion		 = 4,
-	WaitingForRemoteMove = 5,
 	WaitingForCPUMove	 = 6,
 	GameOver			 = 7,
 };

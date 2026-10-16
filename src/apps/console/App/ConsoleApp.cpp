@@ -79,7 +79,6 @@ void ConsoleApp::configureConsole()
 EngineSettings ConsoleApp::defaultSettings()
 {
 	EngineSettings settings;
-	settings.playerName = "Console Player";
 
 #if defined(_WIN32)
 	if (const char *localAppData = std::getenv("LOCALAPPDATA"))

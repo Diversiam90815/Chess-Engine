@@ -25,7 +25,6 @@ bool GameController::initializeGame(GameConfiguration config)
 	{
 	case GameModeSelection::LocalCoop:
 	{
-		mLocalPlayer   = Side::White;
 		mCurrentPlayer = Side::White;
 
 		LOG_INFO("Game initialized: Local coop mode!");
@@ -34,7 +33,6 @@ bool GameController::initializeGame(GameConfiguration config)
 	case GameModeSelection::SinglePlayer:
 	{
 		const SinglePlayerConfig &spConfig = config.getSinglePlayer();
-		mLocalPlayer					   = spConfig.humanPlayerColor;
 		mCurrentPlayer					   = Side::White; // White always starts
 		Side			 cpuColor		   = (spConfig.humanPlayerColor == Side::White) ? Side::Black : Side::White;
 
@@ -48,17 +46,6 @@ bool GameController::initializeGame(GameConfiguration config)
 
 		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", Logging::sideToString(spConfig.humanPlayerColor), Logging::sideToString(cpuColor),
 				 Logging::cpuDifficultyToString(spConfig.aiDifficulty));
-
-		break;
-	}
-	case GameModeSelection::Multiplayer:
-	{
-		// TODO: Init Multiplayer Game
-		const MultiplayerConfig &mpConfig = config.getMultiplayer();
-		mLocalPlayer					  = mpConfig.localPlayerColor;
-		mCurrentPlayer					  = Side::White; // White always starts
-
-		LOG_INFO("Game initialized: Multiplayer mode (Local player: {})", Logging::sideToString(mpConfig.localPlayerColor));
 
 		break;
 	}
@@ -230,12 +217,6 @@ Side GameController::getCurrentSide() const
 }
 
 
-bool GameController::isLocalPlayerTurn() const
-{
-	return mCurrentPlayer == mLocalPlayer;
-}
-
-
 void GameController::switchTurns()
 {
 	if (mCurrentPlayer == Side::None)
@@ -266,7 +247,7 @@ bool GameController::isCPUTurn() const
 	if (mConfig.mode != GameModeSelection::SinglePlayer)
 		return false;
 
-	return !isLocalPlayerTurn();
+	return mCurrentPlayer != mConfig.getSinglePlayer().humanPlayerColor;
 }
 
 

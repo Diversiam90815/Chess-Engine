@@ -21,7 +21,6 @@ struct InputEvent
 		None			= 0,
 		SquareSelected	= 1,
 		PromotionChosen = 2,
-		RemoteMove		= 3,
 		CPUMove			= 4,
 		UndoRequested	= 5,
 		GameStart		= 6,
@@ -61,14 +60,6 @@ struct InputEvent
 		InputEvent e;
 		e.type		= Type::PromotionChosen;
 		e.promotion = piece;
-		return e;
-	}
-
-	static InputEvent RemoteMove(Move m)
-	{
-		InputEvent e;
-		e.type = Type::RemoteMove;
-		e.move = m;
 		return e;
 	}
 

@@ -60,7 +60,6 @@ TEST_F(PlayerTests, DefaultConstructor)
 	Player player;
 
 	EXPECT_EQ(player.getPlayerColor(), Side::None) << "Default player should have no color";
-	EXPECT_TRUE(player.isLocalPlayer()) << "Default player should be local player";
 }
 
 
@@ -68,8 +67,6 @@ TEST_F(PlayerTests, ParameterizedConstructor)
 {
 	EXPECT_EQ(mWhitePlayer->getPlayerColor(), Side::White) << "White player should have white color";
 	EXPECT_EQ(mBlackPlayer->getPlayerColor(), Side::Black) << "Black player should have black color";
-	EXPECT_TRUE(mWhitePlayer->isLocalPlayer()) << "New player should be local by default";
-	EXPECT_TRUE(mBlackPlayer->isLocalPlayer()) << "New player should be local by default";
 }
 
 
@@ -243,22 +240,9 @@ TEST_F(PlayerTests, ResetPreservesPlayerColor)
 }
 
 
-TEST_F(PlayerTests, ResetPreservesLocalPlayerStatus)
-{
-	mWhitePlayer->setIsLocalPlayer(false);
-	bool originalLocalStatus = mWhitePlayer->isLocalPlayer();
-
-	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
-	mWhitePlayer->reset();
-
-	EXPECT_EQ(mWhitePlayer->isLocalPlayer(), originalLocalStatus) << "Local player status should be preserved after reset";
-}
-
-
 TEST_F(PlayerTests, ResetAfterMultipleOperations)
 {
 	mWhitePlayer->setPlayerColor(Side::Black);
-	mWhitePlayer->setIsLocalPlayer(false);
 	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
 	mWhitePlayer->addCapturedPiece(PieceType::BRook);
 	mWhitePlayer->addCapturedPiece(PieceType::BKnight);
@@ -267,7 +251,6 @@ TEST_F(PlayerTests, ResetAfterMultipleOperations)
 	drainCaptures();
 
 	EXPECT_EQ(mWhitePlayer->getPlayerColor(), Side::Black) << "Color should be preserved";
-	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Local status should be preserved";
 	EXPECT_TRUE(mWhitePlayer->getCapturedPieces().empty()) << "Captured pieces should be cleared";
 }
 
@@ -290,63 +273,6 @@ TEST_F(PlayerTests, ResetMultipleTimes)
 	const auto captures = drainCaptures();
 	ASSERT_EQ(captures.size(), 1u);
 	EXPECT_EQ(captures[0].piece, PieceType::BQueen);
-}
-
-
-//=============================================================================
-// LOCAL PLAYER TESTS
-//=============================================================================
-
-TEST_F(PlayerTests, IsLocalPlayerDefault)
-{
-	EXPECT_TRUE(mWhitePlayer->isLocalPlayer()) << "Player should be local by default";
-	EXPECT_TRUE(mBlackPlayer->isLocalPlayer()) << "Player should be local by default";
-}
-
-
-TEST_F(PlayerTests, SetIsLocalPlayer)
-{
-	mWhitePlayer->setIsLocalPlayer(false);
-	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Player should not be local after setting to false";
-
-	mWhitePlayer->setIsLocalPlayer(true);
-	EXPECT_TRUE(mWhitePlayer->isLocalPlayer()) << "Player should be local after setting to true";
-}
-
-
-TEST_F(PlayerTests, SetIsLocalPlayerMultipleTimes)
-{
-	mWhitePlayer->setIsLocalPlayer(false);
-	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Should be remote";
-
-	mWhitePlayer->setIsLocalPlayer(false); // Set to same value
-	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Should remain remote";
-
-	mWhitePlayer->setIsLocalPlayer(true);
-	EXPECT_TRUE(mWhitePlayer->isLocalPlayer()) << "Should be local again";
-
-	mWhitePlayer->setIsLocalPlayer(true); // Set to same value
-	EXPECT_TRUE(mWhitePlayer->isLocalPlayer()) << "Should remain local";
-}
-
-
-TEST_F(PlayerTests, LocalPlayerStatusIndependentOfOtherProperties)
-{
-	mWhitePlayer->setIsLocalPlayer(false);
-	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
-	mWhitePlayer->setPlayerColor(Side::Black);
-
-	EXPECT_FALSE(mWhitePlayer->isLocalPlayer()) << "Local status should be independent of other operations";
-}
-
-
-TEST_F(PlayerTests, LocalPlayerStatusForBothPlayers)
-{
-	mWhitePlayer->setIsLocalPlayer(true);
-	mBlackPlayer->setIsLocalPlayer(false);
-
-	EXPECT_TRUE(mWhitePlayer->isLocalPlayer()) << "White should be local";
-	EXPECT_FALSE(mBlackPlayer->isLocalPlayer()) << "Black should be remote";
 }
 
 

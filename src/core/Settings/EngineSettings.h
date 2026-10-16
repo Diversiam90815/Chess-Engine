@@ -8,7 +8,6 @@
 #pragma once
 
 #include <filesystem>
-#include <string>
 
 
 /**
@@ -17,12 +16,6 @@
  */
 struct EngineSettings
 {
-	// Display name used for multiplayer discovery.
-	std::string			  playerName;
-
 	// Root folder for engine-written files (logs). Empty = current working directory.
 	std::filesystem::path logFolder;
-
-	// UDP port used for LAN opponent discovery.
-	int					  discoveryPort = 0;
 };

@@ -34,7 +34,6 @@ std::string Logging::gameStateToString(GameState state)
 	case GameState::WaitingForTarget: return "Waiting For Target";
 	case GameState::GameOver: return "Game Over";
 	case GameState::PawnPromotion: return "Pawn Promotion";
-	case GameState::WaitingForRemoteMove: return "Waiting for remote move";
 	case GameState::WaitingForCPUMove: return "Waiting for CPU move";
 	default: return "Unknown GameState";
 	}
@@ -44,25 +43,6 @@ std::string Logging::gameStateToString(GameState state)
 std::string Logging::boolToString(const bool value)
 {
 	return value ? "True" : "False";
-}
-
-
-std::string Logging::multiplayerStateToString(MultiplayerState state)
-{
-	switch (state)
-	{
-	case MultiplayerState::None: return "None";
-	case MultiplayerState::Searching: return "Searching";
-	case MultiplayerState::OpponentFound: return "Opponent Found";
-	case MultiplayerState::ConnectionRequested: return "Connection Requested";
-	case MultiplayerState::Connected: return "Connected";
-	case MultiplayerState::PlayerSetup: return "Player Setup";
-	case MultiplayerState::ReadyToStart: return "Ready To Start";
-	case MultiplayerState::InGame: return "In Game";
-	case MultiplayerState::Disconnected: return "Disconnected";
-	case MultiplayerState::Error: return "Error";
-	default: return "Unknown MultiplayerState";
-	}
 }
 
 

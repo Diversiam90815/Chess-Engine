@@ -19,7 +19,7 @@
 /**
  * @brief	Single ordered stream of engine notifications.
  *
- *			Producers (StateMachine, Player, MultiplayerManager) push from whatever
+ *			Producers (StateMachine, Player) push from whatever
  *			thread they run on; the host drains on its own thread.
  */
 class EventQueue

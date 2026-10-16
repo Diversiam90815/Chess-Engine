@@ -34,7 +34,6 @@ GameConfiguration ToGameConfiguration(const CGameConfiguration &config)
 	{
 	case GameModeSelection::LocalCoop: return GameConfiguration::createLocalCoop();
 	case GameModeSelection::SinglePlayer: return GameConfiguration::createSinglePlayer(playerSide, difficulty);
-	case GameModeSelection::Multiplayer: return GameConfiguration::createMultiplayer(playerSide);
 	default: LOG_ERROR("Invalid game mode received from C API: {}", config.mode); break;
 	}
 
@@ -46,23 +45,6 @@ GameConfiguration ToGameConfiguration(const CGameConfiguration &config)
 EngineSettings ToEngineSettings(const CUserSettingsInit &settings)
 {
 	EngineSettings init;
-	init.playerName	   = settings.playerName;
-	init.logFolder	   = settings.logFolder;
-	init.discoveryPort = settings.discoveryUDPPort;
+	init.logFolder = settings.logFolder;
 	return init;
-}
-
-
-CConnectionEvent ToCConnectionEvent(const engine::ConnectionChanged &event)
-{
-	CConnectionEvent cEvent{};
-	cEvent.state = static_cast<int>(event.state);
-
-	if (!event.error.empty())
-		CopyStringToBuffer(cEvent.errorMessage, MAX_STRING_LENGTH, event.error);
-
-	if (!event.remoteName.empty())
-		CopyStringToBuffer(cEvent.remoteName, MAX_STRING_LENGTH, event.remoteName);
-
-	return cEvent;
 }

@@ -27,12 +27,9 @@ enum class MessageType
 	GameStateChanged		= 4,
 	MoveExecuted			= 5,
 	MoveUndone				= 6,
-	ConnectionStateChanged	= 7,
-	MultiplayerPlayerChosen = 8,
-	BoardStateChanged		= 9,
-	PawnPromotion			= 10,
-	LegalMovesCalculated	= 11,
-	OpponentDiscovered		= 12,
+	BoardStateChanged		= 7,
+	PawnPromotion			= 8,
+	LegalMovesCalculated	= 9,
 };
 
 

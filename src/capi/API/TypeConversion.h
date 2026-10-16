@@ -23,6 +23,3 @@ GameConfiguration ToGameConfiguration(const CGameConfiguration &config);
 
 // Host startup payload -> the core's EngineSettings.
 EngineSettings	  ToEngineSettings(const CUserSettingsInit &settings);
-
-// Core connection event -> its flat C mirror.
-CConnectionEvent  ToCConnectionEvent(const engine::ConnectionChanged &event);

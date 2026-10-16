@@ -135,7 +135,6 @@ struct MoveIntent
 	Square	  toSquare	 = Square::None;
 	PieceType promotion	 = PieceType::None;
 	MoveList  legalMoves; // Cached legal moves from selected square
-	bool	  fromRemote = false;
 	bool	  fromCPU	 = false;
 
 	void	  clear()
@@ -143,7 +142,6 @@ struct MoveIntent
 		fromSquare = Square::None;
 		toSquare   = Square::None;
 		promotion  = PieceType::None;
-		fromRemote = false;
 		fromCPU	   = false;
 		legalMoves.clear();
 	}

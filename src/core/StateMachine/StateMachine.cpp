@@ -61,12 +61,6 @@ void StateMachine::onPromotionChosen(PieceType piece)
 }
 
 
-void StateMachine::onRemoteMoveReceived(Move move)
-{
-	postEvent(InputEvent::RemoteMove(move));
-}
-
-
 void StateMachine::onCPUMoveCalculated(Move move)
 {
 	postEvent(InputEvent::CPUMove(move));
@@ -98,17 +92,22 @@ void StateMachine::run()
 		if (!waitForEvent(0))
 			break; // Thread was stopped
 
-		if (!isRunning())
-			break;
-
-		InputEvent event;
+		// Triggers that come in before this thread wakes up count as one: handle everything that is queued
+		while (isRunning())
 		{
-			std::unique_lock lock(mQueueMutex);
-			event = std::move(mEventQueue.front());
-			mEventQueue.pop();
-		}
+			InputEvent event;
+			{
+				std::unique_lock lock(mQueueMutex);
 
-		processEvent(event);
+				if (mEventQueue.empty())
+					break;
+
+				event = std::move(mEventQueue.front());
+				mEventQueue.pop();
+			}
+
+			processEvent(event);
+		}
 	}
 }
 
@@ -130,7 +129,6 @@ void StateMachine::processEvent(const InputEvent &event)
 	case GameState::WaitingForInput: nextState = handleWaitingForInput(event); break;
 	case GameState::WaitingForTarget: nextState = handleWaitingForTarget(event); break;
 	case GameState::PawnPromotion: nextState = handlePawnPromotion(event); break;
-	case GameState::WaitingForRemoteMove: nextState = handleWaitingForRemote(event); break;
 	case GameState::WaitingForCPUMove: nextState = handleWaitingForCPU(event); break;
 	case GameState::GameOver: nextState = handleGameOver(event); break;
 	default: break;
@@ -145,7 +143,6 @@ GameState StateMachine::handleInit(const InputEvent &event)
 {
 	if (event.type == InputEvent::Type::GameStart)
 	{
-		mIsMultiplayer.store(event.config.mode == GameModeSelection::Multiplayer);
 		mIsVsCPU.store(event.config.mode == GameModeSelection::SinglePlayer);
 
 		if (!mController->initializeGame(event.config))
@@ -294,18 +291,6 @@ GameState StateMachine::handlePawnPromotion(const InputEvent &event)
 }
 
 
-GameState StateMachine::handleWaitingForRemote(const InputEvent &event)
-{
-	if (event.type == InputEvent::Type::RemoteMove)
-	{
-		if (tryExecuteMove(event.move))
-			return determineNextTurnState();
-	}
-
-	return GameState::WaitingForRemoteMove;
-}
-
-
 GameState StateMachine::handleWaitingForCPU(const InputEvent &event)
 {
 	if (event.type == InputEvent::Type::CPUMove)
@@ -372,9 +357,6 @@ GameState StateMachine::determineNextTurnState()
 
 		return GameState::GameOver;
 	}
-
-	if (mIsMultiplayer.load() && !mController->isLocalPlayerTurn())
-		return GameState::WaitingForRemoteMove;
 
 	if (mIsVsCPU.load() && mController->isCPUTurn())
 		return GameState::WaitingForCPUMove;

@@ -9,7 +9,7 @@
 
 #include <cstring>
 
-#include "Logging.h"
+#include "EngineLog.h"
 
 
 void CopyStringToBuffer(char *dest, size_t destSize, const std::string &src)

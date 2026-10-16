@@ -14,7 +14,7 @@
 
 #include "EventQueue.h"
 #include "GameController.h"
-#include "Logging.h"
+#include "EngineLog.h"
 #include "Player.h"
 #include "StateMachine.h"
 #include "SystemInfo.h"

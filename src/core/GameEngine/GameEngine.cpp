@@ -175,7 +175,7 @@ EndGameState GameEngine::checkForEndGameConditions()
 	DrawReason reason = mMoveValidation.getDrawReason();
 	if (reason != DrawReason::None)
 	{
-		LOG_INFO("Draw! Reason: {}", Logging::drawReasonToString(reason));
+		LOG_INFO("Draw! Reason: {}", drawReasonToString(reason));
 		return EndGameState::Draw;
 	}
 

@@ -13,7 +13,7 @@
 #include <memory>
 
 #include "ChessBoard.h"
-#include "Logging.h"
+#include "EngineLog.h"
 #include "Move.h"
 #include "Execution/MoveExecution.h"
 #include "BitboardTypes.h"

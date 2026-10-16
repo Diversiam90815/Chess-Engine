@@ -8,7 +8,7 @@
 #pragma once
 
 #include "buildinfo.h"
-#include "Logging.h"
+#include "EngineLog.h"
 
 /// <summary>
 /// Logs detailed information about the system and build configuration to the application log.

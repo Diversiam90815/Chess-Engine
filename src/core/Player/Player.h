@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "EventQueue.h"
-#include "Logging.h"
+#include "EngineLog.h"
 #include "Parameters.h"
 
 

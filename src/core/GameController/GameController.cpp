@@ -44,8 +44,8 @@ bool GameController::initializeGame(GameConfiguration config)
 
 		mCPUPlayer.configure(cpuConfig);
 
-		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", Logging::sideToString(spConfig.humanPlayerColor), Logging::sideToString(cpuColor),
-				 Logging::cpuDifficultyToString(spConfig.aiDifficulty));
+		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", sideToString(spConfig.humanPlayerColor), sideToString(cpuColor),
+				 cpuDifficultyToString(spConfig.aiDifficulty));
 
 		break;
 	}

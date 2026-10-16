@@ -12,7 +12,7 @@
 #include "ChessBoard.h"
 #include "Notation/MoveNotation.h"
 #include "Move.h"
-#include "Logging.h"
+#include "EngineLog.h"
 
 
 struct MoveHistoryEntry

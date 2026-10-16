@@ -324,7 +324,7 @@ void StateMachine::transitionTo(GameState newState)
 {
 	GameState oldState = mState.exchange(newState);
 
-	LOG_INFO("State transition: {} -> {}", Logging::gameStateToString(oldState), Logging::gameStateToString(newState));
+	LOG_INFO("State transition: {} -> {}", gameStateToString(oldState), gameStateToString(newState));
 
 	publish(engine::GameStateChanged{newState});
 

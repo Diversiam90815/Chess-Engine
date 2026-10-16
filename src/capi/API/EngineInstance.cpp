@@ -29,7 +29,7 @@ std::mutex				  gInstanceMutex;
 namespace EngineInstance
 {
 
-void Startup(EngineSettings settings)
+void Startup()
 {
 	std::lock_guard<std::mutex> lock(gInstanceMutex);
 
@@ -38,7 +38,7 @@ void Startup(EngineSettings settings)
 
 	auto instance = std::make_unique<Instance>();
 
-	instance->engine.init(std::move(settings));
+	instance->engine.init();
 
 	// Attach after init so the bridge sees the queue the engine actually publishes to.
 	instance->bridge.attach(&instance->engine.events());

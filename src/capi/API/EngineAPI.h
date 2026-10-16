@@ -26,9 +26,20 @@ extern "C"
 	// Core Engine Lifecycle
 	//=========================================================================
 
-	Engine_API void	 Init(CUserSettingsInit settings);
+	Engine_API void	 Init();
 	Engine_API void	 Deinit();
 	Engine_API void	 SetDelegate(PFN_CALLBACK pDelegate);
+
+
+	//=========================================================================
+	// Logging: the engine writes no log file, its lines go to the host
+	//=========================================================================
+
+	// Works before Init. Null stops the lines; it returns once no line is being passed to the previous callback.
+	Engine_API void	 SetLogCallback(PFN_LOG_CALLBACK callback, void *context);
+
+	// Lines below this level are dropped (see PFN_LOG_CALLBACK). Default: 2 (Info).
+	Engine_API void	 SetLogLevel(int level);
 
 
 	//=========================================================================
@@ -62,16 +73,6 @@ extern "C"
 	Engine_API int	 GetNumLegalMoves();
 	Engine_API bool	 GetLegalMoveAtIndex(int index, MoveInstance *move);
 	Engine_API int	 GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMoves);
-
-
-	//=========================================================================
-	// Logging
-	//=========================================================================
-
-	Engine_API void	 LogInfoWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogErrorWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogWarningWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogDebugWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
 
 
 #ifdef __cplusplus

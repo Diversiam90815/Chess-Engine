@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 	Module:         Logger
-	Description:    Logging instance for the project
+	Description:    Text of engine values for log lines
   ==============================================================================
 */
 
@@ -10,31 +10,17 @@
 #pragma once
 
 #include <string>
-#include <filesystem>
 
+#include "EngineLog.h"
 #include "Parameters.h"
-#include "Logger.h"
-
-namespace fs = std::filesystem;
 
 
 class Logging
 {
 public:
-	Logging()  = default;
-	~Logging() = default;
-
-	void			   initLogging(const fs::path &loggingFolder);
-
 	static std::string gameStateToString(GameState state);
 	static std::string boolToString(const bool value);
 	static std::string sideToString(const Side side);
 	static std::string cpuDifficultyToString(const CPUDifficulty diff);
 	static std::string drawReasonToString(const DrawReason reason);
-
-private:
-	std::string getNewLogFilePath(fs::path logFolder);
-
-	std::string mLoggerName;
-	const int	mSlowLogTimeMS = 500;
 };

@@ -32,6 +32,13 @@ extern "C"
 
 	typedef void(API_CALLBACK *PFN_CALLBACK)(int messageId, void *pContext);
 
+	/**
+	 * @brief	Receives the engine's log lines (see SetLogCallback).
+	 *			level: 0 Trace, 1 Debug, 2 Info, 3 Warning, 4 Error, 5 Critical. Texts are UTF-8 and only
+	 *			valid during the call. Called on whatever engine thread logs; it must not call back into the engine.
+	 */
+	typedef void(API_CALLBACK *PFN_LOG_CALLBACK)(int level, const char *file, int line, const char *function, const char *message, void *context);
+
 
 	//=========================================================================
 	// Structures
@@ -84,15 +91,6 @@ extern "C"
 		int playerColor;   // Side: 0=White, 1=Black (the human player in SinglePlayer)
 		int cpuDifficulty; // CPUDifficulty: 1=Easy, 2=Medium, 3=Hard (only for SinglePlayer)
 	} CGameConfiguration;
-
-
-	/**
-	 * @brief	User settings initialization payload from the C# host.
-	 */
-	typedef struct
-	{
-		char logFolder[512];
-	} CUserSettingsInit;
 
 
 #ifdef __cplusplus

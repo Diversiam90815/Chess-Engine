@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "CommandParser.h"
+#include "ConsoleLogging.h"
 #include "GameSetup.h"
 
 #if defined(_WIN32)
@@ -61,6 +62,7 @@ ConsoleApp::ConsoleApp() : mView(mEngine) {}
 ConsoleApp::~ConsoleApp()
 {
 	mEngine.shutDown();
+	ConsoleLogging::disable();
 }
 
 
@@ -76,29 +78,16 @@ void ConsoleApp::configureConsole()
 }
 
 
-EngineSettings ConsoleApp::defaultSettings()
-{
-	EngineSettings settings;
-
-#if defined(_WIN32)
-	if (const char *localAppData = std::getenv("LOCALAPPDATA"))
-		settings.logFolder = std::filesystem::path(localAppData) / "ChessEngine";
-#else
-	if (const char *home = std::getenv("HOME"))
-		settings.logFolder = std::filesystem::path(home) / ".chessengine";
-#endif
-
-	return settings;
-}
-
-
 int ConsoleApp::run()
 {
 	configureConsole();
 	mView.setUnicode(true);
 	mView.printBanner();
 
-	if (!mEngine.init(defaultSettings()))
+	// The engine writes no log file itself: this app keeps one
+	ConsoleLogging::enable(ConsoleLogging::defaultFolder());
+
+	if (!mEngine.init())
 	{
 		mView.printError("The engine failed to start.");
 		return 1;

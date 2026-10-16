@@ -41,10 +41,3 @@ GameConfiguration ToGameConfiguration(const CGameConfiguration &config)
 	return GameConfiguration::createLocalCoop();
 }
 
-
-EngineSettings ToEngineSettings(const CUserSettingsInit &settings)
-{
-	EngineSettings init;
-	init.logFolder = settings.logFolder;
-	return init;
-}

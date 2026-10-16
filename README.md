@@ -82,7 +82,7 @@ Chess-Engine/
 
 ## Prerequisites
 
-Chess Engine builds on **Windows, Linux, and macOS**. Providing a log file path is entirely the host application's responsibility (it fills in `EngineSettings`, or `Init()` in the C API); the engine itself doesn't look it up.
+Chess Engine builds on **Windows, Linux, and macOS**.
 
 - **C++ Compiler**: C++20 or higher (MSVC on Windows, GCC or Clang on Linux/macOS)
 - **CMake**: Version 4.0 or higher
@@ -239,7 +239,7 @@ All dependencies are managed by CPM.cmake and downloaded automatically at config
 
 | Dependency | Version | Purpose |
 |---|---|---|
-| Logger | 2.0.86 | Logging infrastructure |
+| Logger | 2.0.86 | Log file of the console app |
 | GoogleTest | 1.15.2 | Unit testing |
 | doxygen-awesome-css | 2.3.1 | Documentation theme |
 

@@ -1,28 +1,12 @@
 /*
   ==============================================================================
 	Module:         Logger
-	Description:    Logging instance for the project
+	Description:    Text of engine values for log lines
   ==============================================================================
 */
 
 
 #include "Logging.h"
-
-
-void Logging::initLogging(const fs::path &loggingFolder)
-{
-	std::string fileName = getNewLogFilePath(loggingFolder);
-
-	logging::addFileOutput()
-		.setFilename(fileName)
-		.setLevel(LogLevel::Info)
-		.setMaxFileSize(10_MB)
-		.setMaxFiles(10)
-		.setMaxSkipDuration(std::chrono::microseconds(mSlowLogTimeMS))
-		.setRotateOnSession(true);
-
-	logging::addMSVCOutput().checkForPresentDebugger(true).setLevel(LogLevel::Debug).setMaxSkipDuration(std::chrono::microseconds(mSlowLogTimeMS));
-}
 
 
 std::string Logging::gameStateToString(GameState state)
@@ -80,20 +64,4 @@ std::string Logging::drawReasonToString(const DrawReason reason)
 	case DrawReason::ThreefoldRepetition: return "Threefold repetition";
 	default: return "None";
 	}
-}
-
-
-std::string Logging::getNewLogFilePath(fs::path logFolder)
-{
-	std::error_code ec;
-	fs::path		root = logFolder.empty() ? fs::current_path(ec) : logFolder;
-	fs::path		path = root / FileName::LoggingFolder;
-
-	if (!fs::exists(path) && !fs::create_directories(path, ec))
-		return "";
-
-	auto		log		 = path / FileName::LogFile;
-	std::string fileName = log.string();
-
-	return fileName;
 }

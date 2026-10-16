@@ -58,9 +58,3 @@ enum class DrawReason
 	ThreefoldRepetition	 = 3,
 };
 
-
-namespace FileName
-{
-constexpr auto LoggingFolder = "Logs";
-constexpr auto LogFile		 = "Chess.log";
-} // namespace FileName

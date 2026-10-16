@@ -17,9 +17,9 @@
 //=============================================
 
 
-Engine_API void Init(CUserSettingsInit settings)
+Engine_API void Init()
 {
-	EngineInstance::Startup(ToEngineSettings(settings));
+	EngineInstance::Startup();
 }
 
 
@@ -33,6 +33,35 @@ Engine_API void SetDelegate(PFN_CALLBACK pDelegate)
 {
 	if (auto *bridge = EngineInstance::Bridge())
 		bridge->setDelegate(pDelegate);
+}
+
+
+//=============================================
+//			Logging
+//=============================================
+
+Engine_API void SetLogCallback(PFN_LOG_CALLBACK callback, void *context)
+{
+	if (!callback)
+	{
+		engine::setLogSink({});
+		return;
+	}
+
+	engine::setLogSink([callback, context](const engine::LogRecord &record)
+					   { callback(static_cast<int>(record.level), record.file, record.line, record.function, record.message.c_str(), context); });
+}
+
+
+Engine_API void SetLogLevel(int level)
+{
+	if (level < static_cast<int>(engine::LogLevel::Trace))
+		level = static_cast<int>(engine::LogLevel::Trace);
+
+	if (level > static_cast<int>(engine::LogLevel::Critical))
+		level = static_cast<int>(engine::LogLevel::Critical);
+
+	engine::setLogLevel(static_cast<engine::LogLevel>(level));
 }
 
 
@@ -181,29 +210,4 @@ Engine_API int GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMo
 	}
 
 	return count;
-}
-
-
-//=========================================================================
-// Logging
-//=========================================================================
-
-Engine_API void LogInfoWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Info, className, lineNumber, method, message);
-}
-
-Engine_API void LogErrorWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Error, className, lineNumber, method, message);
-}
-
-Engine_API void LogWarningWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Warn, className, lineNumber, method, message);
-}
-
-Engine_API void LogDebugWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Debug, className, lineNumber, method, message);
 }

@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "EngineSettings.h"
 #include "EventQueue.h"
 #include "GameController.h"
 #include "Logging.h"
@@ -33,7 +32,7 @@ public:
 	// Lifecycle
 	//=========================================================================
 
-	bool								 init(EngineSettings settings);
+	bool								 init();
 	void								 shutDown();
 	[[nodiscard]] bool					 isInitialized() const { return mInitialized; }
 
@@ -93,11 +92,6 @@ public:
 
 	const std::vector<PieceType>		&getCapturedPieces(Side player) const;
 
-	//=========================================================================
-	// Settings
-	//=========================================================================
-
-	const EngineSettings				&settings() const { return mSettings; }
 
 
 private:
@@ -108,13 +102,6 @@ private:
 	EventQueue							mEvents;
 	std::unique_ptr<GameController>		mGameController;
 	std::unique_ptr<StateMachine>		mStateMachine;
-
-	//=========================================================================
-	// Infrastructure
-	//=========================================================================
-
-	Logging								mLog;
-	EngineSettings						mSettings;
 
 	//=========================================================================
 	// State

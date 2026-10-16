@@ -11,7 +11,6 @@ set (ATTACKTABLES_DIR				${SOURCE_DIR}/AttackTables)
 set (PLAYER_DIR						${SOURCE_DIR}/Player)
 set (HELPER_DIR						${SOURCE_DIR}/Helper)
 set (LOGGER_DIR						${SOURCE_DIR}/Logger)
-set (SETTINGS_DIR					${SOURCE_DIR}/Settings)
 set (EVENTS_DIR						${SOURCE_DIR}/Events)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
@@ -28,7 +27,6 @@ set(ALL_PROJECT_DIRS
 			${PLAYER_DIR}
 			${HELPER_DIR}
 			${LOGGER_DIR}
-			${SETTINGS_DIR}
 			${EVENTS_DIR}
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
@@ -88,12 +86,11 @@ set(HELPER_FILES
 )
 
 set(LOGGER_FILES
+	${LOGGER_DIR}/LogSink.h             ${LOGGER_DIR}/LogSink.cpp
+	${LOGGER_DIR}/EngineLog.h
 	${LOGGER_DIR}/Logging.h             ${LOGGER_DIR}/Logging.cpp
 )
 
-set(SETTINGS_FILES
-	${SETTINGS_DIR}/EngineSettings.h
-)
 
 set(EVENTS_FILES
 	${EVENTS_DIR}/EngineEvent.h
@@ -114,19 +111,9 @@ set(ALL_FILES
 	${PLAYER_FILES}
 	${HELPER_FILES}
 	${LOGGER_FILES}
-	${SETTINGS_FILES}
 	${EVENTS_FILES}
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
-)
-
-include(cpm)
-
-CPMAddPackage(
-  NAME Logger
-  GITHUB_REPOSITORY Diversiam90815/Logger
-  VERSION 2.0.86
-  GIT_TAG v2.0.86
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
@@ -182,13 +169,8 @@ endif()
 set(Include_Dirs 
 		${PROJECT_BINARY_DIR}
 		${ALL_PROJECT_DIRS}
-		${LOGGER_INCLUDE_FILE}
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC ${Include_Dirs})
 
-set(TARGET_LIBS		Logger
-					nlohmann_json::nlohmann_json
-)
-
-target_link_libraries(${TARGET_NAME} PUBLIC ${TARGET_LIBS})
+# No dependencies: where the log lines go is up to the host (see LogSink.h)

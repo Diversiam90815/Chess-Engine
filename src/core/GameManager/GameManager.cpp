@@ -14,14 +14,10 @@ GameManager::~GameManager()
 }
 
 
-bool GameManager::init(EngineSettings settings)
+bool GameManager::init()
 {
 	if (mInitialized)
 		return true;
-
-	mSettings = std::move(settings);
-
-	mLog.initLogging(mSettings.logFolder);
 
 	SystemInfo::logSystemInfo();
 

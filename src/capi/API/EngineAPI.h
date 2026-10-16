@@ -26,7 +26,7 @@ extern "C"
 	// Core Engine Lifecycle
 	//=========================================================================
 
-	Engine_API void	 Init(CUserSettingsInit settings);
+	Engine_API void	 Init();
 	Engine_API void	 Deinit();
 	Engine_API void	 SetDelegate(PFN_CALLBACK pDelegate);
 
@@ -62,16 +62,6 @@ extern "C"
 	Engine_API int	 GetNumLegalMoves();
 	Engine_API bool	 GetLegalMoveAtIndex(int index, MoveInstance *move);
 	Engine_API int	 GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMoves);
-
-
-	//=========================================================================
-	// Logging
-	//=========================================================================
-
-	Engine_API void	 LogInfoWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogErrorWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogWarningWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogDebugWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
 
 
 #ifdef __cplusplus

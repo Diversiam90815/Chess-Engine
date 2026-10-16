@@ -86,15 +86,6 @@ extern "C"
 	} CGameConfiguration;
 
 
-	/**
-	 * @brief	User settings initialization payload from the C# host.
-	 */
-	typedef struct
-	{
-		char logFolder[512];
-	} CUserSettingsInit;
-
-
 #ifdef __cplusplus
 }
 #endif

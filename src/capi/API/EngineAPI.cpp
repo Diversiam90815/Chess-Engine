@@ -17,9 +17,9 @@
 //=============================================
 
 
-Engine_API void Init(CUserSettingsInit settings)
+Engine_API void Init()
 {
-	EngineInstance::Startup(ToEngineSettings(settings));
+	EngineInstance::Startup();
 }
 
 
@@ -181,29 +181,4 @@ Engine_API int GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMo
 	}
 
 	return count;
-}
-
-
-//=========================================================================
-// Logging
-//=========================================================================
-
-Engine_API void LogInfoWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Info, className, lineNumber, method, message);
-}
-
-Engine_API void LogErrorWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Error, className, lineNumber, method, message);
-}
-
-Engine_API void LogWarningWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Warn, className, lineNumber, method, message);
-}
-
-Engine_API void LogDebugWithCaller(const char *message, const char *method, const char *className, const int lineNumber)
-{
-	logging::log(LogLevel::Debug, className, lineNumber, method, message);
 }

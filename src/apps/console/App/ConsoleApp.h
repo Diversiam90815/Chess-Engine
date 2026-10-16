@@ -35,7 +35,6 @@ private:
 	//=========================================================================
 
 	static void				 configureConsole();
-	static EngineSettings	 defaultSettings();
 
 	bool					 startNewGame();
 

@@ -76,29 +76,14 @@ void ConsoleApp::configureConsole()
 }
 
 
-EngineSettings ConsoleApp::defaultSettings()
-{
-	EngineSettings settings;
-
-#if defined(_WIN32)
-	if (const char *localAppData = std::getenv("LOCALAPPDATA"))
-		settings.logFolder = std::filesystem::path(localAppData) / "ChessEngine";
-#else
-	if (const char *home = std::getenv("HOME"))
-		settings.logFolder = std::filesystem::path(home) / ".chessengine";
-#endif
-
-	return settings;
-}
-
-
 int ConsoleApp::run()
 {
 	configureConsole();
 	mView.setUnicode(true);
 	mView.printBanner();
 
-	if (!mEngine.init(defaultSettings()))
+
+	if (!mEngine.init())
 	{
 		mView.printError("The engine failed to start.");
 		return 1;

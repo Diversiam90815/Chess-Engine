@@ -62,19 +62,6 @@ extern "C"
 
 
 	/**
-	 * @brief	Network adapter information
-	 */
-	typedef struct
-	{
-		int	 ID;
-		int	 priority;
-		char adapterName[MAX_STRING_LENGTH];
-		char networkName[MAX_STRING_LENGTH];
-
-	} NetworkAdapterInstance;
-
-
-	/**
 	 * @brief	Game Phases for UI
 	 */
 	enum UIGamePhase
@@ -93,22 +80,10 @@ extern "C"
 	 */
 	typedef struct
 	{
-		int mode;		   // GameModeSelection: 1=LocalCoop, 2=SinglePlayer, 3=Multiplayer
-		int playerColor;   // Side: 0=White, 1=Black (used for SinglePlayer/Multiplayer)
+		int mode;		   // GameModeSelection: 1=LocalCoop, 2=SinglePlayer
+		int playerColor;   // Side: 0=White, 1=Black (the human player in SinglePlayer)
 		int cpuDifficulty; // CPUDifficulty: 1=Easy, 2=Medium, 3=Hard (only for SinglePlayer)
 	} CGameConfiguration;
-
-
-	/**
-	 * @brief	Plain C connection event, including its state, the remote name, and an error message
-	 */
-	typedef struct
-	{
-		int	 state;
-		char remoteName[MAX_STRING_LENGTH];
-		char errorMessage[MAX_STRING_LENGTH];
-	} CConnectionEvent;
-
 
 
 	/**
@@ -116,8 +91,6 @@ extern "C"
 	 */
 	typedef struct
 	{
-		char playerName[MAX_STRING_LENGTH];
-		int	 discoveryUDPPort;
 		char logFolder[512];
 	} CUserSettingsInit;
 

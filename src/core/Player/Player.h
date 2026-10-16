@@ -17,7 +17,7 @@
 
 /**
  * @brief	Lightweight aggregation of per-player state (material score, captured pieces,
- *			color assignment, local/remote designation).
+ *			color assignment).
  */
 class Player
 {
@@ -51,17 +51,12 @@ public:
 
 	const std::vector<PieceType> &getCapturedPieces() const { return mCapturedPieces; }
 
-	bool						  isLocalPlayer() const { return mIsLocalPlayer; }
-	void						  setIsLocalPlayer(const bool isLocal) { mIsLocalPlayer = isLocal; }
-
 private:
 	Side				   mSide = Side::None;
 
 	std::vector<PieceType> mCapturedPieces;
 
 	bool				   mIsCurrentTurn = false;
-
-	bool				   mIsLocalPlayer{true}; // Default to local player in single-player mode
 
 	EventQueue			  *mEvents{nullptr};
 };

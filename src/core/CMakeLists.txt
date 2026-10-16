@@ -15,7 +15,6 @@ set (SETTINGS_DIR					${SOURCE_DIR}/Settings)
 set (EVENTS_DIR						${SOURCE_DIR}/Events)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
-set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
 
 
 set(ALL_PROJECT_DIRS 
@@ -33,7 +32,6 @@ set(ALL_PROJECT_DIRS
 			${EVENTS_DIR}
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
-			${MULTIPLAYER_DIR}
 )
 
 
@@ -106,11 +104,6 @@ set(EVALUATION_FILES
 	${EVALUATION_DIR}/Evaluation.h  	${EVALUATION_DIR}/Evaluation.cpp
 )
 
-set(MULTIPLAYER_FILES
-	${MULTIPLAYER_DIR}/MultiplayerTypes.h
-	${MULTIPLAYER_DIR}/MultiplayerManager.h		${MULTIPLAYER_DIR}/MultiplayerManager.cpp
-)
-
 set(ALL_FILES
 	${GAMEENGINE_FILES}
 	${GAMECONTROLLER_FILES}
@@ -125,7 +118,6 @@ set(ALL_FILES
 	${EVENTS_FILES}
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
-	${MULTIPLAYER_FILES}
 )
 
 include(cpm)
@@ -135,12 +127,6 @@ CPMAddPackage(
   GITHUB_REPOSITORY Diversiam90815/Logger
   VERSION 2.0.86
   GIT_TAG v2.0.86
-)
-
-CPMAddPackage(
-  NAME NetLink
-  GITHUB_REPOSITORY Diversiam90815/NetLink
-  GIT_TAG v0.2.0
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
@@ -203,7 +189,6 @@ target_include_directories(${TARGET_NAME} PUBLIC ${Include_Dirs})
 
 set(TARGET_LIBS		Logger
 					nlohmann_json::nlohmann_json
-					NetLink
 )
 
 target_link_libraries(${TARGET_NAME} PUBLIC ${TARGET_LIBS})

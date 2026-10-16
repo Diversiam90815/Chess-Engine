@@ -47,7 +47,6 @@ public:
 	// Configuration
 	//=========================================================================
 
-	void					setMultiplayerMode(bool enabled) { mIsMultiplayer.store(enabled); }
 	void					setVsCPUMode(bool enabled) { mIsVsCPU.store(enabled); }
 
 	//=========================================================================
@@ -60,7 +59,6 @@ public:
 	void					onSquareSelected(Square sq);
 	void					onMoveRequested(Square from, Square to, PieceType promotion = PieceType::None);
 	void					onPromotionChosen(PieceType piece);
-	void					onRemoteMoveReceived(Move move);
 	void					onCPUMoveCalculated(Move move);
 	void					onUndoRequested();
 	void					onGameStart(GameConfiguration config);
@@ -89,7 +87,6 @@ private:
 	GameState			   handleWaitingForInput(const InputEvent &event);
 	GameState			   handleWaitingForTarget(const InputEvent &event);
 	GameState			   handlePawnPromotion(const InputEvent &event);
-	GameState			   handleWaitingForRemote(const InputEvent &event);
 	GameState			   handleWaitingForCPU(const InputEvent &event);
 	GameState			   handleGameOver(const InputEvent &event);
 
@@ -118,7 +115,6 @@ private:
 	// Mode Flags
 	//=========================================================================
 
-	std::atomic<bool>	   mIsMultiplayer{false};
 	std::atomic<bool>	   mIsVsCPU{false};
 
 	//=========================================================================

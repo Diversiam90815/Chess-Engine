@@ -14,7 +14,6 @@
 
 #include "Parameters.h"
 #include "Logger.h"
-#include "MultiplayerTypes.h"
 
 namespace fs = std::filesystem;
 
@@ -29,7 +28,6 @@ public:
 
 	static std::string gameStateToString(GameState state);
 	static std::string boolToString(const bool value);
-	static std::string multiplayerStateToString(MultiplayerState state);
 	static std::string sideToString(const Side side);
 	static std::string cpuDifficultyToString(const CPUDifficulty diff);
 	static std::string drawReasonToString(const DrawReason reason);

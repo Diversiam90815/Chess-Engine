@@ -65,23 +65,6 @@ extern "C"
 
 
 	//=========================================================================
-	// Multiplayer
-	//=========================================================================
-
-	Engine_API void	 StartMultiplayer();
-	Engine_API void	 StopMultiplayer();
-
-	Engine_API void	 FindOpponent();
-	Engine_API int	 GetDiscoveredOpponentCount();
-	Engine_API bool	 GetDiscoveredOpponentAtIndex(int index, char *name, int maxLen);
-	Engine_API void	 ConnectToOpponent(int index);
-	Engine_API void	 RespondToConnectionRequest(bool accept);
-
-	Engine_API void	 SetLocalPlayer(int iLocalPlayer);
-	Engine_API void	 SetLocalPlayerReady(bool ready);
-
-
-	//=========================================================================
 	// Logging
 	//=========================================================================
 
@@ -89,24 +72,6 @@ extern "C"
 	Engine_API void	 LogErrorWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
 	Engine_API void	 LogWarningWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
 	Engine_API void	 LogDebugWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-
-
-	//=========================================================================
-	// Network Adapters
-	//=========================================================================
-
-	Engine_API int	 GetNetworkAdapterCount();
-	Engine_API bool	 GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInstance *adapter);
-	Engine_API bool	 ChangeCurrentAdapter(int ID);
-	Engine_API int	 GetCurrentNetworkAdapterID();
-
-
-	//=========================================================================
-	// Settings
-	//=========================================================================
-
-	Engine_API void	 SetLocalPlayerName(const char *name);
-	Engine_API void	 SetDiscoveryPort(int port);
 
 
 #ifdef __cplusplus

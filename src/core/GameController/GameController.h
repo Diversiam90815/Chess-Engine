@@ -54,7 +54,6 @@ public:
 	//=========================================================================
 
 	Side								 getCurrentSide() const override;
-	bool								 isLocalPlayerTurn() const override;
 	void								 switchTurns() override;
 	void								 changeCurrentPlayer(Side player);
 
@@ -91,7 +90,6 @@ private:
 	GameEngine				  mEngine;
 	CPUPlayer				  mCPUPlayer;
 
-	Side					  mLocalPlayer{Side::White};
 	GameConfiguration		  mConfig{};
 
 	// Every legal move in the current position (backs findMove / isPromotionMove).

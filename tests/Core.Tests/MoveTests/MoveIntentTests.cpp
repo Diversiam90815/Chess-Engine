@@ -25,7 +25,6 @@ TEST_F(MoveIntentTests, DefaultConstruction)
 	EXPECT_EQ(intent.fromSquare, Square::None) << "Default from should be None";
 	EXPECT_EQ(intent.toSquare, Square::None) << "Default to should be None";
 	EXPECT_EQ(intent.promotion, PieceType::None) << "Default promotion should be None";
-	EXPECT_FALSE(intent.fromRemote) << "Default fromRemote should be false";
 	EXPECT_FALSE(intent.fromCPU) << "Default fromCPU should be false";
 	EXPECT_TRUE(intent.legalMoves.empty()) << "Default legal moves should be empty";
 }
@@ -73,7 +72,6 @@ TEST_F(MoveIntentTests, Clear)
 	intent.fromSquare = Square::e2;
 	intent.toSquare	  = Square::e4;
 	intent.promotion  = PieceType::WQueen;
-	intent.fromRemote = true;
 	intent.fromCPU	  = true;
 	intent.legalMoves.push(Move(Square::e2, Square::e4));
 
@@ -82,7 +80,6 @@ TEST_F(MoveIntentTests, Clear)
 	EXPECT_EQ(intent.fromSquare, Square::None) << "From should be None after clear";
 	EXPECT_EQ(intent.toSquare, Square::None) << "To should be None after clear";
 	EXPECT_EQ(intent.promotion, PieceType::None) << "Promotion should be None after clear";
-	EXPECT_FALSE(intent.fromRemote) << "fromRemote should be false after clear";
 	EXPECT_FALSE(intent.fromCPU) << "fromCPU should be false after clear";
 	EXPECT_TRUE(intent.legalMoves.empty()) << "Legal moves should be empty after clear";
 }

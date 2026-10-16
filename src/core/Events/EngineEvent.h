@@ -12,7 +12,6 @@
 
 #include "BitboardTypes.h"
 #include "Move.h"
-#include "MultiplayerTypes.h"
 #include "Parameters.h"
 
 
@@ -89,29 +88,6 @@ struct PieceCaptured
 };
 
 
-// A multiplayer opponent was discovered on the network.
-struct OpponentDiscovered
-{
-	std::string name;
-};
-
-
-// The multiplayer connection changed state.
-struct ConnectionChanged
-{
-	MultiplayerState state{MultiplayerState::None};
-	std::string		 remoteName;
-	std::string		 error;
-};
-
-
-// The remote peer picked a colour.
-struct RemotePlayerChosen
-{
-	Side side{Side::None};
-};
-
-
 using EngineEvent = std::variant<GameStateChanged,
 								 PlayerChanged,
 								 MoveExecuted,
@@ -120,9 +96,6 @@ using EngineEvent = std::variant<GameStateChanged,
 								 LegalMovesAvailable,
 								 PromotionRequired,
 								 GameEnded,
-								 PieceCaptured,
-								 OpponentDiscovered,
-								 ConnectionChanged,
-								 RemotePlayerChosen>;
+								 PieceCaptured>;
 
 } // namespace engine

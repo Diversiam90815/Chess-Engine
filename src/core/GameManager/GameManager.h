@@ -16,7 +16,6 @@
 #include "EventQueue.h"
 #include "GameController.h"
 #include "Logging.h"
-#include "MultiplayerManager.h"
 #include "Player.h"
 #include "StateMachine.h"
 #include "SystemInfo.h"
@@ -99,37 +98,9 @@ public:
 	//=========================================================================
 
 	const EngineSettings				&settings() const { return mSettings; }
-	void								 setLocalPlayerName(const std::string &name) { mSettings.playerName = name; }
-	void								 setDiscoveryPort(int port) { mSettings.discoveryPort = port; }
-
-	//=========================================================================
-	// Multiplayer
-	//=========================================================================
-
-	void								 startMultiplayer();
-	void								 stopMultiplayer();
-	bool								 isMultiplayerActive() const { return mIsMultiplayerMode; }
-
-	void								 findOpponent();
-	std::vector<std::string>			 getDiscoveredOpponents();
-	void								 connectToOpponent(int index);
-	void								 respondToConnectionRequest(bool accept);
-
-	void								 setLocalPlayerColor(Side localPlayer);
-	void								 setLocalPlayerReady(bool ready);
-
-	//=========================================================================
-	// Network Adapters
-	//=========================================================================
-
-	std::vector<netlink::NetworkAdapter> getNetworkAdapters();
-	bool								 changeCurrentNetworkAdapter(int ID);
-	int									 getCurrentNetworkAdapterID();
 
 
 private:
-	void								ensureMultiplayerManager();
-
 	//=========================================================================
 	// Core Components
 	//=========================================================================
@@ -145,13 +116,9 @@ private:
 	Logging								mLog;
 	EngineSettings						mSettings;
 
-	/// Created on first use so hosts that never go online do not spin up NetLink.
-	std::unique_ptr<MultiplayerManager> mMultiplayerManager;
-
 	//=========================================================================
 	// State
 	//=========================================================================
 
-	bool								mIsMultiplayerMode{false};
 	bool								mInitialized{false};
 };

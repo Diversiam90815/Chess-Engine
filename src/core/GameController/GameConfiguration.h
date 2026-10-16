@@ -28,13 +28,6 @@ struct SinglePlayerConfig
 };
 
 
-// Configuration of networked multiplayer mode.
-struct MultiplayerConfig
-{
-	Side localPlayerColor;
-};
-
-
 //=============================================================================
 // Unified Configuration
 //=============================================================================
@@ -44,7 +37,6 @@ enum class GameModeSelection
 	None		 = 0,
 	LocalCoop	 = 1,
 	SinglePlayer = 2,
-	Multiplayer	 = 3
 };
 
 
@@ -58,8 +50,6 @@ struct GameConfiguration
 		LocalCoopConfig	   localCoop;
 		// cppcheck-suppress uninitMemberVarNoCtor
 		SinglePlayerConfig singlePlayer;
-		// cppcheck-suppress uninitMemberVarNoCtor
-		MultiplayerConfig  multiPlayer;
 	};
 
 
@@ -84,14 +74,6 @@ struct GameConfiguration
 		return config;
 	}
 
-	static GameConfiguration createMultiplayer(Side localColor)
-	{
-		GameConfiguration config{};
-		config.mode							= GameModeSelection::Multiplayer;
-		config.multiPlayer.localPlayerColor = localColor;
-		return config;
-	}
-
 
 	//=========================================================================
 	// Accessors
@@ -101,11 +83,5 @@ struct GameConfiguration
 	{
 		assert(mode == GameModeSelection::SinglePlayer);
 		return singlePlayer;
-	}
-
-	const MultiplayerConfig &getMultiplayer() const
-	{
-		assert(mode == GameModeSelection::Multiplayer);
-		return multiPlayer;
 	}
 };

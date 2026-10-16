@@ -8,6 +8,7 @@ set(VIEW_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/View)
 
 set(APP_FILES
     ${APP_DIR}/ConsoleApp.h     ${APP_DIR}/ConsoleApp.cpp
+    ${APP_DIR}/ConsoleLogging.h ${APP_DIR}/ConsoleLogging.cpp
     ${APP_DIR}/GameSetup.h      ${APP_DIR}/GameSetup.cpp
 )
 
@@ -28,6 +29,16 @@ set(ALL_FILES
 )
 
 
+include(cpm)
+
+# The engine only produces log lines; this app writes them to a file
+CPMAddPackage(
+  NAME Logger
+  GITHUB_REPOSITORY Diversiam90815/Logger
+  VERSION 2.0.86
+  GIT_TAG v2.0.86
+)
+
 add_executable(${TARGET_NAME} ${ALL_FILES})
 
 
@@ -40,7 +51,7 @@ target_include_directories(${TARGET_NAME} PRIVATE
     ${VIEW_DIR}
 )
 
-target_link_libraries(${TARGET_NAME} PRIVATE Chess.Engine.Core Chess.Engine.AppCommon)
+target_link_libraries(${TARGET_NAME} PRIVATE Chess.Engine.Core Chess.Engine.AppCommon Logger)
 
 if(MSVC)
     # The figurine glyphs in BitboardTypes.h are UTF-8 source literals.

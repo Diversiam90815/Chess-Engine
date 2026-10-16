@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "CommandParser.h"
+#include "ConsoleLogging.h"
 #include "GameSetup.h"
 
 #if defined(_WIN32)
@@ -61,6 +62,7 @@ ConsoleApp::ConsoleApp() : mView(mEngine) {}
 ConsoleApp::~ConsoleApp()
 {
 	mEngine.shutDown();
+	ConsoleLogging::disable();
 }
 
 
@@ -82,6 +84,8 @@ int ConsoleApp::run()
 	mView.setUnicode(true);
 	mView.printBanner();
 
+	// The engine writes no log file itself: this app keeps one
+	ConsoleLogging::enable(ConsoleLogging::defaultFolder());
 
 	if (!mEngine.init())
 	{

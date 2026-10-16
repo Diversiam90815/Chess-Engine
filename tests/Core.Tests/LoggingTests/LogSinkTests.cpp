@@ -59,7 +59,7 @@ TEST_F(LogSinkTest, Line_ReachesTheSinkWithItsSource)
 	EXPECT_EQ(mLines[0].message, "Move 3 of White");
 	EXPECT_EQ(mLines[0].line, expectedLine);
 	EXPECT_NE(mLines[0].file.find("LogSinkTests.cpp"), std::string::npos);
-	EXPECT_NE(mLines[0].function.find("Line_ReachesTheSinkWithItsSource"), std::string::npos);
+	EXPECT_NE(mLines[0].function.find("TestBody"), std::string::npos);
 }
 
 

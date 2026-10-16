@@ -8,7 +8,7 @@
 #include "EngineAPI.h"
 
 #include "EngineInstance.h"
-#include "Logging.h"
+#include "EngineLog.h"
 #include "TypeConversion.h"
 
 

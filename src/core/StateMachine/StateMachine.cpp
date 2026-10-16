@@ -92,17 +92,22 @@ void StateMachine::run()
 		if (!waitForEvent(0))
 			break; // Thread was stopped
 
-		if (!isRunning())
-			break;
-
-		InputEvent event;
+		// Triggers that come in before this thread wakes up count as one: handle everything that is queued
+		while (isRunning())
 		{
-			std::unique_lock lock(mQueueMutex);
-			event = std::move(mEventQueue.front());
-			mEventQueue.pop();
-		}
+			InputEvent event;
+			{
+				std::unique_lock lock(mQueueMutex);
 
-		processEvent(event);
+				if (mEventQueue.empty())
+					break;
+
+				event = std::move(mEventQueue.front());
+				mEventQueue.pop();
+			}
+
+			processEvent(event);
+		}
 	}
 }
 

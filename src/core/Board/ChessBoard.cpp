@@ -6,8 +6,7 @@
 */
 
 #include "ChessBoard.h"
-#include <stdio.h>
-#include <string.h>
+#include "BitboardUtils.h"
 
 
 void Chessboard::init()

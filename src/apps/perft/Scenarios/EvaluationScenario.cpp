@@ -17,7 +17,7 @@ void EvaluationScenario::run(GameEngine &engine)
 	BoardPrinter::printBoard(engine.getBoard());
 
 	const Chessboard &board = engine.getBoard();
-	int				  score = Evaluation::evaluate(board);
+	const int		  score = Evaluation::evaluate(board);
 
 	const char		 *side	= board.getCurrentSide() == Side::White ? "White" : "Black";
 	printf("   Evaluation (relative to side to move - %s): %+d cp\n\n", side, score);
@@ -37,8 +37,8 @@ void EvaluationScenario::run(GameEngine &engine)
 	{
 		if (engine.makeMoveUnchecked(moves[i]))
 		{
-			int	 s	 = Evaluation::evaluate(engine.getBoard());
-			auto uci = MoveNotation::toUCI(moves[i]);
+			const int s	  = Evaluation::evaluate(engine.getBoard());
+			auto	  uci = MoveNotation::toUCI(moves[i]);
 			printf("   %-6zu  %-8s  %+d cp\n", i + 1, uci.c_str(), s);
 			engine.undoMoveUnchecked();
 			++shown;

@@ -7,7 +7,8 @@
 
 #pragma once
 
-#include <cstdint>
+#include "pch.h"
+
 
 /*
 	Example: Bitboard representation (0ULL)
@@ -144,14 +145,14 @@ enum PieceType
 	BRook	= 11
 };
 
-// ASCII pieces with the enum values as indecies
+// ASCII pieces with the enum values as indexes
 // (capital letters for white, small letters for black)
 constexpr char		  asciiPieces[13]	= "KQPNBRkqpnbr";
 
 constexpr const char *unicodePieces[12] = {"♚", "♛", "♟︎", "♞", "♝", "♜", "♔", "♕", "♙", "♘", "♗", "♖"};
 
 // convert ASCII character pieces to encoded constants
-inline int			  GetPieceTypeFromChar(char c)
+inline int			  GetPieceTypeFromChar(const char c)
 {
 	switch (c)
 	{
@@ -190,6 +191,17 @@ constexpr int to_index(Side s) noexcept
 	return static_cast<int>(s);
 }
 
+constexpr auto sideToString(const Side side)
+{
+	switch (side)
+	{
+	case Side::None: return "None";
+	case Side::White: return "White";
+	case Side::Black: return "Black";
+	case Side::Both: return "Both";
+	default: return "Unknown Side";
+	}
+}
 
 /*
 =========================================
@@ -230,13 +242,13 @@ constexpr Castling operator&(Castling a, Castling b) noexcept
 	return static_cast<Castling>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
 }
 
-constexpr Castling &operator|=(Castling &a, Castling b) noexcept
+constexpr Castling &operator|=(Castling &a, const Castling b) noexcept
 {
 	a = a | b;
 	return a;
 }
 
-constexpr bool has(Castling value, Castling flag) noexcept
+constexpr bool has(const Castling value, const Castling flag) noexcept
 {
 	return (static_cast<uint8_t>(value & flag) != 0);
 }

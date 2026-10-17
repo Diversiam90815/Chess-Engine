@@ -9,7 +9,7 @@
 
 #include "BitboardTypes.h"
 #include "Move.h"
-#include "Parameters.h"
+
 
 /**
  * @brief	Event structure for thread-safe input queuing.
@@ -21,7 +21,6 @@ struct InputEvent
 		None			= 0,
 		SquareSelected	= 1,
 		PromotionChosen = 2,
-		RemoteMove		= 3,
 		CPUMove			= 4,
 		UndoRequested	= 5,
 		GameStart		= 6,
@@ -29,15 +28,15 @@ struct InputEvent
 		MoveRequested	= 8,
 	};
 
-	Type			  type		 = Type::None;
-	Square			  square	 = Square::None;
-	Square			  toSquare	 = Square::None;
-	PieceType		  promotion	 = PieceType::None;
+	Type			  type		= Type::None;
+	Square			  square	= Square::None;
+	Square			  toSquare	= Square::None;
+	PieceType		  promotion = PieceType::None;
 	Move			  move;
 	GameConfiguration config{};
 
 
-	static InputEvent SquareSelected(Square sq)
+	static InputEvent SquareSelected(const Square sq)
 	{
 		InputEvent e;
 		e.type	 = Type::SquareSelected;
@@ -46,7 +45,7 @@ struct InputEvent
 	}
 
 
-	static InputEvent MoveRequested(Square from, Square to, PieceType promotion = PieceType::None)
+	static InputEvent MoveRequested(const Square from, const Square to, const PieceType promotion = PieceType::None)
 	{
 		InputEvent e;
 		e.type		= Type::MoveRequested;
@@ -56,7 +55,7 @@ struct InputEvent
 		return e;
 	}
 
-	static InputEvent PromotionChosen(PieceType piece)
+	static InputEvent PromotionChosen(const PieceType piece)
 	{
 		InputEvent e;
 		e.type		= Type::PromotionChosen;
@@ -64,15 +63,7 @@ struct InputEvent
 		return e;
 	}
 
-	static InputEvent RemoteMove(Move m)
-	{
-		InputEvent e;
-		e.type = Type::RemoteMove;
-		e.move = m;
-		return e;
-	}
-
-	static InputEvent CPUMove(Move m)
+	static InputEvent CPUMove(const Move m)
 	{
 		InputEvent e;
 		e.type = Type::CPUMove;
@@ -87,7 +78,7 @@ struct InputEvent
 		return e;
 	}
 
-	static InputEvent Start(GameConfiguration cfg)
+	static InputEvent Start(const GameConfiguration cfg)
 	{
 		InputEvent e;
 		e.type	 = Type::GameStart;

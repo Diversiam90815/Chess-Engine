@@ -7,10 +7,7 @@
 
 #pragma once
 
-#include <thread>
-#include <mutex>
-#include <atomic>
-#include <condition_variable>
+#include "pch.h"
 
 
 class ThreadBase
@@ -73,7 +70,7 @@ public:
 	 * @brief	Indicates whether the worker thread is currently marked as running.
 	 * @return	true if running flag is set, false otherwise.
 	 */
-	bool isRunning() const { return mRunning.load(); }
+	[[nodiscard]] bool isRunning() const { return mRunning.load(); }
 
 
 protected:
@@ -101,7 +98,7 @@ protected:
 	 * @note	Multiple triggerEvent() calls before the wait unblocks are coalesced.
 	 * @return	true if an event was consumed while still running; false otherwise.
 	 */
-	bool		 waitForEvent(unsigned long timeoutMS = 0)
+	bool		 waitForEvent(const unsigned long timeoutMS = 0)
 	{
 		std::unique_lock<std::mutex> lock(mMutex);
 
@@ -113,8 +110,8 @@ protected:
 		{
 			cv.wait(lock, [this] { return mEventTriggered || !isRunning(); });
 		}
-		bool wasTriggered = mEventTriggered;
-		mEventTriggered	  = false;			// Reset the flag
+		const bool wasTriggered = mEventTriggered;
+		mEventTriggered			= false;	// Reset the flag
 
 		return wasTriggered && isRunning(); // Return true if event was triggered and thread is still running
 	}

@@ -6,11 +6,12 @@
 */
 
 #include "StateMachine.h"
+#include "EngineLog.h"
 
 
 StateMachine::~StateMachine()
 {
-	stop();
+	ThreadBase::stop();
 }
 
 
@@ -26,48 +27,42 @@ void StateMachine::setEventQueue(EventQueue *events)
 }
 
 
-void StateMachine::publish(engine::EngineEvent event)
+void StateMachine::publish(engine::EngineEvent event) const
 {
 	if (mEvents)
 		mEvents->push(std::move(event));
 }
 
 
-void StateMachine::postEvent(InputEvent event)
+void StateMachine::postEvent(const InputEvent &event)
 {
 	{
 		std::lock_guard<std::mutex> lock(mQueueMutex);
-		mEventQueue.push(std::move(event));
+		mEventQueue.push(event);
 	}
 	triggerEvent();
 }
 
 
-void StateMachine::onSquareSelected(Square sq)
+void StateMachine::onSquareSelected(const Square sq)
 {
 	postEvent(InputEvent::SquareSelected(sq));
 }
 
 
-void StateMachine::onMoveRequested(Square from, Square to, PieceType promotion)
+void StateMachine::onMoveRequested(const Square from, const Square to, const PieceType promotion)
 {
 	postEvent(InputEvent::MoveRequested(from, to, promotion));
 }
 
 
-void StateMachine::onPromotionChosen(PieceType piece)
+void StateMachine::onPromotionChosen(const PieceType piece)
 {
 	postEvent(InputEvent::PromotionChosen(piece));
 }
 
 
-void StateMachine::onRemoteMoveReceived(Move move)
-{
-	postEvent(InputEvent::RemoteMove(move));
-}
-
-
-void StateMachine::onCPUMoveCalculated(Move move)
+void StateMachine::onCPUMoveCalculated(const Move move)
 {
 	postEvent(InputEvent::CPUMove(move));
 }
@@ -79,7 +74,7 @@ void StateMachine::onUndoRequested()
 }
 
 
-void StateMachine::onGameStart(GameConfiguration config)
+void StateMachine::onGameStart(const GameConfiguration config)
 {
 	postEvent(InputEvent::Start(config));
 }
@@ -98,17 +93,22 @@ void StateMachine::run()
 		if (!waitForEvent(0))
 			break; // Thread was stopped
 
-		if (!isRunning())
-			break;
-
-		InputEvent event;
+		// Triggers that come in before this thread wakes up count as one: handle everything that is queued
+		while (isRunning())
 		{
-			std::unique_lock lock(mQueueMutex);
-			event = std::move(mEventQueue.front());
-			mEventQueue.pop();
-		}
+			InputEvent event;
+			{
+				std::unique_lock lock(mQueueMutex);
 
-		processEvent(event);
+				if (mEventQueue.empty())
+					break;
+
+				event = mEventQueue.front();
+				mEventQueue.pop();
+			}
+
+			processEvent(event);
+		}
 	}
 }
 
@@ -121,8 +121,8 @@ void StateMachine::processEvent(const InputEvent &event)
 		return;
 	}
 
-	GameState currentState = mState.load();
-	GameState nextState	   = currentState;
+	const GameState currentState = mState.load();
+	GameState		nextState	 = currentState;
 
 	switch (currentState)
 	{
@@ -130,7 +130,6 @@ void StateMachine::processEvent(const InputEvent &event)
 	case GameState::WaitingForInput: nextState = handleWaitingForInput(event); break;
 	case GameState::WaitingForTarget: nextState = handleWaitingForTarget(event); break;
 	case GameState::PawnPromotion: nextState = handlePawnPromotion(event); break;
-	case GameState::WaitingForRemoteMove: nextState = handleWaitingForRemote(event); break;
 	case GameState::WaitingForCPUMove: nextState = handleWaitingForCPU(event); break;
 	case GameState::GameOver: nextState = handleGameOver(event); break;
 	default: break;
@@ -145,7 +144,6 @@ GameState StateMachine::handleInit(const InputEvent &event)
 {
 	if (event.type == InputEvent::Type::GameStart)
 	{
-		mIsMultiplayer.store(event.config.mode == GameModeSelection::Multiplayer);
 		mIsVsCPU.store(event.config.mode == GameModeSelection::SinglePlayer);
 
 		if (!mController->initializeGame(event.config))
@@ -173,7 +171,7 @@ GameState StateMachine::handleWaitingForInput(const InputEvent &event)
 		MoveList moves;
 		mController->getLegalMovesFromSquare(event.square, moves);
 
-		if (moves.size() > 0)
+		if (!moves.empty())
 		{
 			mMoveIntent.clear();
 			mMoveIntent.fromSquare = event.square;
@@ -222,7 +220,7 @@ GameState StateMachine::handleWaitingForTarget(const InputEvent &event)
 	if (event.type != InputEvent::Type::SquareSelected)
 		return GameState::WaitingForTarget;
 
-	Square sq = event.square;
+	const Square sq = event.square;
 
 	// Deselect if clicked on same square
 	if (sq == mMoveIntent.fromSquare)
@@ -236,7 +234,7 @@ GameState StateMachine::handleWaitingForTarget(const InputEvent &event)
 	MoveList newMoves;
 	mController->getLegalMovesFromSquare(sq, newMoves);
 
-	if (newMoves.size() > 0)
+	if (!newMoves.empty())
 	{
 		mMoveIntent.clear();
 		mMoveIntent.fromSquare = sq;
@@ -250,7 +248,7 @@ GameState StateMachine::handleWaitingForTarget(const InputEvent &event)
 }
 
 
-GameState StateMachine::resolveAndPlay(Square from, Square to, PieceType promotion)
+GameState StateMachine::resolveAndPlay(const Square from, const Square to, const PieceType promotion)
 {
 	mMoveIntent.toSquare  = to;
 	mMoveIntent.promotion = promotion;
@@ -258,11 +256,11 @@ GameState StateMachine::resolveAndPlay(Square from, Square to, PieceType promoti
 	// Promotion without a piece choice: ask the host and park until it answers.
 	if (promotion == PieceType::None && mController->isPromotionMove(from, to))
 	{
-		publish(engine::PromotionRequired{from, to});
+		publish(engine::PromotionRequired{.from = from, .to = to});
 		return GameState::PawnPromotion;
 	}
 
-	Move move = mController->findMove(from, to, promotion);
+	const Move move = mController->findMove(from, to, promotion);
 
 	if (move.isValid() && tryExecuteMove(move))
 		return determineNextTurnState();
@@ -280,7 +278,7 @@ GameState StateMachine::handlePawnPromotion(const InputEvent &event)
 	{
 		mMoveIntent.promotion = event.promotion;
 
-		Move move			  = mController->findMove(mMoveIntent.fromSquare, mMoveIntent.toSquare, mMoveIntent.promotion);
+		const Move move		  = mController->findMove(mMoveIntent.fromSquare, mMoveIntent.toSquare, mMoveIntent.promotion);
 
 		if (move.isValid() && tryExecuteMove(move))
 			return determineNextTurnState();
@@ -291,18 +289,6 @@ GameState StateMachine::handlePawnPromotion(const InputEvent &event)
 	}
 
 	return GameState::PawnPromotion;
-}
-
-
-GameState StateMachine::handleWaitingForRemote(const InputEvent &event)
-{
-	if (event.type == InputEvent::Type::RemoteMove)
-	{
-		if (tryExecuteMove(event.move))
-			return determineNextTurnState();
-	}
-
-	return GameState::WaitingForRemoteMove;
 }
 
 
@@ -335,11 +321,11 @@ GameState StateMachine::handleGameOver(const InputEvent &event)
 }
 
 
-void StateMachine::transitionTo(GameState newState)
+void StateMachine::transitionTo(const GameState newState)
 {
-	GameState oldState = mState.exchange(newState);
+	const GameState oldState = mState.exchange(newState);
 
-	LOG_INFO("State transition: {} -> {}", Logging::gameStateToString(oldState), Logging::gameStateToString(newState));
+	LOG_INFO("State transition: {} -> {}", gameStateToString(oldState), gameStateToString(newState));
 
 	publish(engine::GameStateChanged{newState});
 
@@ -347,7 +333,7 @@ void StateMachine::transitionTo(GameState newState)
 }
 
 
-void StateMachine::onStateEnter(GameState enteringState)
+void StateMachine::onStateEnter(const GameState enteringState) const
 {
 	switch (enteringState)
 	{
@@ -361,20 +347,17 @@ void StateMachine::onStateEnter(GameState enteringState)
 }
 
 
-GameState StateMachine::determineNextTurnState()
+GameState StateMachine::determineNextTurnState() const
 {
 	if (mEndgameState != EndGameState::OnGoing)
 	{
-		Side	   winner = (mEndgameState == EndGameState::Checkmate) ? (mController->getCurrentSide() == Side::White ? Side::Black : Side::White) : Side::None;
-		DrawReason reason = (mEndgameState == EndGameState::Draw) ? mController->getDrawReason() : DrawReason::None;
+		const Side		 winner = (mEndgameState == EndGameState::Checkmate) ? (mController->getCurrentSide() == Side::White ? Side::Black : Side::White) : Side::None;
+		const DrawReason reason = (mEndgameState == EndGameState::Draw) ? mController->getDrawReason() : DrawReason::None;
 
-		publish(engine::GameEnded{mEndgameState, winner, reason});
+		publish(engine::GameEnded{.state = mEndgameState, .winner = winner, .reason = reason});
 
 		return GameState::GameOver;
 	}
-
-	if (mIsMultiplayer.load() && !mController->isLocalPlayerTurn())
-		return GameState::WaitingForRemoteMove;
 
 	if (mIsVsCPU.load() && mController->isCPUTurn())
 		return GameState::WaitingForCPUMove;
@@ -383,18 +366,18 @@ GameState StateMachine::determineNextTurnState()
 }
 
 
-bool StateMachine::tryExecuteMove(Move move)
+bool StateMachine::tryExecuteMove(const Move move)
 {
-	auto executionResult = mController->executeMove(move);
+	const auto executionResult = mController->executeMove(move);
 
 	if (!executionResult)
 		return false;
 
-	publish(engine::MoveExecuted{move, executionResult.notation});
+	publish(engine::MoveExecuted{.move = move, .notation = executionResult.notation});
 	publish(engine::BoardStateChanged{});
 
 	mController->switchTurns();
-	Side currentSide = mController->getCurrentSide();
+	const Side currentSide = mController->getCurrentSide();
 	publish(engine::PlayerChanged{currentSide});
 
 	mEndgameState = mController->checkEndGame();

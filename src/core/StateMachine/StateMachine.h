@@ -7,12 +7,8 @@
 
 #pragma once
 
-#include <queue>
-#include <mutex>
-#include <atomic>
-#include <condition_variable>
+#include "pch.h"
 
-#include "Logging.h"
 #include "Parameters.h"
 #include "Move.h"
 #include "ThreadBase.h"
@@ -47,20 +43,18 @@ public:
 	// Configuration
 	//=========================================================================
 
-	void					setMultiplayerMode(bool enabled) { mIsMultiplayer.store(enabled); }
-	void					setVsCPUMode(bool enabled) { mIsVsCPU.store(enabled); }
+	void					setVsCPUMode(const bool enabled) { mIsVsCPU.store(enabled); }
 
 	//=========================================================================
 	// Event Input (thread-safe, can be called from any thread)
 	//=========================================================================
 
-	void					postEvent(InputEvent event);
+	void					postEvent(const InputEvent &event);
 
 	// Convenience methods
 	void					onSquareSelected(Square sq);
 	void					onMoveRequested(Square from, Square to, PieceType promotion = PieceType::None);
 	void					onPromotionChosen(PieceType piece);
-	void					onRemoteMoveReceived(Move move);
 	void					onCPUMoveCalculated(Move move);
 	void					onUndoRequested();
 	void					onGameStart(GameConfiguration config);
@@ -72,9 +66,10 @@ public:
 
 	[[nodiscard]] GameState getState() const { return mState.load(); }
 
-private:
-	void				   run() override;
+protected:
+	void run() override;
 
+private:
 	//=========================================================================
 	// Event Processing
 	//=========================================================================
@@ -89,7 +84,6 @@ private:
 	GameState			   handleWaitingForInput(const InputEvent &event);
 	GameState			   handleWaitingForTarget(const InputEvent &event);
 	GameState			   handlePawnPromotion(const InputEvent &event);
-	GameState			   handleWaitingForRemote(const InputEvent &event);
 	GameState			   handleWaitingForCPU(const InputEvent &event);
 	GameState			   handleGameOver(const InputEvent &event);
 
@@ -98,13 +92,13 @@ private:
 	//=========================================================================
 
 	void				   transitionTo(GameState newState);
-	void				   onStateEnter(GameState enteringState);
-	GameState			   determineNextTurnState();
+	void				   onStateEnter(GameState enteringState) const;
+	[[nodiscard]] GameState			   determineNextTurnState() const;
 	bool				   tryExecuteMove(Move move);
 
 	GameState			   resolveAndPlay(Square from, Square to, PieceType promotion);
 
-	void				   publish(engine::EngineEvent event);
+	void				   publish(engine::EngineEvent event) const;
 
 	//=========================================================================
 	// State
@@ -118,7 +112,6 @@ private:
 	// Mode Flags
 	//=========================================================================
 
-	std::atomic<bool>	   mIsMultiplayer{false};
 	std::atomic<bool>	   mIsVsCPU{false};
 
 	//=========================================================================

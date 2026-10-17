@@ -7,15 +7,8 @@
 
 #pragma once
 
-#include <vector>
-#include <unordered_map>
-#include <future>
-#include <memory>
-
 #include "ChessBoard.h"
-#include "Logging.h"
 #include "Move.h"
-#include "Execution/MoveExecution.h"
 #include "BitboardTypes.h"
 
 
@@ -28,19 +21,19 @@ public:
 	explicit MoveGeneration(Chessboard &board);
 	~MoveGeneration() = default;
 
-	bool isSquareAttacked(Square square, Side attacker) const;
-	void generateAllMoves(MoveList &moves);
+	[[nodiscard]] bool isSquareAttacked(Square square, Side attacker) const;
+	void			   generateAllMoves(MoveList &moves) const;
 
 private:
-	void		generateCastlingMoves(MoveList &moves, Side side);
-	void		generatePawnMoves(MoveList &moves, Side side);
-	void		generateKnightMoves(MoveList &moves, Side side);
-	void		generateRookMoves(MoveList &moves, Side side);
-	void		generateBishopMoves(MoveList &moves, Side side);
-	void		generateQueenMoves(MoveList &moves, Side side);
-	void		generateKingMoves(MoveList &moves, Side side);
+	void		generateCastlingMoves(MoveList &moves, Side side) const;
+	void		generatePawnMoves(MoveList &moves, Side side) const;
+	void		generateKnightMoves(MoveList &moves, Side side) const;
+	void		generateRookMoves(MoveList &moves, Side side) const;
+	void		generateBishopMoves(MoveList &moves, Side side) const;
+	void		generateQueenMoves(MoveList &moves, Side side) const;
+	void		generateKingMoves(MoveList &moves, Side side) const;
 
-	void		addSlidingMoves(MoveList &moves, Square from, U64 attacks, U64 enemyOcc);
+	static void addSlidingMoves(MoveList &moves, Square from, U64 attacks, U64 enemyOcc);
 
 	Chessboard &mChessBoard;
 };

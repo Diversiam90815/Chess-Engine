@@ -14,8 +14,8 @@
 class IScenario
 {
 public:
-	virtual ~IScenario()						= default;
+	virtual ~IScenario()									  = default;
 
-	virtual std::string name() const			= 0;
-	virtual void		run(GameEngine &engine) = 0;
+	[[nodiscard]] virtual std::string name() const			  = 0;
+	virtual void					  run(GameEngine &engine) = 0;
 };

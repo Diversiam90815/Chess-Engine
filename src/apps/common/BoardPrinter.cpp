@@ -18,7 +18,7 @@ namespace BoardPrinter
 namespace
 {
 
-int pieceIndexAt(const Chessboard &board, int square)
+int pieceIndexAt(const Chessboard &board, const int square)
 {
 	for (int bbPiece = 0; bbPiece < 12; ++bbPiece)
 	{
@@ -32,20 +32,20 @@ int pieceIndexAt(const Chessboard &board, int square)
 
 bool isHighlighted(const Options &options, int square)
 {
-	return std::find(options.highlight.begin(), options.highlight.end(), static_cast<Square>(square)) != options.highlight.end();
+	return std::ranges::find(options.highlight, static_cast<Square>(square)) != options.highlight.end();
 }
 
 } // namespace
 
 
-void printBitboard(U64 bitboard)
+void printBitboard(const U64 bitboard)
 {
 	printf("\n");
 	for (int rank = 0; rank < 8; ++rank)
 	{
 		for (int file = 0; file < 8; ++file)
 		{
-			int square = rank * 8 + file;
+			const int square = rank * 8 + file;
 			if (!file)
 				printf("  %d ", 8 - rank);
 			printf(" %d", BitUtils::getBit(bitboard, square) ? 1 : 0);
@@ -111,7 +111,7 @@ void printBoard(const Chessboard &board, const Options &options)
 		return;
 
 	printf("   Side:      %s\n", board.getCurrentSide() == Side::White ? "White" : board.getCurrentSide() == Side::Black ? "Black" : "--");
-	printf("   Enpassant: %s\n", board.getCurrentEnPassantSqaure() != Square::None ? square_to_coordinates[to_index(board.getCurrentEnPassantSqaure())] : "no");
+	printf("   Enpassant: %s\n", board.getCurrentEnPassantSquare() != Square::None ? square_to_coordinates[to_index(board.getCurrentEnPassantSquare())] : "no");
 	printf("   Castling:  %c%c%c%c\n\n", static_cast<int>(board.getCurrentCastlingRights() & Castling::WK) ? 'K' : '-',
 		   static_cast<int>(board.getCurrentCastlingRights() & Castling::WQ) ? 'Q' : '-', static_cast<int>(board.getCurrentCastlingRights() & Castling::BK) ? 'k' : '-',
 		   static_cast<int>(board.getCurrentCastlingRights() & Castling::BQ) ? 'q' : '-');

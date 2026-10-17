@@ -6,16 +6,17 @@
 */
 
 #include "MoveExecution.h"
+#include "EngineLog.h"
 
 
 MoveExecution::MoveExecution(Chessboard &board) : mChessBoard(board) {}
 
 
-bool MoveExecution::makeMove(Move move)
+bool MoveExecution::makeMove(const Move move)
 {
-	Square	  from	= move.from();
-	Square	  to	= move.to();
-	PieceType piece = mChessBoard.pieceAt(from);
+	const Square	from  = move.from();
+	const Square	to	  = move.to();
+	const PieceType piece = mChessBoard.pieceAt(from);
 
 	if (piece == PieceType::None)
 	{
@@ -24,19 +25,17 @@ bool MoveExecution::makeMove(Move move)
 	}
 
 	// Save state before making move
-	BoardState prevState = mChessBoard.saveState();
+	BoardState		prevState = mChessBoard.saveState();
 
 	// determine side
-	bool	   isWhite	 = (piece < 6);
-	PieceType  pawnType	 = isWhite ? WPawn : BPawn;
-	PieceType  rookType	 = isWhite ? WRook : BRook;
+	const bool		isWhite	  = (piece < 6);
+	const PieceType pawnType  = isWhite ? WPawn : BPawn;
+	const PieceType rookType  = isWhite ? WRook : BRook;
 
 	// Captures	(En Passant handled later)
 	if (move.isCapture() && !move.isEnPassant())
 	{
-		PieceType captured = mChessBoard.pieceAt(to);
-
-		if (captured != -1)
+		if (const PieceType captured = mChessBoard.pieceAt(to); captured != -1)
 		{
 			prevState.capturedPiece = captured;
 			mChessBoard.removePiece(captured, to);
@@ -55,25 +54,25 @@ bool MoveExecution::makeMove(Move move)
 	}
 	case MoveFlag::EnPassant:
 	{
-		Square	  capturedSquare = static_cast<Square>(to_index(to) + (isWhite ? 8 : -8));
-		PieceType capturedPawn	 = isWhite ? BPawn : WPawn;
-		prevState.capturedPiece	 = capturedPawn;
+		const auto		capturedSquare = static_cast<Square>(to_index(to) + (isWhite ? 8 : -8));
+		const PieceType capturedPawn   = isWhite ? BPawn : WPawn;
+		prevState.capturedPiece		   = capturedPawn;
 		mChessBoard.removePiece(capturedPawn, capturedSquare);
 		mChessBoard.setEnPassantSquare(Square::None);
 		break;
 	}
 	case MoveFlag::KingCastle:
 	{
-		Square rookFrom = isWhite ? Square::h1 : Square::h8;
-		Square rookTo	= isWhite ? Square::f1 : Square::f8;
+		const Square rookFrom = isWhite ? Square::h1 : Square::h8;
+		const Square rookTo	  = isWhite ? Square::f1 : Square::f8;
 		mChessBoard.movePiece(rookType, rookFrom, rookTo);
 		mChessBoard.setEnPassantSquare(Square::None);
 		break;
 	}
 	case MoveFlag::QueenCastle:
 	{
-		Square rookFrom = isWhite ? Square::a1 : Square::a8;
-		Square rookTo	= isWhite ? Square::d1 : Square::d8;
+		const Square rookFrom = isWhite ? Square::a1 : Square::a8;
+		const Square rookTo	  = isWhite ? Square::d1 : Square::d8;
 		mChessBoard.movePiece(rookType, rookFrom, rookTo);
 		mChessBoard.setEnPassantSquare(Square::None);
 		break;
@@ -118,12 +117,12 @@ bool MoveExecution::makeMove(Move move)
 	}
 
 	// Update castling rights
-	uint8_t rights = static_cast<uint8_t>(mChessBoard.getCurrentCastlingRights());
+	auto rights = static_cast<uint8_t>(mChessBoard.getCurrentCastlingRights());
 	rights &= sCastlingRightsUpdate[to_index(from)];
 	rights &= sCastlingRightsUpdate[to_index(to)];
 	mChessBoard.setCastlingRights(static_cast<Castling>(rights));
 
-	// Update halfmove clock
+	// Update half-move clock
 	if (piece == pawnType || move.isCapture())
 		mChessBoard.setHalfMoveClock(0);
 	else
@@ -140,7 +139,7 @@ bool MoveExecution::makeMove(Move move)
 	mChessBoard.updateOccupancies();
 
 	// record move in history
-	mHistory.push_back({move, prevState});
+	mHistory.push_back({.move = move, .previousState = prevState});
 
 	return true;
 }
@@ -154,20 +153,19 @@ bool MoveExecution::unmakeMove()
 		return false;
 	}
 
-	const auto &entry = mHistory.back();
-	Move		move  = entry.move;
-	Square		from  = move.from();
-	Square		to	  = move.to();
+	const auto &[move, previousState] = mHistory.back();
+	const Square from				  = move.from();
+	const Square to					  = move.to();
 
 	// Flip side back frist
 	mChessBoard.flipSide();
 
-	bool	  isWhite	= (mChessBoard.getCurrentSide() == Side::White);
-	PieceType pawnType	= isWhite ? WPawn : BPawn;
-	PieceType rookType	= isWhite ? WRook : BRook;
+	const bool		isWhite	  = (mChessBoard.getCurrentSide() == Side::White);
+	const PieceType pawnType  = isWhite ? WPawn : BPawn;
+	const PieceType rookType  = isWhite ? WRook : BRook;
 
 	// get piece at dest.
-	PieceType pieceAtTo = mChessBoard.pieceAt(to);
+	const PieceType pieceAtTo = mChessBoard.pieceAt(to);
 
 	// handle promotions
 	if (move.isPromotion())
@@ -180,28 +178,28 @@ bool MoveExecution::unmakeMove()
 		mChessBoard.movePiece(pieceAtTo, to, from);
 
 	// restore captured piece
-	if (entry.previousState.capturedPiece != PieceType::None)
+	if (previousState.capturedPiece != PieceType::None)
 	{
 		if (move.isEnPassant())
 		{
-			Square capturedSq = static_cast<Square>(to_index(to) + (isWhite ? 8 : -8));
-			mChessBoard.addPiece(entry.previousState.capturedPiece, capturedSq);
+			const auto capturedSq = static_cast<Square>(to_index(to) + (isWhite ? 8 : -8));
+			mChessBoard.addPiece(previousState.capturedPiece, capturedSq);
 		}
 		else
-			mChessBoard.addPiece(entry.previousState.capturedPiece, to);
+			mChessBoard.addPiece(previousState.capturedPiece, to);
 	}
 
 	// Undo castling rook movement
 	if (move.flags() == MoveFlag::KingCastle)
 	{
-		Square rookFrom = isWhite ? Square::f1 : Square::f8;
-		Square rookTo	= isWhite ? Square::h1 : Square::h8;
+		const Square rookFrom = isWhite ? Square::f1 : Square::f8;
+		const Square rookTo	  = isWhite ? Square::h1 : Square::h8;
 		mChessBoard.movePiece(rookType, rookFrom, rookTo);
 	}
 	else if (move.flags() == MoveFlag::QueenCastle)
 	{
-		Square rookFrom = isWhite ? Square::d1 : Square::d8;
-		Square rookTo	= isWhite ? Square::a1 : Square::a8;
+		const Square rookFrom = isWhite ? Square::d1 : Square::d8;
+		const Square rookTo	  = isWhite ? Square::a1 : Square::a8;
 		mChessBoard.movePiece(rookType, rookFrom, rookTo);
 	}
 
@@ -209,7 +207,7 @@ bool MoveExecution::unmakeMove()
 	if (!isWhite)
 		mChessBoard.decrementMoveCounter();
 
-	mChessBoard.restoreState(entry.previousState);
+	mChessBoard.restoreState(previousState);
 
 	mChessBoard.updateOccupancies();
 
@@ -228,15 +226,13 @@ const MoveHistoryEntry *MoveExecution::getLastMove() const
 }
 
 
-PieceType MoveExecution::getLastCapturedPiece()
+PieceType MoveExecution::getLastCapturedPiece() const
 {
-	if (mHistory.size() == 0)
+	if (mHistory.empty())
 		return PieceType::None;
 
-	auto &lastState = mHistory.back();
-
-	if (lastState.move.isCapture())
-		return lastState.previousState.capturedPiece;
+	if (const auto &[move, previousState] = mHistory.back(); move.isCapture())
+		return previousState.capturedPiece;
 
 	return PieceType::None;
 }
@@ -244,18 +240,18 @@ PieceType MoveExecution::getLastCapturedPiece()
 
 bool MoveExecution::isRepeatedPosition(int count) const
 {
-	uint64_t currentHash = mChessBoard.getHash();
-	int		 occurrences = 1;
+	const uint64_t currentHash = mChessBoard.getHash();
+	int			   occurrences = 1;
 
-	for (auto it = mHistory.rbegin(); it != mHistory.rend(); ++it)
+	for (auto [move, previousState] : mHistory)
 	{
-		if (it->previousState.hash == currentHash)
+		if (previousState.hash == currentHash)
 			if (++occurrences >= count)
 				return true;
 
 		// Irreversible moves (captures / pawn move/ castling rights loss)
 		// mean no earlier position can ever repeat again -> stop early
-		if (it->previousState.capturedPiece != PieceType::None)
+		if (previousState.capturedPiece != PieceType::None)
 			break;
 	}
 

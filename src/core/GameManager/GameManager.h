@@ -7,19 +7,11 @@
 
 #pragma once
 
-#include <array>
-#include <memory>
-#include <string>
-#include <vector>
+#include "pch.h"
 
-#include "EngineSettings.h"
 #include "EventQueue.h"
 #include "GameController.h"
-#include "Logging.h"
-#include "MultiplayerManager.h"
-#include "Player.h"
 #include "StateMachine.h"
-#include "SystemInfo.h"
 
 
 class GameManager
@@ -34,7 +26,7 @@ public:
 	// Lifecycle
 	//=========================================================================
 
-	bool								 init(EngineSettings settings);
+	bool								 init();
 	void								 shutDown();
 	[[nodiscard]] bool					 isInitialized() const { return mInitialized; }
 
@@ -49,9 +41,9 @@ public:
 	// Game Control
 	//=========================================================================
 
-	void								 startGame(GameConfiguration config);
-	void								 resetGame();
-	void								 undoMove();
+	void								 startGame(GameConfiguration config) const;
+	void								 resetGame() const;
+	void								 undoMove() const;
 
 	//=========================================================================
 	// Input Events
@@ -62,11 +54,11 @@ public:
 	 *			both squares (console, tests, engine protocols).
 	 *			Leave @p promotion as None to be asked via a PromotionRequired event.
 	 */
-	void								 submitMove(Square from, Square to, PieceType promotion = PieceType::None);
+	void								 submitMove(Square from, Square to, PieceType promotion = PieceType::None) const;
 
 	/// Click-driven path: first call selects, second call targets.
-	void								 onSquareSelected(Square sq);
-	void								 onPromotionChosen(PieceType piece);
+	void								 onSquareSelected(Square sq) const;
+	void								 onPromotionChosen(PieceType piece) const;
 
 	//=========================================================================
 	// Board & Game State Queries
@@ -94,64 +86,20 @@ public:
 
 	const std::vector<PieceType>		&getCapturedPieces(Side player) const;
 
-	//=========================================================================
-	// Settings
-	//=========================================================================
-
-	const EngineSettings				&settings() const { return mSettings; }
-	void								 setLocalPlayerName(const std::string &name) { mSettings.playerName = name; }
-	void								 setDiscoveryPort(int port) { mSettings.discoveryPort = port; }
-
-	//=========================================================================
-	// Multiplayer
-	//=========================================================================
-
-	void								 startMultiplayer();
-	void								 stopMultiplayer();
-	bool								 isMultiplayerActive() const { return mIsMultiplayerMode; }
-
-	void								 findOpponent();
-	std::vector<std::string>			 getDiscoveredOpponents();
-	void								 connectToOpponent(int index);
-	void								 respondToConnectionRequest(bool accept);
-
-	void								 setLocalPlayerColor(Side localPlayer);
-	void								 setLocalPlayerReady(bool ready);
-
-	//=========================================================================
-	// Network Adapters
-	//=========================================================================
-
-	std::vector<netlink::NetworkAdapter> getNetworkAdapters();
-	bool								 changeCurrentNetworkAdapter(int ID);
-	int									 getCurrentNetworkAdapterID();
 
 
 private:
-	void								ensureMultiplayerManager();
-
 	//=========================================================================
 	// Core Components
 	//=========================================================================
 
-	EventQueue							mEvents;
-	std::unique_ptr<GameController>		mGameController;
-	std::unique_ptr<StateMachine>		mStateMachine;
-
-	//=========================================================================
-	// Infrastructure
-	//=========================================================================
-
-	Logging								mLog;
-	EngineSettings						mSettings;
-
-	/// Created on first use so hosts that never go online do not spin up NetLink.
-	std::unique_ptr<MultiplayerManager> mMultiplayerManager;
+	EventQueue						mEvents;
+	std::unique_ptr<GameController> mGameController;
+	std::unique_ptr<StateMachine>	mStateMachine;
 
 	//=========================================================================
 	// State
 	//=========================================================================
 
-	bool								mIsMultiplayerMode{false};
-	bool								mInitialized{false};
+	bool							mInitialized{false};
 };

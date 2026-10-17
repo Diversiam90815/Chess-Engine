@@ -7,6 +7,7 @@
 
 #include "ZobristHash.h"
 
+
 // Static member definitions
 bool									 ZobristHash::mInitialized = false;
 std::array<std::array<uint64_t, 64>, 12> ZobristHash::mPieceKeys{};

@@ -18,7 +18,7 @@ namespace EngineInstance
 {
 
 // Create and initialize the engine. Safe to call twice.
-void			Startup(EngineSettings settings);
+void			Startup();
 
 // Tear the engine down and drop the instance.
 void			Shutdown();

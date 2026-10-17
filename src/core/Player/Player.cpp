@@ -7,9 +7,10 @@
 
 
 #include "Player.h"
+#include "EngineLog.h"
 
 
-Player::Player(Side color) : mSide(color) {}
+Player::Player(const Side color) : mSide(color) {}
 
 
 Side Player::getPlayerColor() const
@@ -18,7 +19,7 @@ Side Player::getPlayerColor() const
 }
 
 
-void Player::setPlayerColor(Side value)
+void Player::setPlayerColor(const Side value)
 {
 	if (mSide != value)
 	{
@@ -32,7 +33,7 @@ void Player::addCapturedPiece(const PieceType piece)
 	mCapturedPieces.push_back(piece);
 
 	if (mEvents)
-		mEvents->push(engine::PieceCaptured{getPlayerColor(), piece, true});
+		mEvents->push(engine::PieceCaptured{.player = getPlayerColor(), .piece = piece, .captured = true});
 }
 
 
@@ -46,11 +47,11 @@ void Player::removeLastCapturedPiece()
 	}
 
 	// Retrieve and remove the last captured piece
-	PieceType lastCapture = mCapturedPieces.back();
+	const PieceType lastCapture = mCapturedPieces.back();
 	mCapturedPieces.pop_back();
 
 	if (mEvents)
-		mEvents->push(engine::PieceCaptured{getPlayerColor(), lastCapture, false});
+		mEvents->push(engine::PieceCaptured{.player = getPlayerColor(), .piece = lastCapture, .captured = false});
 }
 
 

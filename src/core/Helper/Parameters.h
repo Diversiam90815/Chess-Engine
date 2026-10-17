@@ -7,10 +7,6 @@
 
 #pragma once
 
-#include <array>
-
-#include "BitboardTypes.h"
-
 
 // <summary>
 // Represents the possible end states of a chess game.
@@ -35,20 +31,44 @@ enum class CPUDifficulty
 	Hard   = 3
 };
 
+constexpr auto cpuDifficultyToString(const CPUDifficulty diff)
+{
+	switch (diff)
+	{
+	case CPUDifficulty::Easy: return "Easy";
+	case CPUDifficulty::Medium: return "Medium";
+	case CPUDifficulty::Hard: return "Hard";
+	default: return "Unknown Difficulty";
+	}
+}
+
 
 // <summary>
 // Represents the various states of a game used in the StateMachine.
 // </summary>
 enum class GameState
 {
-	Init				 = 1,
-	WaitingForInput		 = 2,
-	WaitingForTarget	 = 3,
-	PawnPromotion		 = 4,
-	WaitingForRemoteMove = 5,
-	WaitingForCPUMove	 = 6,
-	GameOver			 = 7,
+	Init			  = 1,
+	WaitingForInput	  = 2,
+	WaitingForTarget  = 3,
+	PawnPromotion	  = 4,
+	WaitingForCPUMove = 6,
+	GameOver		  = 7,
 };
+
+constexpr auto gameStateToString(const GameState state)
+{
+	switch (state)
+	{
+	case GameState::Init: return "Init";
+	case GameState::WaitingForInput: return "Waiting For Input";
+	case GameState::WaitingForTarget: return "Waiting For Target";
+	case GameState::GameOver: return "Game Over";
+	case GameState::PawnPromotion: return "Pawn Promotion";
+	case GameState::WaitingForCPUMove: return "Waiting for CPU move";
+	default: return "Unknown GameState";
+	}
+}
 
 
 enum class DrawReason
@@ -59,9 +79,13 @@ enum class DrawReason
 	ThreefoldRepetition	 = 3,
 };
 
-
-namespace FileName
+constexpr auto drawReasonToString(const DrawReason reason)
 {
-constexpr auto LoggingFolder = "Logs";
-constexpr auto LogFile		 = "Chess.log";
-} // namespace FileName
+	switch (reason)
+	{
+	case DrawReason::FiftyMoveRule: return "Fifty-move rule";
+	case DrawReason::InsufficientMaterial: return "Insufficient material";
+	case DrawReason::ThreefoldRepetition: return "Threefold repetition";
+	default: return "None";
+	}
+}

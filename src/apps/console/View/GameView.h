@@ -23,33 +23,33 @@ public:
 	// Presentation Options
 	//=========================================================================
 
-	void		toggleOrientation() { mFlip = !mFlip; }
-	void		setUnicode(bool enabled) { mUnicode = enabled; }
+	void			   toggleOrientation() { mFlip = !mFlip; }
+	void			   setUnicode(const bool enabled) { mUnicode = enabled; }
 
 	//=========================================================================
 	// Rendering
 	//=========================================================================
 
-	void		printBanner() const;
-	void		printBoard() const;
-	void		printStatus() const;
-	void		printLegalMoves(Square from) const;
-	void		printAllLegalMoves() const;
-	void		printHelp() const;
+	static void		   printBanner();
+	void			   printBoard() const;
+	void			   printStatus() const;
+	void			   printLegalMoves(Square from) const;
+	void			   printAllLegalMoves() const;
+	static void		   printHelp();
 
 	// @param sanLog Notation collected from MoveExecuted events, oldest first.
-	void		printHistory(const std::vector<std::string> &sanLog) const;
+	static void		   printHistory(const std::vector<std::string> &sanLog);
 
 	//=========================================================================
 	// Event Reporting
 	//=========================================================================
 
-	void		printMovePlayed(const engine::MoveExecuted &event, Side mover) const;
-	void		printCapture(const engine::PieceCaptured &event) const;
-	void		printGameEnded(const engine::GameEnded &event) const;
+	static void		   printMovePlayed(const engine::MoveExecuted &event, Side mover);
+	static void		   printCapture(const engine::PieceCaptured &event);
+	static void		   printGameEnded(const engine::GameEnded &event);
 
-	void		printMessage(const std::string &text) const;
-	void		printError(const std::string &text) const;
+	static void		   printMessage(const std::string &text);
+	static void		   printError(const std::string &text);
 
 	//=========================================================================
 	// Helpers

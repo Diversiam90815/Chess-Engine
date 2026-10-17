@@ -23,7 +23,7 @@ namespace
  * @brief	Prompt until the player picks one of @p optionCount numbered choices.
  * @return	The 1-based choice, or nullopt on end of input.
  */
-std::optional<int> askChoice(const char *prompt, int optionCount)
+std::optional<int> askChoice(const char *prompt, const int optionCount)
 {
 	std::string line;
 
@@ -91,7 +91,7 @@ std::optional<GameConfiguration> run()
 	if (!colour)
 		return std::nullopt;
 
-	Side playerSide = Side::White;
+	auto playerSide = Side::White;
 
 	if (*colour == 2)
 		playerSide = Side::Black;
@@ -108,7 +108,7 @@ std::optional<GameConfiguration> run()
 	if (!strength)
 		return std::nullopt;
 
-	const CPUDifficulty difficulty = static_cast<CPUDifficulty>(*strength);
+	const auto difficulty = static_cast<CPUDifficulty>(*strength);
 
 	printf("\n  You play %s against the computer.\n", playerSide == Side::White ? "White" : "Black");
 

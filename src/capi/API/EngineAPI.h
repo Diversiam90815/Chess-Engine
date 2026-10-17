@@ -26,9 +26,20 @@ extern "C"
 	// Core Engine Lifecycle
 	//=========================================================================
 
-	Engine_API void	 Init(CUserSettingsInit settings);
+	Engine_API void	 Init();
 	Engine_API void	 Deinit();
 	Engine_API void	 SetDelegate(PFN_CALLBACK pDelegate);
+
+
+	//=========================================================================
+	// Logging: the engine writes no log file, its lines go to the host
+	//=========================================================================
+
+	// Works before Init. Null stops the lines; it returns once no line is being passed to the previous callback.
+	Engine_API void	 SetLogCallback(PFN_LOG_CALLBACK callback, void *context);
+
+	// Lines below this level are dropped (see PFN_LOG_CALLBACK). Default: 2 (Info).
+	Engine_API void	 SetLogLevel(int level);
 
 
 	//=========================================================================
@@ -62,51 +73,6 @@ extern "C"
 	Engine_API int	 GetNumLegalMoves();
 	Engine_API bool	 GetLegalMoveAtIndex(int index, MoveInstance *move);
 	Engine_API int	 GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMoves);
-
-
-	//=========================================================================
-	// Multiplayer
-	//=========================================================================
-
-	Engine_API void	 StartMultiplayer();
-	Engine_API void	 StopMultiplayer();
-
-	Engine_API void	 FindOpponent();
-	Engine_API int	 GetDiscoveredOpponentCount();
-	Engine_API bool	 GetDiscoveredOpponentAtIndex(int index, char *name, int maxLen);
-	Engine_API void	 ConnectToOpponent(int index);
-	Engine_API void	 RespondToConnectionRequest(bool accept);
-
-	Engine_API void	 SetLocalPlayer(int iLocalPlayer);
-	Engine_API void	 SetLocalPlayerReady(bool ready);
-
-
-	//=========================================================================
-	// Logging
-	//=========================================================================
-
-	Engine_API void	 LogInfoWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogErrorWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogWarningWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-	Engine_API void	 LogDebugWithCaller(const char *message, const char *method, const char *className, const int lineNumber);
-
-
-	//=========================================================================
-	// Network Adapters
-	//=========================================================================
-
-	Engine_API int	 GetNetworkAdapterCount();
-	Engine_API bool	 GetNetworkAdapterAtIndex(unsigned int index, NetworkAdapterInstance *adapter);
-	Engine_API bool	 ChangeCurrentAdapter(int ID);
-	Engine_API int	 GetCurrentNetworkAdapterID();
-
-
-	//=========================================================================
-	// Settings
-	//=========================================================================
-
-	Engine_API void	 SetLocalPlayerName(const char *name);
-	Engine_API void	 SetDiscoveryPort(int port);
 
 
 #ifdef __cplusplus

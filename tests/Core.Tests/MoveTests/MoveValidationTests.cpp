@@ -53,7 +53,7 @@ TEST_F(MoveValidationTest, InitialSetupNotDraw)
 TEST_F(MoveValidationTest, ValidMoveIsLegal)
 {
 	// e2-e4 is a legal move
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 
 	EXPECT_TRUE(mValidation.isMoveLegal(move)) << "e2-e4 should be a legal move";
 }
@@ -223,7 +223,7 @@ TEST_F(MoveValidationTest, PinnedPieceCannotMoveOffPinLine)
 	mBoard.updateOccupancies();
 
 	// Illegal move that moves bishop off the pin line
-	Move illegalMove(Square::d2, Square::b4, MoveFlag::Quiet);
+	constexpr Move illegalMove(Square::d2, Square::b4, MoveFlag::Quiet);
 
 	EXPECT_FALSE(mValidation.isMoveLegal(illegalMove)) << "Pinned bishop should not be allowed to move off the pin line";
 }
@@ -243,7 +243,7 @@ TEST_F(MoveValidationTest, PinnedPieceCanMoveAlongPinLine)
 	mBoard.updateOccupancies();
 
 	// Legal move along the pin line
-	Move legalMove(Square::e4, Square::e5, MoveFlag::Quiet);
+	constexpr Move legalMove(Square::e4, Square::e5, MoveFlag::Quiet);
 
 	EXPECT_TRUE(mValidation.isMoveLegal(legalMove)) << "Pinned rook should be allowed to move along the pin line";
 }
@@ -261,10 +261,10 @@ TEST_F(MoveValidationTest, KingCannotMoveIntoCheck)
 	mBoard.updateOccupancies();
 
 	// Illegal: king moves to e2, still in check
-	Move illegalMove(Square::e1, Square::e2, MoveFlag::Quiet);
+	constexpr Move illegalMove(Square::e1, Square::e2, MoveFlag::Quiet);
 
 	// Legal: king moves to d1, escapes check
-	Move legalMove(Square::e1, Square::d1, MoveFlag::Quiet);
+	constexpr Move legalMove(Square::e1, Square::d1, MoveFlag::Quiet);
 
 	EXPECT_FALSE(mValidation.isMoveLegal(illegalMove)) << "King should not be allowed to move into check";
 	EXPECT_TRUE(mValidation.isMoveLegal(legalMove)) << "King should be allowed to escape check";
@@ -285,10 +285,10 @@ TEST_F(MoveValidationTest, MustBlockOrCaptureWhenInCheck)
 	mBoard.updateOccupancies();
 
 	// Legal: bishop blocks at e4
-	Move blockMove(Square::d3, Square::e4, MoveFlag::Quiet);
+	constexpr Move blockMove(Square::d3, Square::e4, MoveFlag::Quiet);
 
 	// Illegal: bishop moves somewhere that doesn't address the check
-	Move illegalMove(Square::d3, Square::c2, MoveFlag::Quiet);
+	constexpr Move illegalMove(Square::d3, Square::c2, MoveFlag::Quiet);
 
 	EXPECT_TRUE(mValidation.isMoveLegal(blockMove)) << "Bishop should be able to block the check";
 	EXPECT_FALSE(mValidation.isMoveLegal(illegalMove)) << "Must address check, cannot make unrelated move";
@@ -308,7 +308,7 @@ TEST_F(MoveValidationTest, CanCaptureCheckingPiece)
 	mBoard.updateOccupancies();
 
 	// Knight can capture the checking rook
-	Move captureMove(Square::d5, Square::e3, MoveFlag::Capture);
+	constexpr Move captureMove(Square::d5, Square::e3, MoveFlag::Capture);
 
 	EXPECT_TRUE(mValidation.isMoveLegal(captureMove)) << "Knight should be able to capture the checking rook";
 }
@@ -330,16 +330,16 @@ TEST_F(MoveValidationTest, GenerateLegalMovesFiltersIllegal)
 	mValidation.generateLegalMoves(legalMoves);
 
 	// All moves should be legal (escape check)
-	for (size_t i = 0; i < legalMoves.size(); ++i)
+	for (const auto legalMove : legalMoves)
 	{
-		EXPECT_TRUE(mValidation.isMoveLegal(legalMoves[i])) << "All generated moves should be legal";
+		EXPECT_TRUE(mValidation.isMoveLegal(legalMove)) << "All generated moves should be legal";
 	}
 
 	// Pawn move should not be in the list (doesn't address check)
 	bool hasPawnMove = false;
-	for (size_t i = 0; i < legalMoves.size(); ++i)
+	for (auto legalMove : legalMoves)
 	{
-		if (legalMoves[i].from() == Square::a2)
+		if (legalMove.from() == Square::a2)
 		{
 			hasPawnMove = true;
 			break;
@@ -352,7 +352,7 @@ TEST_F(MoveValidationTest, GenerateLegalMovesFiltersIllegal)
 
 TEST_F(MoveValidationTest, CountLegalMovesReturnsCorrectCount)
 {
-	size_t count = mValidation.countLegalMoves();
+	const size_t count = mValidation.countLegalMoves();
 
 	// Initial position has 20 legal moves
 	EXPECT_EQ(count, 20) << "Initial position should have 20 legal moves";
@@ -502,10 +502,10 @@ TEST_F(MoveValidationTest, NotYetFiftyMoveRuleIsNotDraw)
 TEST_F(MoveValidationTest, ThreefoldRepetitionTriggersDraw)
 {
 	// Use the initial position and shuffle knights back and forth to repeat the position 3 times
-	Move nf3(Square::g1, Square::f3, MoveFlag::Quiet);
-	Move nf6(Square::g8, Square::f6, MoveFlag::Quiet);
-	Move ng1(Square::f3, Square::g1, MoveFlag::Quiet);
-	Move ng8(Square::f6, Square::g8, MoveFlag::Quiet);
+	constexpr Move nf3(Square::g1, Square::f3, MoveFlag::Quiet);
+	constexpr Move nf6(Square::g8, Square::f6, MoveFlag::Quiet);
+	constexpr Move ng1(Square::f3, Square::g1, MoveFlag::Quiet);
+	constexpr Move ng8(Square::f6, Square::g8, MoveFlag::Quiet);
 
 	// Position after init() is occurrence #1.
 	ASSERT_TRUE(mExecution.makeMove(nf3));
@@ -528,18 +528,18 @@ TEST_F(MoveValidationTest, RepetitionCounterResetsAfterIrreversibleMove)
 {
 	// Repeat a position twice, then make a capture/pawn-move to reset the clock,
 	// then repeat again - should NOT count towards the earlier repetitions.
-	Move nf3(Square::g1, Square::f3, MoveFlag::Quiet);
-	Move nf6(Square::g8, Square::f6, MoveFlag::Quiet);
-	Move ng1(Square::f3, Square::g1, MoveFlag::Quiet);
-	Move ng8(Square::f6, Square::g8, MoveFlag::Quiet);
+	constexpr Move nf3(Square::g1, Square::f3, MoveFlag::Quiet);
+	constexpr Move nf6(Square::g8, Square::f6, MoveFlag::Quiet);
+	constexpr Move ng1(Square::f3, Square::g1, MoveFlag::Quiet);
+	constexpr Move ng8(Square::f6, Square::g8, MoveFlag::Quiet);
 
 	ASSERT_TRUE(mExecution.makeMove(nf3));
 	ASSERT_TRUE(mExecution.makeMove(nf6));
 	ASSERT_TRUE(mExecution.makeMove(ng1));
 	ASSERT_TRUE(mExecution.makeMove(ng8)); // occurrence #2 of initial position
 
-	// Irreversible move: pawn push resets halfmove clock
-	Move e4(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+										   // Irreversible move: pawn push resets halfmove clock
+	constexpr Move e4(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	ASSERT_TRUE(mExecution.makeMove(e4));
 
 	EXPECT_FALSE(mValidation.isDraw()) << "Repetition count should not persist across an irreversible move";

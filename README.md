@@ -8,7 +8,7 @@
 
 ## Overview
 
-A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multiplayer. The board state is encoded entirely in 64-bit integers for fast move generation. The core is pure C++ and knows nothing about its hosts: it publishes an ordered stream of engine events that a host drains on its own thread. Two hosts ship in this repo: a plain C API (DLL) for non-C++ runtimes, and a console app you can play in the terminal. All built through a unified Python-driven CMake build system.
+A bitboard-based chess engine written in C++20 with a CPU opponent. The board state is encoded entirely in 64-bit integers for fast move generation. The core is pure C++ and knows nothing about its hosts: it publishes an ordered stream of engine events that a host drains on its own thread. Two hosts ship in this repo: a plain C API (DLL) for non-C++ runtimes, and a console app you can play in the terminal. All built through a unified Python-driven CMake build system.
 
 
 ## Features
@@ -16,7 +16,7 @@ A bitboard-based chess engine written in C++20 with a CPU opponent and LAN multi
 - **Bitboard Representation**: The board state is encoded entirely in 64-bit integers. Pre-computed attack tables and Zobrist hashing power efficient move generation, legal-move validation, and transposition-table lookups.
 - **CPU Opponent**: Single-player mode against the AI at multiple difficulty levels. Transposition tables are used to avoid redundant evaluation.
 - **Adjustable Sides**: Choose whether to play as White or Black when starting a game against the CPU.
-- **LAN Multiplayer**: Both players discover each other automatically on the local network. On machines with multiple network interfaces, a specific adapter can be selected for a stable connection.
+- **Source-Agnostic Input**: The engine does not care where a move comes from. A click in a UI, a line typed in the console or a move received over the network reach it through the same calls (`SubmitMove()` in the C API) and are checked against the legal moves. Networked games are the host's job.
 - **Plain C API (DLL)**: The entire engine is accessible through a plain C API exported as a DLL, making it straightforward to drive from C#, Python, or any runtime with C FFI support.
 - **Console App**: Play a full game in the terminal (local co-op or against the CPU) with legal-move listing, undo, move history and board flipping.
 
@@ -53,7 +53,6 @@ The [Perft app](src/apps/perft) is a third, developer-only front end used for pe
 | Category | Technology |
 |---|---|
 | Language | C++20 |
-| Networking | [NetLink v0.2.0](https://github.com/Diversiam90815/NetLink) |
 | Build System | CMake 4.0+, Python 3.x |
 | Dependency Management | [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) |
 | Testing | GoogleTest 1.15.2 + CTest |
@@ -83,13 +82,12 @@ Chess-Engine/
 
 ## Prerequisites
 
-Chess Engine builds on **Windows, Linux, and macOS**. Providing a default local player name and an log file path is entirely the host application's responsibility (it fills in `EngineSettings`, or `Init()`/`SetLocalPlayerName()` in the C API); the engine itself doesn't look either up.
+Chess Engine builds on **Windows, Linux, and macOS**.
 
 - **C++ Compiler**: C++20 or higher (MSVC on Windows, GCC or Clang on Linux/macOS)
 - **CMake**: Version 4.0 or higher
 - **Git**: Required — the build system derives the build number from commit history
 - **Python**: 3.x (for `build.py`)
-- **Linux only**: `libnl-genl-3-dev` / `libnl-3-dev` (NetLink's Linux WiFi backend dependency)
 
 ### Optional Developer Tools
 
@@ -168,7 +166,7 @@ python build.py --docs
 | Console application | `build/<arch>/src/apps/console/` |
 | Perft application | `build/<arch>/src/apps/perft/` |
 | Test executable | `build/<arch>/tests/` |
-| Installed headers / libs | `install/` |
+| Installed C API (`bin/`, `include/ChessEngine/`) | `install/` |
 | Doxygen HTML docs | `build/doxygen/html/index.html` |
 
 ### Playing in the Console
@@ -241,8 +239,7 @@ All dependencies are managed by CPM.cmake and downloaded automatically at config
 
 | Dependency | Version | Purpose |
 |---|---|---|
-| Logger | 2.0.86 | Logging infrastructure |
-| NetLink | 0.2.0 | Peer discovery, TCP/UDP networking (bundles ASIO and nlohmann_json) |
+| Logger | 2.0.86 | Log file of the console app |
 | GoogleTest | 1.15.2 | Unit testing |
 | doxygen-awesome-css | 2.3.1 | Documentation theme |
 

@@ -59,9 +59,9 @@ void CallbackBridge::drain()
 void CallbackBridge::dispatch(const engine::EngineEvent &event)
 {
 	std::visit(
-		[this](const auto &e)
+		[this]<typename T0>(const T0 &e)
 		{
-			using T = std::decay_t<decltype(e)>;
+			using T = std::decay_t<T0>;
 
 			if constexpr (std::is_same_v<T, engine::GameStateChanged>)
 			{
@@ -111,23 +111,6 @@ void CallbackBridge::dispatch(const engine::EngineEvent &event)
 				payload.captured	= e.captured;
 				sendToHost(MessageType::PlayerCapturedPiece, &payload);
 			}
-			else if constexpr (std::is_same_v<T, engine::OpponentDiscovered>)
-			{
-				CConnectionEvent payload{};
-				payload.state = static_cast<int>(MultiplayerState::OpponentFound);
-				CopyStringToBuffer(payload.remoteName, MAX_STRING_LENGTH, e.name);
-				sendToHost(MessageType::OpponentDiscovered, &payload);
-			}
-			else if constexpr (std::is_same_v<T, engine::ConnectionChanged>)
-			{
-				CConnectionEvent payload = ToCConnectionEvent(e);
-				sendToHost(MessageType::ConnectionStateChanged, &payload);
-			}
-			else if constexpr (std::is_same_v<T, engine::RemotePlayerChosen>)
-			{
-				Side side = e.side;
-				sendToHost(MessageType::MultiplayerPlayerChosen, &side);
-			}
 		},
 		event);
 }
@@ -145,7 +128,7 @@ bool CallbackBridge::sendToHost(MessageType type, void *message) const
 }
 
 
-UIGamePhase CallbackBridge::mapToUIPhase(GameState state)
+UIGamePhase CallbackBridge::mapToUIPhase(const GameState state)
 {
 	switch (state)
 	{
@@ -154,7 +137,6 @@ UIGamePhase CallbackBridge::mapToUIPhase(GameState state)
 	case GameState::WaitingForInput:
 	case GameState::WaitingForTarget: return UIGamePhase::PlayerTurn;
 
-	case GameState::WaitingForRemoteMove:
 	case GameState::WaitingForCPUMove: return UIGamePhase::OpponentTurn;
 
 	case GameState::PawnPromotion: return UIGamePhase::PromotionDialog;

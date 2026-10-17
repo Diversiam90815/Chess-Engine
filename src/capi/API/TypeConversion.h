@@ -9,8 +9,6 @@
 
 #include <string>
 
-#include "EngineEvent.h"
-#include "EngineSettings.h"
 #include "EngineTypes.h"
 #include "GameConfiguration.h"
 
@@ -20,9 +18,3 @@ void			  CopyStringToBuffer(char *dest, size_t destSize, const std::string &src)
 
 // Flat C game configuration -> the core's tagged GameConfiguration.
 GameConfiguration ToGameConfiguration(const CGameConfiguration &config);
-
-// Host startup payload -> the core's EngineSettings.
-EngineSettings	  ToEngineSettings(const CUserSettingsInit &settings);
-
-// Core connection event -> its flat C mirror.
-CConnectionEvent  ToCConnectionEvent(const engine::ConnectionChanged &event);

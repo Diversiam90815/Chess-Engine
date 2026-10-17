@@ -21,48 +21,47 @@
 class IGameController
 {
 public:
-	virtual ~IGameController()																						= default;
+	virtual ~IGameController()																	 = default;
 
 	//=========================================================================
 	// Game Lifecycle
 	//=========================================================================
 
-	virtual bool					  initializeGame(GameConfiguration config)										= 0;
-	virtual void					  resetGame()																	= 0;
+	virtual bool					 initializeGame(GameConfiguration config)					 = 0;
+	virtual void					 resetGame()												 = 0;
 
 	//=========================================================================
 	// Move Operations
 	//=========================================================================
 
-	virtual void					  getLegalMovesFromSquare(Square sq, MoveList &moves)							= 0;
-	virtual MoveExecutionResult		  executeMove(Move move)														= 0;
-	virtual bool					  undoLastMove()																= 0;
+	virtual void					 getLegalMovesFromSquare(Square sq, MoveList &moves)		 = 0;
+	virtual MoveExecutionResult		 executeMove(Move move)										 = 0;
+	virtual bool					 undoLastMove()												 = 0;
 
 	//=========================================================================
 	// Queries
 	//=========================================================================
 
-	virtual bool					  isPromotionMove(Square from, Square to) const									= 0;
-	virtual Move					  findMove(Square from, Square to, PieceType promotion = PieceType::None) const = 0;
-	virtual EndGameState			  checkEndGame()																= 0;
-	virtual DrawReason				  getDrawReason() const															= 0;
+	[[nodiscard]] virtual bool		 isPromotionMove(Square from, Square to) const				 = 0;
+	[[nodiscard]] virtual Move		 findMove(Square from, Square to, PieceType promotion) const = 0;
+	virtual EndGameState			 checkEndGame()												 = 0;
+	[[nodiscard]] virtual DrawReason getDrawReason() const										 = 0;
 
 	//=========================================================================
 	// Turn Management
 	//=========================================================================
 
-	virtual Side					  getCurrentSide() const														= 0;
-	virtual bool					  isLocalPlayerTurn() const														= 0;
-	virtual void					  switchTurns()																	= 0;
+	virtual Side					 getCurrentSide() const										 = 0;
+	virtual void					 switchTurns()												 = 0;
 
 	//=========================================================================
 	// CPU
 	//=========================================================================
 
-	virtual bool					  isCPUTurn() const																= 0;
-	virtual void					  requestCPUMoveAsync()															= 0;
+	virtual bool					 isCPUTurn() const											 = 0;
+	virtual void					 requestCPUMoveAsync()										 = 0;
 
-	//=====================================================================
+	//====================================================================
 	// Game Clock
 	//=====================================================================
 

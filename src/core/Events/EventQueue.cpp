@@ -47,7 +47,7 @@ bool EventQueue::poll(engine::EngineEvent &out)
 }
 
 
-bool EventQueue::waitAndPop(engine::EngineEvent &out, std::chrono::milliseconds timeout)
+bool EventQueue::waitAndPop(engine::EngineEvent &out, const std::chrono::milliseconds timeout)
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 

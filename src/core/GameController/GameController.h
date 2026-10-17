@@ -5,7 +5,7 @@
   ==============================================================================
 */
 
-#include <memory>
+#pragma once
 
 #include "IGameController.h"
 #include "GameEngine.h"
@@ -55,7 +55,6 @@ public:
 	//=========================================================================
 
 	Side								 getCurrentSide() const override;
-	bool								 isLocalPlayerTurn() const override;
 	void								 switchTurns() override;
 	void								 changeCurrentPlayer(Side player);
 
@@ -80,7 +79,7 @@ public:
 	// Every legal move in the current position.
 	const MoveList						&getAllLegalMoves() const;
 
-	std::string							 getMoveNotation(Move move) const { return mEngine.getMoveNotation(move); }
+	std::string							 getMoveNotation(const Move move) const { return mEngine.getMoveNotation(move); }
 
 	Player								&getWhitePlayer() { return mWhitePlayer; }
 	Player								&getBlackPlayer() { return mBlackPlayer; }
@@ -115,15 +114,14 @@ private:
 
 	GameEngine				  mEngine;
 	CPUPlayer				  mCPUPlayer;
-	Side					  mLocalPlayer{Side::White};
 	GameClock				  mClock;
 
 	// Every legal move in the current position (backs findMove / isPromotionMove).
 	mutable MoveList		  mCachedLegalMoves;
 	mutable bool			  mCacheValid{false};
 
-	// Legal moves of the last square the user selected
-	// Legal moves of the last square the user selected
+	// Legal moves of the last square the user selected. Kept apart from the
+	// position cache so a selection query cannot narrow what findMove searches.
 	MoveList				  mSelectionMoves;
 
 	// Players
@@ -133,6 +131,6 @@ private:
 
 	std::function<void(Move)> mOnCPUMove;
 
-	void					  invalidateCache() { mCacheValid = false; }
+	void					  invalidateCache() const { mCacheValid = false; }
 	void					  ensureCacheValid() const;
 };

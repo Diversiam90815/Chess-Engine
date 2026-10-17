@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <assert.h>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 #include "Parameters.h"
@@ -28,13 +28,6 @@ struct SinglePlayerConfig
 };
 
 
-// Configuration of networked multiplayer mode.
-struct MultiplayerConfig
-{
-	Side localPlayerColor;
-};
-
-
 //=============================================================================
 // Unified Configuration
 //=============================================================================
@@ -44,7 +37,6 @@ enum class GameModeSelection
 	None		 = 0,
 	LocalCoop	 = 1,
 	SinglePlayer = 2,
-	Multiplayer	 = 3
 };
 
 
@@ -58,8 +50,6 @@ struct GameConfiguration
 		LocalCoopConfig	   localCoop;
 		// cppcheck-suppress uninitMemberVarNoCtor
 		SinglePlayerConfig singlePlayer;
-		// cppcheck-suppress uninitMemberVarNoCtor
-		MultiplayerConfig  multiPlayer;
 	};
 
 
@@ -75,7 +65,7 @@ struct GameConfiguration
 		return config;
 	}
 
-	static GameConfiguration createSinglePlayer(Side humanColor, CPUDifficulty difficulty)
+	static GameConfiguration createSinglePlayer(const Side humanColor, const CPUDifficulty difficulty)
 	{
 		GameConfiguration config{};
 		config.mode							 = GameModeSelection::SinglePlayer;
@@ -84,28 +74,14 @@ struct GameConfiguration
 		return config;
 	}
 
-	static GameConfiguration createMultiplayer(Side localColor)
-	{
-		GameConfiguration config{};
-		config.mode							= GameModeSelection::Multiplayer;
-		config.multiPlayer.localPlayerColor = localColor;
-		return config;
-	}
-
 
 	//=========================================================================
 	// Accessors
 	//=========================================================================
 
-	const SinglePlayerConfig &getSinglePlayer() const
+	[[nodiscard]] const SinglePlayerConfig &getSinglePlayer() const
 	{
 		assert(mode == GameModeSelection::SinglePlayer);
 		return singlePlayer;
-	}
-
-	const MultiplayerConfig &getMultiplayer() const
-	{
-		assert(mode == GameModeSelection::Multiplayer);
-		return multiPlayer;
 	}
 };

@@ -21,7 +21,7 @@ namespace
 
 std::string toLower(std::string text)
 {
-	std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	std::ranges::transform(text, text.begin(), [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
 	return text;
 }
 
@@ -61,8 +61,8 @@ Command parseMove(const std::vector<std::string> &tokens)
 	// Coordinate notation: "e2e4", "e7e8q".
 	if (joined.size() >= 4 && joined.size() <= 5)
 	{
-		auto from = parseSquare(joined.substr(0, 2));
-		auto to	  = parseSquare(joined.substr(2, 2));
+		const auto from = parseSquare(joined.substr(0, 2));
+		const auto to	= parseSquare(joined.substr(2, 2));
 
 		if (from && to)
 		{
@@ -118,7 +118,7 @@ std::optional<Square> parseSquare(const std::string &text)
 }
 
 
-std::optional<PieceType> parsePromotion(char c)
+std::optional<PieceType> parsePromotion(const char c)
 {
 	switch (std::tolower(static_cast<unsigned char>(c)))
 	{
@@ -141,25 +141,25 @@ Command parse(const std::string &line)
 	const std::string keyword = toLower(tokens[0]);
 
 	if (keyword == "quit" || keyword == "exit" || keyword == "q")
-		return Command{CommandType::Quit};
+		return Command{.type = CommandType::Quit};
 
 	if (keyword == "help" || keyword == "?")
-		return Command{CommandType::Help};
+		return Command{.type = CommandType::Help};
 
 	if (keyword == "board" || keyword == "b")
-		return Command{CommandType::ShowBoard};
+		return Command{.type = CommandType::ShowBoard};
 
 	if (keyword == "undo" || keyword == "u")
-		return Command{CommandType::Undo};
+		return Command{.type = CommandType::Undo};
 
 	if (keyword == "new")
-		return Command{CommandType::NewGame};
+		return Command{.type = CommandType::NewGame};
 
 	if (keyword == "history" || keyword == "h")
-		return Command{CommandType::History};
+		return Command{.type = CommandType::History};
 
 	if (keyword == "flip")
-		return Command{CommandType::Flip};
+		return Command{.type = CommandType::Flip};
 
 	if (keyword == "moves" || keyword == "m")
 	{
@@ -168,7 +168,7 @@ Command parse(const std::string &line)
 
 		if (tokens.size() > 1)
 		{
-			auto square = parseSquare(toLower(tokens[1]));
+			const auto square = parseSquare(toLower(tokens[1]));
 
 			if (!square)
 				return invalid("'" + tokens[1] + "' is not a square.");

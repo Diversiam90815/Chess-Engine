@@ -11,11 +11,9 @@ set (ATTACKTABLES_DIR				${SOURCE_DIR}/AttackTables)
 set (PLAYER_DIR						${SOURCE_DIR}/Player)
 set (HELPER_DIR						${SOURCE_DIR}/Helper)
 set (LOGGER_DIR						${SOURCE_DIR}/Logger)
-set (SETTINGS_DIR					${SOURCE_DIR}/Settings)
 set (EVENTS_DIR						${SOURCE_DIR}/Events)
 set (STATEMACHINE_DIR				${SOURCE_DIR}/StateMachine)
 set (EVALUATION_DIR					${SOURCE_DIR}/Evaluation)
-set (MULTIPLAYER_DIR				${SOURCE_DIR}/Multiplayer)
 set (CLOCK_DIR						${SOURCE_DIR}/Clock)
 
 
@@ -30,11 +28,9 @@ set(ALL_PROJECT_DIRS
 			${PLAYER_DIR}
 			${HELPER_DIR}
 			${LOGGER_DIR}
-			${SETTINGS_DIR}
 			${EVENTS_DIR}
 			${STATEMACHINE_DIR}
 			${EVALUATION_DIR}
-			${MULTIPLAYER_DIR}
 			${CLOCK_DIR}
 )
 
@@ -92,12 +88,10 @@ set(HELPER_FILES
 )
 
 set(LOGGER_FILES
-	${LOGGER_DIR}/Logging.h             ${LOGGER_DIR}/Logging.cpp
+	${LOGGER_DIR}/LogSink.h             ${LOGGER_DIR}/LogSink.cpp
+	${LOGGER_DIR}/EngineLog.h
 )
 
-set(SETTINGS_FILES
-	${SETTINGS_DIR}/EngineSettings.h
-)
 
 set(EVENTS_FILES
 	${EVENTS_DIR}/EngineEvent.h
@@ -108,10 +102,7 @@ set(EVALUATION_FILES
 	${EVALUATION_DIR}/Evaluation.h  	${EVALUATION_DIR}/Evaluation.cpp
 )
 
-set(MULTIPLAYER_FILES
-	${MULTIPLAYER_DIR}/MultiplayerTypes.h
-	${MULTIPLAYER_DIR}/MultiplayerManager.h		${MULTIPLAYER_DIR}/MultiplayerManager.cpp
-)
+set(PCH_FILE						${SOURCE_DIR}/pch.h)
 
 set(CLOCK_FILES
 	${CLOCK_DIR}/TimeControl.h
@@ -121,6 +112,7 @@ set(CLOCK_FILES
 )
 
 set(ALL_FILES
+	${PCH_FILE}
 	${GAMEENGINE_FILES}
 	${GAMECONTROLLER_FILES}
 	${BOARD_FILES}
@@ -130,27 +122,10 @@ set(ALL_FILES
 	${PLAYER_FILES}
 	${HELPER_FILES}
 	${LOGGER_FILES}
-	${SETTINGS_FILES}
 	${EVENTS_FILES}
 	${STATEMACHINE_FILES}
 	${EVALUATION_FILES}
-	${MULTIPLAYER_FILES}
 	${CLOCK_FILES}
-)
-
-include(cpm)
-
-CPMAddPackage(
-  NAME Logger
-  GITHUB_REPOSITORY Diversiam90815/Logger
-  VERSION 2.0.86
-  GIT_TAG v2.0.86
-)
-
-CPMAddPackage(
-  NAME NetLink
-  GITHUB_REPOSITORY Diversiam90815/NetLink
-  GIT_TAG v0.2.0
 )
 
 add_library(${TARGET_NAME} STATIC ${ALL_FILES})
@@ -159,6 +134,8 @@ include(BuildInfo)
 BuildInfo(${TARGET_NAME})
 
 source_group(TREE ${SOURCE_DIR} FILES ${ALL_FILES})
+
+target_precompile_headers(${TARGET_NAME} PRIVATE ${PCH_FILE})
 
 if(ENABLE_CPPCHECK)
 	AddCppCheck(${TARGET_NAME})
@@ -206,14 +183,7 @@ endif()
 set(Include_Dirs 
 		${PROJECT_BINARY_DIR}
 		${ALL_PROJECT_DIRS}
-		${LOGGER_INCLUDE_FILE}
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC ${Include_Dirs})
 
-set(TARGET_LIBS		Logger
-					nlohmann_json::nlohmann_json
-					NetLink
-)
-
-target_link_libraries(${TARGET_NAME} PUBLIC ${TARGET_LIBS})

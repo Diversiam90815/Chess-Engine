@@ -17,7 +17,7 @@
 namespace MovePrinter
 {
 
-void printAttackedSquares(MoveGeneration &gen, Side side);
+void printAttackedSquares(const MoveGeneration &gen, Side side);
 void printMoveList(const MoveList &moves);
 
 /**

@@ -6,6 +6,7 @@
 */
 
 #include "GameEngine.h"
+#include "EngineLog.h"
 
 
 GameEngine::GameEngine() : mMoveGeneration(mChessBoard), mMoveExecution(mChessBoard), mMoveValidation(mChessBoard, mMoveGeneration, mMoveExecution) {}
@@ -94,19 +95,19 @@ bool GameEngine::undoMoveUnchecked()
 }
 
 
-void GameEngine::generateLegalMoves(MoveList &moves)
+void GameEngine::generateLegalMoves(MoveList &moves)const
 {
 	mMoveValidation.generateLegalMoves(moves);
 }
 
 
-bool GameEngine::isMoveLegal(const Move move)
+bool GameEngine::isMoveLegal(const Move move)const
 {
 	return mMoveValidation.isMoveLegal(move);
 }
 
 
-void GameEngine::getMovesFromSquare(const Square from, MoveList &moves)
+void GameEngine::getMovesFromSquare(const Square from, MoveList &moves) const
 {
 	MoveList allMoves;
 	generateLegalMoves(allMoves);
@@ -130,13 +131,13 @@ bool GameEngine::isInCheck() const
 }
 
 
-bool GameEngine::isCheckmate()
+bool GameEngine::isCheckmate()const
 {
 	return mMoveValidation.isCheckmate();
 }
 
 
-bool GameEngine::isStalemate()
+bool GameEngine::isStalemate()const
 {
 	return mMoveValidation.isStalemate();
 }

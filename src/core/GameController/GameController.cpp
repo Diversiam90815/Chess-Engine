@@ -6,6 +6,7 @@
 */
 
 #include "GameController.h"
+#include "EngineLog.h"
 
 
 GameController::GameController() : mCPUPlayer(mEngine) {}

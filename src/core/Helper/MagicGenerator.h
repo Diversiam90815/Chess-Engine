@@ -13,8 +13,8 @@
 #include "AttackTables.h"
 #include "BitboardUtils.h"
 
-
-#define CHESS_DEV_TOOLS
+// Enable to build the magic number search tool (development only)
+// #define CHESS_DEV_TOOLS
 
 
 #ifdef CHESS_DEV_TOOLS
@@ -62,8 +62,6 @@ static inline U64 generateMagicNumbers()
 
 static inline U64 findMagicNumber(const int square, const int relevantBits, const int bishop)
 {
-	// AttackTables attackTables;
-
 	// init occupancies
 	U64		  occupancies[4096];
 
@@ -109,7 +107,7 @@ static inline U64 findMagicNumber(const int square, const int relevantBits, cons
 		for (index = 0, fail = 0; !fail && index < occupancy_indices; index++)
 		{
 			// init magic index
-			int magicIndex = static_cast<int>((occupancies[index] * magicNumber) >> (64 - relevantBits));
+			const int magicIndex = static_cast<int>((occupancies[index] * magicNumber) >> (64 - relevantBits));
 
 			// if magic index works
 			if (usedAttacks[magicIndex] == 0ULL)
@@ -129,7 +127,7 @@ static inline U64 findMagicNumber(const int square, const int relevantBits, cons
 	}
 
 	// if magic number doesn't work
-	printf("  Magic number fails!\n");
+	std::printf("  Magic number fails!\n");
 	return 0ULL;
 }
 

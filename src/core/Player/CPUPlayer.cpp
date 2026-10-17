@@ -7,6 +7,7 @@
 
 #include "CPUPlayer.h"
 #include "Evaluation.h"
+#include "EngineLog.h"
 
 
 constexpr int INF				   = std::numeric_limits<int>::max();
@@ -115,9 +116,7 @@ Move CPUPlayer::searchAlphaBeta(const MoveList &moves, const int depth, const st
 	lookupTransposition(hash, 0, NEG_INF, INF, ttScoreUnused, ttMove);
 
 	// Copy and order moves
-	MoveList orderedMoves;
-	for (const auto move : moves)
-		orderedMoves.push(move);
+	MoveList orderedMoves = moves;
 
 	mMoveEvaluation.orderMoves(orderedMoves, mSearchEngine.getBoard(), ttMove, 0);
 
@@ -281,7 +280,7 @@ Move CPUPlayer::selectBestMove(std::vector<ScoredMove> &scoredMoves)
 	if (scoredMoves.empty())
 		return {};
 
-	const auto best = std::max_element(scoredMoves.begin(), scoredMoves.end());
+	const auto best = std::ranges::max_element(scoredMoves, {}, &ScoredMove::score);
 
 	return best->move;
 }
@@ -293,7 +292,7 @@ Move CPUPlayer::selectWithRandomization(std::vector<ScoredMove> &scoredMoves)
 		return {};
 
 	// sort descending by score
-	std::sort(scoredMoves.begin(), scoredMoves.end());
+	std::ranges::sort(scoredMoves, std::greater{}, &ScoredMove::score);
 
 	const auto topMoves = filterTopCandidates(scoredMoves, 5);
 

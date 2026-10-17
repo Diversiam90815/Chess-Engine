@@ -52,19 +52,19 @@ public:
 	// Move Generation & Validation
 	//=========================================================================
 
-	void											   generateLegalMoves(MoveList &moves);
+	void											   generateLegalMoves(MoveList &moves)const;
 
-	bool											   isMoveLegal(Move move);
+	[[nodiscard]] bool											   isMoveLegal(Move move)const;
 
-	void											   getMovesFromSquare(Square from, MoveList &moves);
+	void getMovesFromSquare(Square from, MoveList&moves)const;
 
 	//=========================================================================
 	//	Game State Queries
 	//=========================================================================
 
 	[[nodiscard]] bool								   isInCheck() const;
-	bool											   isCheckmate();
-	bool											   isStalemate();
+	[[nodiscard]] bool											   isCheckmate()const;
+	[[nodiscard]] bool											   isStalemate()const;
 	[[nodiscard]] bool								   isDraw() const;
 	[[nodiscard]] DrawReason						   getDrawReason() const;
 	EndGameState									   checkForEndGameConditions();
@@ -79,7 +79,7 @@ public:
 	//	CPU Player
 	//=========================================================================
 
-	uint64_t										   getHash() const;
+	[[nodiscard]] uint64_t										   getHash() const;
 
 	//=========================================================================
 	//	Accessors

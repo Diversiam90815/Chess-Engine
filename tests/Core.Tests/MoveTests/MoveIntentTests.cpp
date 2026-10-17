@@ -20,7 +20,7 @@ class MoveIntentTests : public ::testing::Test
 
 TEST_F(MoveIntentTests, DefaultConstruction)
 {
-	MoveIntent intent;
+	const MoveIntent intent;
 
 	EXPECT_EQ(intent.fromSquare, Square::None) << "Default from should be None";
 	EXPECT_EQ(intent.toSquare, Square::None) << "Default to should be None";

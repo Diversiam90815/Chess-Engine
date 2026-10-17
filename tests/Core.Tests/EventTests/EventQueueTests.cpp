@@ -58,7 +58,7 @@ TEST_F(EventQueueTests, PushThenPoll)
 TEST_F(EventQueueTests, EventsComeOutInOrder)
 {
 	mQueue.push(engine::GameStateChanged{GameState::WaitingForInput});
-	mQueue.push(engine::MoveExecuted{Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush), "e4"});
+	mQueue.push(engine::MoveExecuted{.move = Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush), .notation = "e4"});
 	mQueue.push(engine::BoardStateChanged{});
 	mQueue.push(engine::PlayerChanged{Side::Black});
 
@@ -91,8 +91,8 @@ TEST_F(EventQueueTests, WaitAndPopTimesOutOnEmptyQueue)
 {
 	engine::EngineEvent event;
 
-	const auto			start   = std::chrono::steady_clock::now();
-	const bool			gotOne  = mQueue.waitAndPop(event, 50ms);
+	const auto			start	= std::chrono::steady_clock::now();
+	const bool			gotOne	= mQueue.waitAndPop(event, 50ms);
 	const auto			elapsed = std::chrono::steady_clock::now() - start;
 
 	EXPECT_FALSE(gotOne) << "Nothing was pushed, so the wait should time out";
@@ -134,12 +134,12 @@ TEST_F(EventQueueTests, CloseUnblocksWaiter)
 	std::atomic<bool> finished{false};
 
 	std::thread		  consumer(
-		 [this, &finished]
-		 {
-			 engine::EngineEvent event;
-			 mQueue.waitAndPop(event); // indefinite wait
-			 finished.store(true);
-		 });
+		  [this, &finished]
+		  {
+			  engine::EngineEvent event;
+			  mQueue.waitAndPop(event); // indefinite wait
+			  finished.store(true);
+		  });
 
 	std::this_thread::sleep_for(30ms);
 	EXPECT_FALSE(finished.load()) << "The consumer should still be blocked";

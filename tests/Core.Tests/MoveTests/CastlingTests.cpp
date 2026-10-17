@@ -11,6 +11,8 @@
 #include "Validation/MoveValidation.h"
 #include "Execution/MoveExecution.h"
 
+#include <algorithm>
+
 
 namespace MoveTests
 {
@@ -25,7 +27,7 @@ protected:
 
 	void		   SetUp() override { mBoard.init(); }
 
-	void		   SetupCastlingPosition(Side side)
+	void		   SetupCastlingPosition(const Side side)
 	{
 		mBoard.clear();
 
@@ -50,14 +52,9 @@ protected:
 		mBoard.updateOccupancies();
 	}
 
-	bool hasCastlingMove(const MoveList &moves, MoveFlag flag) const
+	static bool hasCastlingMove(const MoveList &moves, const MoveFlag flag)
 	{
-		for (size_t i = 0; i < moves.size(); ++i)
-		{
-			if (moves[i].flags() == flag)
-				return true;
-		}
-		return false;
+		return std::ranges::any_of(moves, [&](const auto &move) { return move.flags() == flag; });
 	}
 };
 
@@ -66,7 +63,7 @@ TEST_F(CastlingTests, WhiteKingsideCastlingMovesKingAndRook)
 {
 	SetupCastlingPosition(Side::White);
 
-	Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
 	mExecution.makeMove(castleMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::g1), PieceType::WKing) << "King should be at g1";
@@ -80,7 +77,7 @@ TEST_F(CastlingTests, WhiteQueensideCastlingMovesKingAndRook)
 {
 	SetupCastlingPosition(Side::White);
 
-	Move castleMove(Square::e1, Square::c1, MoveFlag::QueenCastle);
+	constexpr Move castleMove(Square::e1, Square::c1, MoveFlag::QueenCastle);
 	mExecution.makeMove(castleMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::c1), PieceType::WKing) << "King should be at c1";
@@ -94,7 +91,7 @@ TEST_F(CastlingTests, BlackKingsideCastlingMovesKingAndRook)
 {
 	SetupCastlingPosition(Side::Black);
 
-	Move castleMove(Square::e8, Square::g8, MoveFlag::KingCastle);
+	constexpr Move castleMove(Square::e8, Square::g8, MoveFlag::KingCastle);
 	mExecution.makeMove(castleMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::g8), PieceType::BKing) << "King should be at g8";
@@ -108,7 +105,7 @@ TEST_F(CastlingTests, BlackQueensideCastlingMovesKingAndRook)
 {
 	SetupCastlingPosition(Side::Black);
 
-	Move castleMove(Square::e8, Square::c8, MoveFlag::QueenCastle);
+	constexpr Move castleMove(Square::e8, Square::c8, MoveFlag::QueenCastle);
 	mExecution.makeMove(castleMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::c8), PieceType::BKing) << "King should be at c8";
@@ -296,7 +293,7 @@ TEST_F(CastlingTests, UnmakeCastlingRestoresPosition)
 {
 	SetupCastlingPosition(Side::White);
 
-	Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
 	mExecution.makeMove(castleMove);
 	mExecution.unmakeMove();
 
@@ -311,7 +308,7 @@ TEST_F(CastlingTests, UnmakeQueensideCastlingRestoresPosition)
 {
 	SetupCastlingPosition(Side::White);
 
-	Move castleMove(Square::e1, Square::c1, MoveFlag::QueenCastle);
+	constexpr Move castleMove(Square::e1, Square::c1, MoveFlag::QueenCastle);
 	mExecution.makeMove(castleMove);
 	mExecution.unmakeMove();
 
@@ -326,9 +323,9 @@ TEST_F(CastlingTests, CastlingRightsRestoredOnUnmake)
 {
 	SetupCastlingPosition(Side::White);
 
-	Castling originalRights = mBoard.getCurrentCastlingRights();
+	const Castling originalRights = mBoard.getCurrentCastlingRights();
 
-	Move	 castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
 	mExecution.makeMove(castleMove);
 
 	// After castling, rights should be lost
@@ -352,10 +349,10 @@ TEST_F(CastlingTests, CastlingRightsLostWhenRookCaptured)
 
 	// Simulate black capturing the rook (switch to black's turn first)
 	mBoard.flipSide();
-	Move captureMove(Square::h3, Square::h1, MoveFlag::Capture);
+	constexpr Move captureMove(Square::h3, Square::h1, MoveFlag::Capture);
 	mExecution.makeMove(captureMove);
 
-	Castling rights = mBoard.getCurrentCastlingRights();
+	const Castling rights = mBoard.getCurrentCastlingRights();
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be lost when h1 rook captured";
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WQ)) << "White queenside castling should still be available";
 }
@@ -382,8 +379,8 @@ TEST_F(CastlingTests, CastlingIsLegalMove)
 {
 	SetupCastlingPosition(Side::White);
 
-	Move kingsideCastle(Square::e1, Square::g1, MoveFlag::KingCastle);
-	Move queensideCastle(Square::e1, Square::c1, MoveFlag::QueenCastle);
+	constexpr Move kingsideCastle(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move queensideCastle(Square::e1, Square::c1, MoveFlag::QueenCastle);
 
 	EXPECT_TRUE(mValidation.isMoveLegal(kingsideCastle)) << "Kingside castling should be legal";
 	EXPECT_TRUE(mValidation.isMoveLegal(queensideCastle)) << "Queenside castling should be legal";

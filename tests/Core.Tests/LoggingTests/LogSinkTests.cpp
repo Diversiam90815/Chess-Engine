@@ -51,7 +51,7 @@ protected:
 
 TEST_F(LogSinkTest, Line_ReachesTheSinkWithItsSource)
 {
-	const int expectedLine = __LINE__ + 1;
+	constexpr int expectedLine = __LINE__ + 1;
 	LOG_INFO("Move {} of {}", 3, "White");
 
 	ASSERT_EQ(mLines.size(), 1u);
@@ -86,8 +86,8 @@ TEST_F(LogSinkTest, EveryMacro_HasItsLevel)
 
 TEST_F(LogSinkTest, LinesBelowTheLevel_AreNotEvenFormatted)
 {
-	int formatted = 0;
-	auto counted  = [&formatted]
+	int	 formatted = 0;
+	auto counted   = [&formatted]
 	{
 		++formatted;
 		return 1;
@@ -106,8 +106,8 @@ TEST_F(LogSinkTest, LinesBelowTheLevel_AreNotEvenFormatted)
 
 TEST_F(LogSinkTest, WithoutASink_NothingIsFormattedOrPassedOn)
 {
-	int formatted = 0;
-	auto counted  = [&formatted]
+	int	 formatted = 0;
+	auto counted   = [&formatted]
 	{
 		++formatted;
 		return 1;

@@ -36,7 +36,7 @@ TEST_F(MoveHistoryTests, InitiallyEmptyHistory)
 
 TEST_F(MoveHistoryTests, MakeMoveAddsToHistory)
 {
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(move);
 
 	EXPECT_EQ(mExecution.historySize(), 1) << "History should have one entry";
@@ -97,7 +97,7 @@ TEST_F(MoveHistoryTests, UnmakeAllMoves)
 
 TEST_F(MoveHistoryTests, UnmakeFromEmptyHistoryReturnsFalse)
 {
-	bool result = mExecution.unmakeMove();
+	const bool result = mExecution.unmakeMove();
 	EXPECT_FALSE(result) << "Unmake from empty history should return false";
 }
 
@@ -138,7 +138,7 @@ TEST_F(MoveHistoryTests, UnmakeRestoresCastlingRights)
 	mBoard.setCastlingRights(Castling::WK);
 	mBoard.updateOccupancies();
 
-	Castling originalRights = mBoard.getCurrentCastlingRights();
+	const Castling originalRights = mBoard.getCurrentCastlingRights();
 
 	// Move king (loses castling rights)
 	mExecution.makeMove(Move(Square::e1, Square::f1, MoveFlag::Quiet));
@@ -320,7 +320,7 @@ TEST_F(MoveHistoryTests, CastlingRecordedInHistory)
 TEST_F(MoveHistoryTests, ZobristHashRestoredOnUnmake)
 {
 	mBoard.computeHash();
-	uint64_t originalHash = mBoard.getHash();
+	const uint64_t originalHash = mBoard.getHash();
 
 	mExecution.makeMove(Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush));
 
@@ -336,8 +336,8 @@ TEST_F(MoveHistoryTests, MultipleMakesAndUnmakesPreserveState)
 {
 	// Save initial state
 	mBoard.computeHash();
-	uint64_t initialHash	 = mBoard.getHash();
-	Castling initialCastling = mBoard.getCurrentCastlingRights();
+	const uint64_t initialHash	   = mBoard.getHash();
+	const Castling initialCastling = mBoard.getCurrentCastlingRights();
 
 	// Play several moves
 	mExecution.makeMove(Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush));

@@ -100,7 +100,10 @@ set(EVALUATION_FILES
 	${EVALUATION_DIR}/Evaluation.h  	${EVALUATION_DIR}/Evaluation.cpp
 )
 
+set(PCH_FILE						${SOURCE_DIR}/pch.h)
+
 set(ALL_FILES
+	${PCH_FILE}
 	${GAMEENGINE_FILES}
 	${GAMECONTROLLER_FILES}
 	${BOARD_FILES}
@@ -121,6 +124,8 @@ include(BuildInfo)
 BuildInfo(${TARGET_NAME})
 
 source_group(TREE ${SOURCE_DIR} FILES ${ALL_FILES})
+
+target_precompile_headers(${TARGET_NAME} PRIVATE ${PCH_FILE})
 
 if(ENABLE_CPPCHECK)
 	AddCppCheck(${TARGET_NAME})

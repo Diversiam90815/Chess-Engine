@@ -12,7 +12,6 @@
 #include <atomic>
 #include <condition_variable>
 
-#include "EngineLog.h"
 #include "Parameters.h"
 #include "Move.h"
 #include "ThreadBase.h"
@@ -47,13 +46,13 @@ public:
 	// Configuration
 	//=========================================================================
 
-	void					setVsCPUMode(bool enabled) { mIsVsCPU.store(enabled); }
+	void					setVsCPUMode(const bool enabled) { mIsVsCPU.store(enabled); }
 
 	//=========================================================================
 	// Event Input (thread-safe, can be called from any thread)
 	//=========================================================================
 
-	void					postEvent(InputEvent event);
+	void					postEvent(const InputEvent &event);
 
 	// Convenience methods
 	void					onSquareSelected(Square sq);
@@ -70,9 +69,10 @@ public:
 
 	[[nodiscard]] GameState getState() const { return mState.load(); }
 
-private:
-	void				   run() override;
+protected:
+	void run() override;
 
+private:
 	//=========================================================================
 	// Event Processing
 	//=========================================================================
@@ -95,13 +95,13 @@ private:
 	//=========================================================================
 
 	void				   transitionTo(GameState newState);
-	void				   onStateEnter(GameState enteringState);
-	GameState			   determineNextTurnState();
+	void				   onStateEnter(GameState enteringState) const;
+	GameState			   determineNextTurnState() const;
 	bool				   tryExecuteMove(Move move);
 
 	GameState			   resolveAndPlay(Square from, Square to, PieceType promotion);
 
-	void				   publish(engine::EngineEvent event);
+	void				   publish(engine::EngineEvent event) const;
 
 	//=========================================================================
 	// State

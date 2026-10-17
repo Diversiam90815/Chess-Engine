@@ -38,7 +38,7 @@ void GameEngine::snapshotFrom(const GameEngine &other)
 }
 
 
-MoveExecutionResult GameEngine::makeMove(Move move)
+MoveExecutionResult GameEngine::makeMove(const Move move)
 {
 	std::lock_guard<std::mutex> lock(mMoveMutex);
 
@@ -72,9 +72,6 @@ bool GameEngine::undoMove()
 {
 	std::lock_guard<std::mutex> lock(mMoveMutex);
 
-	// Get the captured piece before undoing
-	PieceType					capturedPiece = mMoveExecution.getLastCapturedPiece();
-
 	if (!mMoveExecution.unmakeMove())
 	{
 		LOG_WARNING("No move to undo!");
@@ -85,7 +82,7 @@ bool GameEngine::undoMove()
 }
 
 
-bool GameEngine::makeMoveUnchecked(Move move)
+bool GameEngine::makeMoveUnchecked(const Move move)
 {
 	return mMoveExecution.makeMove(move);
 }
@@ -103,26 +100,26 @@ void GameEngine::generateLegalMoves(MoveList &moves)
 }
 
 
-bool GameEngine::isMoveLegal(Move move)
+bool GameEngine::isMoveLegal(const Move move)
 {
 	return mMoveValidation.isMoveLegal(move);
 }
 
 
-void GameEngine::getMovesFromSquare(Square from, MoveList &moves)
+void GameEngine::getMovesFromSquare(const Square from, MoveList &moves)
 {
 	MoveList allMoves;
 	generateLegalMoves(allMoves);
 
 	moves.clear();
-	for (size_t i = 0; i < allMoves.size(); ++i)
+	for (auto allMove : allMoves)
 	{
-		Square fromVariable = allMoves[i].from();
+		const Square fromVariable = allMove.from();
 		LOG_DEBUG("FromVariable: {}", to_index(fromVariable));
 		LOG_DEBUG("From: {}", to_index(from));
 
-		if (allMoves[i].from() == from)
-			moves.push(allMoves[i]);
+		if (allMove.from() == from)
+			moves.push(allMove);
 	}
 }
 
@@ -162,7 +159,6 @@ EndGameState GameEngine::checkForEndGameConditions()
 	if (mMoveValidation.isCheckmate())
 	{
 		LOG_INFO("Checkmate!");
-		auto winner = getWinner();
 		return EndGameState::Checkmate;
 	}
 
@@ -172,8 +168,7 @@ EndGameState GameEngine::checkForEndGameConditions()
 		return EndGameState::StaleMate;
 	}
 
-	DrawReason reason = mMoveValidation.getDrawReason();
-	if (reason != DrawReason::None)
+	if (const DrawReason reason = mMoveValidation.getDrawReason(); reason != DrawReason::None)
 	{
 		LOG_INFO("Draw! Reason: {}", drawReasonToString(reason));
 		return EndGameState::Draw;
@@ -190,7 +185,7 @@ Side GameEngine::getWinner() const
 }
 
 
-uint64_t GameEngine::getHash()
+uint64_t GameEngine::getHash() const
 {
 	return mChessBoard.getHash();
 }

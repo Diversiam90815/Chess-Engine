@@ -147,7 +147,7 @@ TEST_F(MoveExecutionTest, DoublePawnPushSetsEnPassantSquare)
 	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(move);
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant square should be e3 after e2-e4";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant square should be e3 after e2-e4";
 }
 
 
@@ -159,7 +159,7 @@ TEST_F(MoveExecutionTest, QuietMoveResetsEnPassantSquare)
 	// Make a quiet move
 	mExecution.makeMove(Move(Square::b8, Square::c6, MoveFlag::Quiet));
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "En passant should be reset after quiet move";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "En passant should be reset after quiet move";
 }
 
 

@@ -15,9 +15,7 @@
 #include "EventQueue.h"
 #include "GameController.h"
 #include "EngineLog.h"
-#include "Player.h"
 #include "StateMachine.h"
-#include "SystemInfo.h"
 
 
 class GameManager
@@ -47,9 +45,9 @@ public:
 	// Game Control
 	//=========================================================================
 
-	void								 startGame(GameConfiguration config);
-	void								 resetGame();
-	void								 undoMove();
+	void								 startGame(GameConfiguration config) const;
+	void								 resetGame() const;
+	void								 undoMove() const;
 
 	//=========================================================================
 	// Input Events
@@ -60,11 +58,11 @@ public:
 	 *			both squares (console, tests, engine protocols).
 	 *			Leave @p promotion as None to be asked via a PromotionRequired event.
 	 */
-	void								 submitMove(Square from, Square to, PieceType promotion = PieceType::None);
+	void								 submitMove(Square from, Square to, PieceType promotion = PieceType::None) const;
 
 	/// Click-driven path: first call selects, second call targets.
-	void								 onSquareSelected(Square sq);
-	void								 onPromotionChosen(PieceType piece);
+	void								 onSquareSelected(Square sq) const;
+	void								 onPromotionChosen(PieceType piece) const;
 
 	//=========================================================================
 	// Board & Game State Queries
@@ -99,13 +97,13 @@ private:
 	// Core Components
 	//=========================================================================
 
-	EventQueue							mEvents;
-	std::unique_ptr<GameController>		mGameController;
-	std::unique_ptr<StateMachine>		mStateMachine;
+	EventQueue						mEvents;
+	std::unique_ptr<GameController> mGameController;
+	std::unique_ptr<StateMachine>	mStateMachine;
 
 	//=========================================================================
 	// State
 	//=========================================================================
 
-	bool								mInitialized{false};
+	bool							mInitialized{false};
 };

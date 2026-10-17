@@ -11,7 +11,7 @@
 GameController::GameController() : mCPUPlayer(mEngine) {}
 
 
-bool GameController::initializeGame(GameConfiguration config)
+bool GameController::initializeGame(const GameConfiguration config)
 {
 	mConfig = config;
 
@@ -32,23 +32,24 @@ bool GameController::initializeGame(GameConfiguration config)
 	}
 	case GameModeSelection::SinglePlayer:
 	{
-		const SinglePlayerConfig &spConfig = config.getSinglePlayer();
-		mCurrentPlayer					   = Side::White; // White always starts
-		Side			 cpuColor		   = (spConfig.humanPlayerColor == Side::White) ? Side::Black : Side::White;
+		const auto &[humanPlayerColor, aiDifficulty] = config.getSinglePlayer();
+		mCurrentPlayer								 = Side::White; // White always starts
+		const Side		 cpuColor					 = (humanPlayerColor == Side::White) ? Side::Black : Side::White;
 
 		CPUConfiguration cpuConfig;
-		cpuConfig.difficulty		  = spConfig.aiDifficulty;
+		cpuConfig.difficulty		  = aiDifficulty;
 		cpuConfig.enabled			  = true;
 		cpuConfig.cpuColor			  = cpuColor;
 		cpuConfig.enableRandomization = true;
 
 		mCPUPlayer.configure(cpuConfig);
 
-		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", sideToString(spConfig.humanPlayerColor), sideToString(cpuColor),
-				 cpuDifficultyToString(spConfig.aiDifficulty));
+		LOG_INFO("Game initialized: Single Player mode (Human: {}, CPU: {}, Difficulty: {})", sideToString(humanPlayerColor), sideToString(cpuColor),
+				 cpuDifficultyToString(aiDifficulty));
 
 		break;
 	}
+	case GameModeSelection::None: break;
 	}
 
 	invalidateCache();
@@ -71,11 +72,11 @@ void GameController::resetGame()
 }
 
 
-void GameController::getLegalMovesFromSquare(Square sq, MoveList &moves)
+void GameController::getLegalMovesFromSquare(const Square sq, MoveList &moves)
 {
 	mEngine.getMovesFromSquare(sq, moves);
 
-	if (moves.size() > 0)
+	if (!moves.empty())
 		mSelectionMoves = moves;
 }
 
@@ -87,7 +88,7 @@ const MoveList &GameController::getAllLegalMoves() const
 }
 
 
-MoveExecutionResult GameController::executeMove(Move move)
+MoveExecutionResult GameController::executeMove(const Move move)
 {
 	MoveExecutionResult result = mEngine.makeMove(move);
 
@@ -96,9 +97,7 @@ MoveExecutionResult GameController::executeMove(Move move)
 
 	if (result.capturedPiece != PieceType::None)
 	{
-		Side currentSide = getCurrentSide();
-
-		if (currentSide == Side::White)
+		if (const Side currentSide = getCurrentSide(); currentSide == Side::White)
 			mWhitePlayer.addCapturedPiece(result.capturedPiece);
 		else if (currentSide == Side::Black)
 			mBlackPlayer.addCapturedPiece(result.capturedPiece);
@@ -112,11 +111,9 @@ bool GameController::undoLastMove()
 {
 	// Check if last move was a capture before undoing
 	const auto &history	   = mEngine.getMoveHistory();
-	bool		wasCapture = !history.empty() && history.back().move.isCapture();
+	const bool	wasCapture = !history.empty() && history.back().move.isCapture();
 
-	bool		success	   = mEngine.undoMove();
-
-	if (success)
+	if (mEngine.undoMove())
 	{
 		invalidateCache();
 
@@ -130,13 +127,14 @@ bool GameController::undoLastMove()
 			else if (lastMover == Side::Black)
 				mBlackPlayer.removeLastCapturedPiece();
 		}
+		return true;
 	}
 
-	return success;
+	return false;
 }
 
 
-constexpr int GameController::promotionPieceToOffset(PieceType pt)
+constexpr int GameController::promotionPieceToOffset(const PieceType pt)
 {
 	switch (pt)
 	{
@@ -153,43 +151,30 @@ constexpr int GameController::promotionPieceToOffset(PieceType pt)
 }
 
 
-bool GameController::isPromotionMove(Square from, Square to) const
+bool GameController::isPromotionMove(const Square from, const Square to) const
 {
 	ensureCacheValid();
-
-	for (size_t i = 0; i < mCachedLegalMoves.size(); ++i)
-	{
-		const Move &m = mCachedLegalMoves[i];
-		if (m.from() == from && m.to() == to && m.isPromotion())
-			return true;
-	}
-
-	return false;
+	return std::ranges::any_of(mCachedLegalMoves, [&](const Move &m) { return m.from() == from && m.to() == to && m.isPromotion(); });
 }
 
 
-Move GameController::findMove(Square from, Square to, PieceType promotion) const
+Move GameController::findMove(const Square from, const Square to, const PieceType promotion) const
 {
 	ensureCacheValid();
 
-	for (size_t i = 0; i < mCachedLegalMoves.size(); ++i)
-	{
-		const Move &m = mCachedLegalMoves[i];
+	const auto it = std::ranges::find_if(mCachedLegalMoves,
+										 [&](const Move &m)
+										 {
+											 if (m.from() != from || m.to() != to)
+												 return false;
+											 if (promotion != PieceType::None)
+											 {
+												 return m.isPromotion() && m.promotionPieceOffset() == promotionPieceToOffset(promotion);
+											 }
+											 return !m.isPromotion();
+										 });
 
-		if (m.from() == from && m.to() == to)
-		{
-			// if promotion specified, matchit
-			if (promotion != PieceType::None)
-			{
-				if (m.isPromotion() && m.promotionPieceOffset() == promotionPieceToOffset(promotion))
-					return m;
-			}
-			else if (!m.isPromotion())
-				return m;
-		}
-	}
-
-	return Move();
+	return (it != mCachedLegalMoves.end()) ? *it : Move{};
 }
 
 
@@ -225,7 +210,7 @@ void GameController::switchTurns()
 		return;
 	}
 
-	Side next = (mCurrentPlayer == Side::White) ? Side::Black : Side::White;
+	const Side next = (mCurrentPlayer == Side::White) ? Side::Black : Side::White;
 
 	changeCurrentPlayer(next);
 
@@ -233,7 +218,7 @@ void GameController::switchTurns()
 }
 
 
-void GameController::changeCurrentPlayer(Side player)
+void GameController::changeCurrentPlayer(const Side player)
 {
 	if (mCurrentPlayer == player)
 		return;
@@ -254,7 +239,7 @@ bool GameController::isCPUTurn() const
 void GameController::requestCPUMoveAsync()
 {
 	mCPUPlayer.calculateMoveAsync(
-		[this](Move move)
+		[this](const Move move)
 		{
 			if (mOnCPUMove)
 				mOnCPUMove(move);

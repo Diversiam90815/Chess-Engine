@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 	Module:         MoveNotation
-	Description:    Transforming the Move class into a Standart Algebraic Notation string
+	Description:    Transforming the Move class into a Standard Algebraic Notation string
   ==============================================================================
 */
 
@@ -22,7 +22,7 @@ public:
 	/**
 	 * @brief	Produce SAN (Standard Algebraic Notation) for a move.
 	 */
-	static std::string toSAN(Move &move, const Chessboard &board, bool isCheck, bool isCheckmate);
+	static std::string toSAN(const Move &move, const Chessboard &board, bool isCheck, bool isCheckmate);
 
 	/**
 	 * @brief Generate UCI notation (e.g., "e2e4", "e7e8q").
@@ -31,9 +31,9 @@ public:
 
 
 private:
-	static inline std::string squareToString(Square sq) noexcept
+	static inline std::string squareToString(const Square sq) noexcept
 	{
-		int idx = to_index(sq);
+		const int idx = to_index(sq);
 
 		if (idx >= 0 && idx < 64)
 			return square_to_coordinates[idx];
@@ -41,19 +41,19 @@ private:
 		return "--";
 	}
 
-	static inline char getFile(Square sq) noexcept
+	static inline char getFile(const Square sq) noexcept
 	{
-		int idx = to_index(sq);
+		const int idx = to_index(sq);
 		return 'a' + (idx % 8);
 	}
 
-	static inline char getRank(Square sq) noexcept
+	static inline char getRank(const Square sq) noexcept
 	{
-		int idx = to_index(sq);
+		const int idx = to_index(sq);
 		return '8' - (idx / 8);
 	}
 
-	static inline char pieceToSANChar(int pieceType) noexcept
+	static inline char pieceToSANChar(const int pieceType) noexcept
 	{
 		switch (pieceType)
 		{
@@ -71,7 +71,7 @@ private:
 		}
 	}
 
-	static inline char pieceToUCIChar(int pieceType) noexcept
+	static inline char pieceToUCIChar(const int pieceType) noexcept
 	{
 		switch (pieceType)
 		{

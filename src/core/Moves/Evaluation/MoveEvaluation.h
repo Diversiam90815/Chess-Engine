@@ -10,10 +10,8 @@
 
 #include "Move.h"
 #include "ChessBoard.h"
-#include "PieceValues.h"
 
 #include <array>
-#include <cstring>
 
 
 /**
@@ -32,17 +30,16 @@ public:
 	MoveEvaluation()  = default;
 	~MoveEvaluation() = default;
 
-	void orderMoves(MoveList &moves, const Chessboard &board, Move ttMove, int ply) const;
-	void orderCaptures(MoveList &moves, const Chessboard &board) const;
+	void		orderMoves(MoveList &moves, const Chessboard &board, Move ttMove, int ply) const;
+	static void orderCaptures(MoveList &moves, const Chessboard &board);
 
-	void updateKillerMove(Move move, int ply);
-	void updateHistory(Move move, int depth);
+	void		updateKillerMove(Move move, int ply);
+	void		updateHistory(Move move, int depth);
 
-	void clearSearchState();
+	void		clearSearchState();
 
 
 private:
-
 	[[nodiscard]] int									   evaluateMove(Move move, const Chessboard &board, Move ttMove, int ply) const;
 	[[nodiscard]] static int							   evaluateMVV_LVA(Move move, const Chessboard &board);
 

@@ -111,7 +111,7 @@ void printBoard(const Chessboard &board, const Options &options)
 		return;
 
 	printf("   Side:      %s\n", board.getCurrentSide() == Side::White ? "White" : board.getCurrentSide() == Side::Black ? "Black" : "--");
-	printf("   Enpassant: %s\n", board.getCurrentEnPassantSqaure() != Square::None ? square_to_coordinates[to_index(board.getCurrentEnPassantSqaure())] : "no");
+	printf("   Enpassant: %s\n", board.getCurrentEnPassantSquare() != Square::None ? square_to_coordinates[to_index(board.getCurrentEnPassantSquare())] : "no");
 	printf("   Castling:  %c%c%c%c\n\n", static_cast<int>(board.getCurrentCastlingRights() & Castling::WK) ? 'K' : '-',
 		   static_cast<int>(board.getCurrentCastlingRights() & Castling::WQ) ? 'Q' : '-', static_cast<int>(board.getCurrentCastlingRights() & Castling::BK) ? 'k' : '-',
 		   static_cast<int>(board.getCurrentCastlingRights() & Castling::BQ) ? 'q' : '-');

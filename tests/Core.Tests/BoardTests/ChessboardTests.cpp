@@ -48,7 +48,7 @@ TEST_F(ChessboardTest, InitialCastlingRightsAllAvailable)
 
 TEST_F(ChessboardTest, InitialEnPassantSquareIsNone)
 {
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "No en passant square on initial board";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "No en passant square on initial board";
 }
 
 
@@ -185,7 +185,7 @@ TEST_F(ChessboardTest, SetEnPassantSquareUpdatesCorrectly)
 {
 	mBoard.setEnPassantSquare(Square::e3);
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant square should be e3";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant square should be e3";
 }
 
 
@@ -210,7 +210,7 @@ TEST_F(ChessboardTest, SaveAndRestoreState)
 	mBoard.restoreState(state);
 
 	// Verify restoration
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::d6) << "En passant should be restored to d6";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::d6) << "En passant should be restored to d6";
 	EXPECT_EQ(mBoard.getCurrentCastlingRights(), Castling::WK | Castling::BQ) << "Castling rights should be restored";
 	EXPECT_EQ(mBoard.getHalfMoveClock(), 15) << "Half move clock should be restored to 15";
 }
@@ -244,7 +244,7 @@ TEST_F(ChessboardTest, ParseFENWithEnPassant)
 	Chessboard board;
 	board.parseFEN("rnbqkbnr/pppp1ppp/8/4pP2/8/8/PPPPP1PP/RNBQKBNR w KQkq e6 0 3");
 
-	EXPECT_EQ(board.getCurrentEnPassantSqaure(), Square::e6) << "En passant square should be e6";
+	EXPECT_EQ(board.getCurrentEnPassantSquare(), Square::e6) << "En passant square should be e6";
 }
 
 

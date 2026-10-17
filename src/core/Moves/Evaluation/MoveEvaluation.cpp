@@ -6,13 +6,14 @@
   ==============================================================================
 */
 
-#include "MoveEvaluation.h"
-
 #include <algorithm>
 #include <cstring>
 
+#include "MoveEvaluation.h"
+#include "PieceValues.h"
 
-void MoveEvaluation::orderMoves(MoveList &moves, const Chessboard &board, Move ttMove, int ply) const
+
+void MoveEvaluation::orderMoves(MoveList &moves, const Chessboard &board, const Move ttMove, const int ply) const
 {
 	// incremental selection sort (cheap for small lists with max ~218)
 	// and we often get a cutoff before examining all moves
@@ -23,9 +24,7 @@ void MoveEvaluation::orderMoves(MoveList &moves, const Chessboard &board, Move t
 
 		for (size_t j = i + 1; j < moves.size(); ++j)
 		{
-			int s = evaluateMove(moves[j], board, ttMove, ply);
-
-			if (s > bestScore)
+			if (const int s = evaluateMove(moves[j], board, ttMove, ply); s > bestScore)
 			{
 				bestScore = s;
 				bestIdx	  = j;
@@ -38,7 +37,7 @@ void MoveEvaluation::orderMoves(MoveList &moves, const Chessboard &board, Move t
 }
 
 
-void MoveEvaluation::orderCaptures(MoveList &moves, const Chessboard &board) const
+void MoveEvaluation::orderCaptures(MoveList &moves, const Chessboard &board)
 {
 	for (size_t i = 0; i < moves.size(); ++i)
 	{
@@ -47,9 +46,7 @@ void MoveEvaluation::orderCaptures(MoveList &moves, const Chessboard &board) con
 
 		for (size_t j = i + 1; j < moves.size(); ++j)
 		{
-			int s = evaluateMVV_LVA(moves[j], board);
-
-			if (s > bestScore)
+			if (const int s = evaluateMVV_LVA(moves[j], board); s > bestScore)
 			{
 				bestScore = s;
 				bestIdx	  = j;
@@ -62,7 +59,7 @@ void MoveEvaluation::orderCaptures(MoveList &moves, const Chessboard &board) con
 }
 
 
-void MoveEvaluation::updateKillerMove(Move move, int ply)
+void MoveEvaluation::updateKillerMove(const Move move, const int ply)
 {
 	if (ply < 0 || ply >= MAX_PLY)
 		return;
@@ -80,13 +77,13 @@ void MoveEvaluation::updateKillerMove(Move move, int ply)
 }
 
 
-void MoveEvaluation::updateHistory(Move move, int depth)
+void MoveEvaluation::updateHistory(const Move move, const int depth)
 {
 	if (move.isCapture())
 		return;
 
-	int from = to_index(move.from());
-	int to	 = to_index(move.to());
+	const int from = to_index(move.from());
+	const int to   = to_index(move.to());
 
 	// depth-squared bonus (deeper cutoffs are more valuable)
 	mHistory[from][to] += depth * depth;
@@ -110,7 +107,7 @@ void MoveEvaluation::clearSearchState()
 }
 
 
-int MoveEvaluation::evaluateMove(Move move, const Chessboard &board, Move ttMove, int ply) const
+int MoveEvaluation::evaluateMove(const Move move, const Chessboard &board, const Move ttMove, const int ply) const
 {
 	// 1 TT best move (always search first)
 	if (ttMove.isValid() && move == ttMove)
@@ -133,10 +130,10 @@ int MoveEvaluation::evaluateMove(Move move, const Chessboard &board, Move ttMove
 }
 
 
-int MoveEvaluation::evaluateMVV_LVA(Move move, const Chessboard &board)
+int MoveEvaluation::evaluateMVV_LVA(const Move move, const Chessboard &board)
 {
-	PieceType victim   = board.pieceAt(move.to());
-	PieceType attacker = board.pieceAt(move.from());
+	const PieceType victim	 = board.pieceAt(move.to());
+	const PieceType attacker = board.pieceAt(move.from());
 
 	if (victim == PieceType::None || attacker == PieceType::None)
 		return 0;
@@ -146,7 +143,7 @@ int MoveEvaluation::evaluateMVV_LVA(Move move, const Chessboard &board)
 }
 
 
-bool MoveEvaluation::isKillerMove(Move move, int ply) const
+bool MoveEvaluation::isKillerMove(const Move move, const int ply) const
 {
 	if (ply < 0 || ply >= MAX_PLY)
 		return false;
@@ -155,7 +152,7 @@ bool MoveEvaluation::isKillerMove(Move move, int ply) const
 }
 
 
-int MoveEvaluation::getHistoryScore(Move move) const
+int MoveEvaluation::getHistoryScore(const Move move) const
 {
 	return mHistory[to_index(move.from())][to_index(move.to())];
 }

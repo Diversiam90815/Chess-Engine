@@ -10,11 +10,9 @@
 #include <memory>
 #include <random>
 #include <thread>
-#include <algorithm>
 
 #include "Parameters.h"
 #include "GameEngine.h"
-#include "Evaluation.h"
 #include "Evaluation/MoveEvaluation.h"
 
 
@@ -84,9 +82,9 @@ public:
 	void			 configure(const CPUConfiguration &config);
 	CPUConfiguration getConfiguration() const { return mConfig; }
 
-	void			 setEnabled(bool enabled) { mConfig.enabled = enabled; }
+	void			 setEnabled(const bool enabled) { mConfig.enabled = enabled; }
 	bool			 isEnabled() const { return mConfig.enabled; }
-	bool			 isCPUPlayer(Side side) const { return mConfig.enabled && mConfig.cpuColor == side; }
+	bool			 isCPUPlayer(const Side side) const { return mConfig.enabled && mConfig.cpuColor == side; }
 
 	//=========================================================================
 	// Move Calculation
@@ -96,7 +94,7 @@ public:
 	 * @brief	Calculate best move asynchronously.
 	 * @param	callback Called on completion with the chosen move.
 	 */
-	void			 calculateMoveAsync(std::function<void(Move)> callback);
+	void			 calculateMoveAsync(const std::function<void(Move)> &callback);
 
 	/**
 	 * @brief	Calculate best move synchronously (blocking).
@@ -123,30 +121,30 @@ private:
 	/**
 	 * @brief	Top-level search dispatcher based on difficulty.
 	 */
-	Move											 computeBestMove(std::stop_token stopToken);
+	Move											 computeBestMove(const std::stop_token &stopToken);
 
 	/**
 	 * @brief	Minimax search with alpha-beta pruning.
 	 */
-	Move											 searchAlphaBeta(const MoveList &moves, int depth, std::stop_token stopToken);
+	Move											 searchAlphaBeta(const MoveList &moves, int depth, const std::stop_token &stopToken);
 
 	/**
 	 * @brief	Recursive alpha-beta implementation.
 	 */
-	int												 alphaBeta(int depth, int alpha, int beta, int ply, std::stop_token stopToken);
+	int												 alphaBeta(int depth, int alpha, int beta, int ply, const std::stop_token &stopToken);
 
 	/**
 	 * @brief	Quiescence search to avoid horizon effect.
 	 */
-	int												 quiescence(int alpha, int beta, std::stop_token stopToken, int qDepth);
+	int												 quiescence(int alpha, int beta, const std::stop_token &stopToken, int qDepth);
 
 	//=========================================================================
 	// Move Selection
 	//=========================================================================
 
-	Move											 selectBestMove(std::vector<ScoredMove> &scoredMoves);
+	static Move										 selectBestMove(std::vector<ScoredMove> &scoredMoves);
 	Move											 selectWithRandomization(std::vector<ScoredMove> &scoredMoves);
-	std::vector<ScoredMove>							 filterTopCandidates(std::vector<ScoredMove> &moves, size_t maxCount) const;
+	static std::vector<ScoredMove>					 filterTopCandidates(const std::vector<ScoredMove> &moves, size_t maxCount);
 
 
 	//=========================================================================
@@ -161,7 +159,7 @@ private:
 	// Helpers
 	//=========================================================================
 
-	bool											 isCancelled(std::stop_token token) const { return token.stop_requested(); }
+	static bool										 isCancelled(const std::stop_token &token) { return token.stop_requested(); }
 	int												 getSearchDepth() const;
 
 	//=========================================================================

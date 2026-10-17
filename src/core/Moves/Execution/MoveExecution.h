@@ -28,7 +28,7 @@ struct MoveExecutionResult
 	std::string notation{};
 	PieceType	capturedPiece{PieceType::None};
 
-	explicit	operator bool() { return success; }
+	explicit	operator bool() const { return success; }
 };
 
 
@@ -50,7 +50,7 @@ public:
 	[[nodiscard]] const std::vector<MoveHistoryEntry> &getHistory() const { return mHistory; }
 	void											   clearHistory() { mHistory.clear(); }
 
-	PieceType										   getLastCapturedPiece();
+	[[nodiscard]] PieceType										   getLastCapturedPiece() const;
 
 	[[nodiscard]] bool								   isRepeatedPosition(int count = 3) const;
 

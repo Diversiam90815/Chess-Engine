@@ -7,11 +7,18 @@
 
 #include "MoveGeneration.h"
 
+#include "ChessBoard.h"
+#include "EngineLog.h"
+#include "Move.h"
+#include "BitboardTypes.h"
+#include "AttackTables.h"
+#include "BitboardUtils.h"
+
 
 MoveGeneration::MoveGeneration(Chessboard &board) : mChessBoard(board) {}
 
 
-bool MoveGeneration::isSquareAttacked(Square square, Side attacker) const
+bool MoveGeneration::isSquareAttacked(const Square square, const Side attacker) const
 {
 	const auto &at		 = AttackTables::instance();
 	const U64	occBoth	 = mChessBoard.occ()[to_index(Side::Both)];
@@ -20,9 +27,10 @@ bool MoveGeneration::isSquareAttacked(Square square, Side attacker) const
 	const int	offset	 = (attacker == Side::White) ? 0 : 6;
 
 	// Pawns attack in reverse direction
-	Side		pawnSide = (attacker == Side::White) ? Side::Black : Side::White;
+	const Side	pawnSide = (attacker == Side::White) ? Side::Black : Side::White;
 	if (at.pawnAttacks(pawnSide, square) & pieces[WPawn + offset])
 		return true;
+
 	if (at.knightAttacks(square) & pieces[WKnight + offset])
 		return true;
 
@@ -42,10 +50,10 @@ bool MoveGeneration::isSquareAttacked(Square square, Side attacker) const
 }
 
 
-void MoveGeneration::generateAllMoves(MoveList &moves)
+void MoveGeneration::generateAllMoves(MoveList &moves) const
 {
 	moves.clear();
-	Side currentSide = mChessBoard.getCurrentSide();
+	const Side currentSide = mChessBoard.getCurrentSide();
 
 	generatePawnMoves(moves, currentSide);
 	generateKnightMoves(moves, currentSide);
@@ -57,11 +65,11 @@ void MoveGeneration::generateAllMoves(MoveList &moves)
 }
 
 
-void MoveGeneration::generateCastlingMoves(MoveList &moves, Side side)
+void MoveGeneration::generateCastlingMoves(MoveList &moves, const Side side) const
 {
-	Castling rights = mChessBoard.getCurrentCastlingRights();
-	U64		 occ	= mChessBoard.occ()[to_index(Side::Both)];
-	Side	 enemy	= (side == Side::White) ? Side::Black : Side::White;
+	const Castling rights = mChessBoard.getCurrentCastlingRights();
+	const U64	   occ	  = mChessBoard.occ()[to_index(Side::Both)];
+	const Side	   enemy  = (side == Side::White) ? Side::Black : Side::White;
 
 	if (side == Side::White)
 	{
@@ -108,7 +116,7 @@ void MoveGeneration::generateCastlingMoves(MoveList &moves, Side side)
 }
 
 
-void MoveGeneration::generatePawnMoves(MoveList &moves, Side side)
+void MoveGeneration::generatePawnMoves(MoveList &moves, const Side side) const
 {
 	const auto &at			 = AttackTables::instance();
 	const U64	occBoth		 = mChessBoard.occ()[to_index(Side::Both)];
@@ -125,12 +133,12 @@ void MoveGeneration::generatePawnMoves(MoveList &moves, Side side)
 
 	while (pawns)
 	{
-		int	   source	   = BitUtils::lsb(pawns);
-		int	   target	   = source + pushDir;
-		Square from		   = static_cast<Square>(source);
-		Square to		   = static_cast<Square>(target);
+		int		   source	   = BitUtils::lsb(pawns);
+		int		   target	   = source + pushDir;
+		const auto from		   = static_cast<Square>(source);
+		const auto to		   = static_cast<Square>(target);
 
-		bool   isPromoRank = (source >= promoRankMin && source <= promoRankMax);
+		const bool isPromoRank = (source >= promoRankMin && source <= promoRankMax);
 
 		// Single push
 		if (!BitUtils::getBit(occBoth, target))
@@ -161,8 +169,8 @@ void MoveGeneration::generatePawnMoves(MoveList &moves, Side side)
 		U64 captures = at.pawnAttacks(side, from) & occEnemy;
 		while (captures)
 		{
-			int	   capTarget = BitUtils::lsb(captures);
-			Square capTo	 = static_cast<Square>(capTarget);
+			int		   capTarget = BitUtils::lsb(captures);
+			const auto capTo	 = static_cast<Square>(capTarget);
 
 			if (isPromoRank)
 			{
@@ -178,10 +186,10 @@ void MoveGeneration::generatePawnMoves(MoveList &moves, Side side)
 		}
 
 		// En Passant
-		Square epSquare = mChessBoard.getCurrentEnPassantSqaure();
+		const Square epSquare = mChessBoard.getCurrentEnPassantSquare();
 		if (epSquare != Square::None)
 		{
-			U64 epCapture = at.pawnAttacks(side, from) & (1ULL << to_index(epSquare));
+			const U64 epCapture = at.pawnAttacks(side, from) & (1ULL << to_index(epSquare));
 
 			if (epCapture)
 				moves.push(Move(from, epSquare, MoveFlag::EnPassant));
@@ -192,7 +200,7 @@ void MoveGeneration::generatePawnMoves(MoveList &moves, Side side)
 }
 
 
-void MoveGeneration::generateKnightMoves(MoveList &moves, Side side)
+void MoveGeneration::generateKnightMoves(MoveList &moves, const Side side) const
 {
 	const auto &at		   = AttackTables::instance();
 	const int	knightType = (side == Side::White) ? WKnight : BKnight;
@@ -202,9 +210,9 @@ void MoveGeneration::generateKnightMoves(MoveList &moves, Side side)
 
 	while (knights)
 	{
-		int	   source  = BitUtils::lsb(knights);
-		Square from	   = static_cast<Square>(source);
-		U64	   attacks = at.knightAttacks(from) & ~ownOcc;
+		int		   source  = BitUtils::lsb(knights);
+		const auto from	   = static_cast<Square>(source);
+		const U64  attacks = at.knightAttacks(from) & ~ownOcc;
 
 		addSlidingMoves(moves, from, attacks, enemyOcc);
 
@@ -213,7 +221,7 @@ void MoveGeneration::generateKnightMoves(MoveList &moves, Side side)
 }
 
 
-void MoveGeneration::generateRookMoves(MoveList &moves, Side side)
+void MoveGeneration::generateRookMoves(MoveList &moves, const Side side) const
 {
 	const auto &at		 = AttackTables::instance();
 	const int	rookType = (side == Side::White) ? WRook : BRook;
@@ -224,9 +232,9 @@ void MoveGeneration::generateRookMoves(MoveList &moves, Side side)
 
 	while (rooks)
 	{
-		int	   source  = BitUtils::lsb(rooks);
-		Square from	   = static_cast<Square>(source);
-		U64	   attacks = at.rookAttacks(from, occBoth) & ~ownOcc;
+		int		   source  = BitUtils::lsb(rooks);
+		const auto from	   = static_cast<Square>(source);
+		const U64  attacks = at.rookAttacks(from, occBoth) & ~ownOcc;
 
 		addSlidingMoves(moves, from, attacks, enemyOcc);
 
@@ -235,7 +243,7 @@ void MoveGeneration::generateRookMoves(MoveList &moves, Side side)
 }
 
 
-void MoveGeneration::generateBishopMoves(MoveList &moves, Side side)
+void MoveGeneration::generateBishopMoves(MoveList &moves, const Side side) const
 {
 	const auto &at		   = AttackTables::instance();
 	const int	bishopType = (side == Side::White) ? WBishop : BBishop;
@@ -246,9 +254,9 @@ void MoveGeneration::generateBishopMoves(MoveList &moves, Side side)
 
 	while (bishops)
 	{
-		int	   source  = BitUtils::lsb(bishops);
-		Square from	   = static_cast<Square>(source);
-		U64	   attacks = at.bishopAttacks(from, occBoth) & ~ownOcc;
+		int		   source  = BitUtils::lsb(bishops);
+		const auto from	   = static_cast<Square>(source);
+		const U64  attacks = at.bishopAttacks(from, occBoth) & ~ownOcc;
 
 		addSlidingMoves(moves, from, attacks, enemyOcc);
 
@@ -257,7 +265,7 @@ void MoveGeneration::generateBishopMoves(MoveList &moves, Side side)
 }
 
 
-void MoveGeneration::generateQueenMoves(MoveList &moves, Side side)
+void MoveGeneration::generateQueenMoves(MoveList &moves, const Side side) const
 {
 	const auto &at		  = AttackTables::instance();
 	const int	queenType = (side == Side::White) ? WQueen : BQueen;
@@ -268,9 +276,9 @@ void MoveGeneration::generateQueenMoves(MoveList &moves, Side side)
 
 	while (queens)
 	{
-		int	   source  = BitUtils::lsb(queens);
-		Square from	   = static_cast<Square>(source);
-		U64	   attacks = at.queenAttacks(from, occBoth) & ~ownOcc;
+		int		   source  = BitUtils::lsb(queens);
+		const auto from	   = static_cast<Square>(source);
+		const U64  attacks = at.queenAttacks(from, occBoth) & ~ownOcc;
 
 		addSlidingMoves(moves, from, attacks, enemyOcc);
 
@@ -279,31 +287,31 @@ void MoveGeneration::generateQueenMoves(MoveList &moves, Side side)
 }
 
 
-void MoveGeneration::generateKingMoves(MoveList &moves, Side side)
+void MoveGeneration::generateKingMoves(MoveList &moves, const Side side) const
 {
 	const auto &at		 = AttackTables::instance();
 	const int	kingType = (side == Side::White) ? WKing : BKing;
-	U64			king	 = mChessBoard.pieces()[kingType];
+	const U64	king	 = mChessBoard.pieces()[kingType];
 	const U64	ownOcc	 = mChessBoard.occ()[to_index(side)];
 	const U64	enemyOcc = mChessBoard.occ()[to_index(side == Side::White ? Side::Black : Side::White)];
 
 	if (king)
 	{
-		int	   source  = BitUtils::lsb(king);
-		Square from	   = static_cast<Square>(source);
-		U64	   attacks = at.kingAttacks(from) & ~ownOcc;
+		int		   source  = BitUtils::lsb(king);
+		const auto from	   = static_cast<Square>(source);
+		const U64  attacks = at.kingAttacks(from) & ~ownOcc;
 
 		addSlidingMoves(moves, from, attacks, enemyOcc);
 	}
 }
 
 
-void MoveGeneration::addSlidingMoves(MoveList &moves, Square from, U64 attacks, U64 enemyOcc)
+void MoveGeneration::addSlidingMoves(MoveList &moves, const Square from, U64 attacks, const U64 enemyOcc)
 {
 	while (attacks)
 	{
-		int	   target = BitUtils::lsb(attacks);
-		Square to	  = static_cast<Square>(target);
+		int		   target = BitUtils::lsb(attacks);
+		const auto to	  = static_cast<Square>(target);
 
 		if (BitUtils::getBit(enemyOcc, target))
 			moves.push(Move(from, to, MoveFlag::Capture));

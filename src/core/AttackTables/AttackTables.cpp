@@ -6,6 +6,7 @@
 */
 
 #include "AttackTables.h"
+#include "BitBoardUtils.h"
 
 
 void AttackTables::initLeaperAttacks()
@@ -22,7 +23,7 @@ void AttackTables::initLeaperAttacks()
 }
 
 
-U64 AttackTables::maskPawnAttacks(Side side, int square)
+U64 AttackTables::maskPawnAttacks(const Side side, const int square)
 {
 	// result attacks bitboard
 	U64 attacks	 = 0ULL;
@@ -57,7 +58,7 @@ U64 AttackTables::maskPawnAttacks(Side side, int square)
 }
 
 
-U64 AttackTables::maskKnightAttacks(int square)
+U64 AttackTables::maskKnightAttacks(const int square)
 {
 	// result attacks bitboard
 	U64 attacks	 = 0ULL;
@@ -91,7 +92,7 @@ U64 AttackTables::maskKnightAttacks(int square)
 }
 
 
-U64 AttackTables::maskKingAttacks(int square)
+U64 AttackTables::maskKingAttacks(const int square)
 {
 	// result attacks bitboard
 	U64 attacks	 = 0ULL;
@@ -125,18 +126,18 @@ U64 AttackTables::maskKingAttacks(int square)
 }
 
 
-U64 AttackTables::generateBishopAttacks(int square, U64 blocker)
+U64 AttackTables::generateBishopAttacks(const int square, const U64 blocker)
 {
 	// result attacks bitboard
-	U64 attacks = 0ULL;
+	U64		  attacks = 0ULL;
 
 	// init rank, files
-	int r		= 0;
-	int f		= 0;
+	int		  r		  = 0;
+	int		  f		  = 0;
 
 	// init target rank & files
-	int tr		= square / 8;
-	int tf		= square % 8;
+	const int tr	  = square / 8;
+	const int tf	  = square % 8;
 
 	// generate bishop attacks
 	for (r = tr + 1, f = tf + 1; r <= 7 && f <= 7; r++, f++)
@@ -171,18 +172,18 @@ U64 AttackTables::generateBishopAttacks(int square, U64 blocker)
 }
 
 
-U64 AttackTables::generateRookAttacks(int square, U64 blocker)
+U64 AttackTables::generateRookAttacks(const int square, const U64 blocker)
 {
 	// result attacks bitboard
-	U64 attacks = 0ULL;
+	U64		  attacks = 0ULL;
 
 	// init rank, files
-	int r		= 0;
-	int f		= 0;
+	int		  r		  = 0;
+	int		  f		  = 0;
 
 	// init target rank & files
-	int tr		= square / 8;
-	int tf		= square % 8;
+	const int tr	  = square / 8;
+	const int tf	  = square % 8;
 
 	// generate rook attacks
 	for (r = tr + 1; r <= 7; r++)
@@ -217,17 +218,17 @@ U64 AttackTables::generateRookAttacks(int square, U64 blocker)
 }
 
 
-U64 AttackTables::maskBishopAttacks(int square)
+U64 AttackTables::maskBishopAttacks(const int square)
 {
 	// result attacks bitboard
-	U64 attacks = 0ULL;
+	U64		  attacks = 0ULL;
 
 	// init ranks & files
-	int r, f;
+	int		  r, f;
 
 	// init target rank & files
-	int tr = square / 8;
-	int tf = square % 8;
+	const int tr = square / 8;
+	const int tf = square % 8;
 
 	// mask relevant bishop occupancy bits
 	for (r = tr + 1, f = tf + 1; r <= 6 && f <= 6; r++, f++)
@@ -243,17 +244,17 @@ U64 AttackTables::maskBishopAttacks(int square)
 }
 
 
-U64 AttackTables::maskRookAttacks(int square)
+U64 AttackTables::maskRookAttacks(const int square)
 {
 	// result attacks bitboard
-	U64 attacks = 0ULL;
+	U64		  attacks = 0ULL;
 
 	// init ranks & files
-	int r, f;
+	int		  r, f;
 
 	// init target rank & files
-	int tr = square / 8;
-	int tf = square % 8;
+	const int tr = square / 8;
+	const int tf = square % 8;
 
 	// mask relevant rook occupancy bits
 	for (r = tr + 1; r <= 6; r++)
@@ -269,14 +270,14 @@ U64 AttackTables::maskRookAttacks(int square)
 }
 
 
-U64 AttackTables::setOccupancy(int index, int bitsInMask, U64 attackMask)
+U64 AttackTables::setOccupancy(const int index, const int bitsInMask, U64 attackMask)
 {
 	U64 occupancy = 0ULL; // Occupancy map
 
 	for (int count = 0; count < bitsInMask; ++count)
 	{
 		// get least significant 1st bit of attack mask
-		int square = BitUtils::lsb(attackMask);
+		const int square = BitUtils::lsb(attackMask);
 
 		// pop least significant 1st bit in attack map
 		BitUtils::popBit(attackMask, square);
@@ -290,35 +291,35 @@ U64 AttackTables::setOccupancy(int index, int bitsInMask, U64 attackMask)
 }
 
 
-void AttackTables::initSliderAttacks(int bishop)
+void AttackTables::initSliderAttacks(const int bishop)
 {
 	// loop over all squares
 	for (int square = 0; square < 64; ++square)
 	{
 		// init bishop & rook masks
-		mBishopMasks[square]  = maskBishopAttacks(square);
-		mRookMasks[square]	  = maskRookAttacks(square);
+		mBishopMasks[square]		= maskBishopAttacks(square);
+		mRookMasks[square]			= maskRookAttacks(square);
 
 		// ini current maks
-		U64 attackMask		  = bishop ? mBishopMasks[square] : mRookMasks[square];
+		const U64 attackMask		= bishop ? mBishopMasks[square] : mRookMasks[square];
 
 		// init relevant occupancy bit count
-		int relevantBitsCount = BitUtils::countBits(attackMask);
+		const int relevantBitsCount = BitUtils::countBits(attackMask);
 
-		// init occupancy indicies
-		int occupancyIndicies = (1 << relevantBitsCount);
+		// init occupancy indices
+		const int occupancy_indices = (1 << relevantBitsCount);
 
-		// loop over occupancy indicies
-		for (int index = 0; index < occupancyIndicies; ++index)
+		// loop over occupancy indices
+		for (int index = 0; index < occupancy_indices; ++index)
 		{
 			// bishop
 			if (bishop)
 			{
 				// init current occupancy variation
-				U64 occupancy					   = setOccupancy(index, relevantBitsCount, attackMask);
+				const U64 occupancy				   = setOccupancy(index, relevantBitsCount, attackMask);
 
 				// init magic index
-				int magicIndex					   = (occupancy * mBishopMagicNumbers[square]) >> (64 - bishop_relevant_bits[square]);
+				const U64 magicIndex			   = (occupancy * mBishopMagicNumbers[square]) >> (64 - bishop_relevant_bits[square]);
 
 				// init bishop attacks
 				mBishopAttacks[square][magicIndex] = generateBishopAttacks(square, occupancy);
@@ -327,10 +328,10 @@ void AttackTables::initSliderAttacks(int bishop)
 			else
 			{
 				// init current occupancy variation
-				U64 occupancy					 = setOccupancy(index, relevantBitsCount, attackMask);
+				const U64 occupancy				 = setOccupancy(index, relevantBitsCount, attackMask);
 
 				// init magic index
-				int magicIndex					 = (occupancy * mRookMagicNumbers[square]) >> (64 - rook_relevant_bits[square]);
+				const U64 magicIndex			 = (occupancy * mRookMagicNumbers[square]) >> (64 - rook_relevant_bits[square]);
 
 				// init rook attacks
 				mRookAttacks[square][magicIndex] = generateRookAttacks(square, occupancy);
@@ -340,7 +341,7 @@ void AttackTables::initSliderAttacks(int bishop)
 }
 
 
-U64 AttackTables::getBishopAttacks(int square, U64 occupancy) const
+U64 AttackTables::getBishopAttacks(const int square, U64 occupancy) const
 {
 	// get bishop attacks assuming current board occupancy
 	occupancy &= mBishopMasks[square];
@@ -351,7 +352,7 @@ U64 AttackTables::getBishopAttacks(int square, U64 occupancy) const
 };
 
 
-U64 AttackTables::getRookAttacks(int square, U64 occupancy) const
+U64 AttackTables::getRookAttacks(const int square, U64 occupancy) const
 {
 	// get rook attacks assuming current board occupancy
 	occupancy &= mRookMasks[square];
@@ -362,7 +363,7 @@ U64 AttackTables::getRookAttacks(int square, U64 occupancy) const
 }
 
 
-U64 AttackTables::getQueenAttacks(int square, U64 occupancy) const
+U64 AttackTables::getQueenAttacks(const int square, const U64 occupancy) const
 {
 	// init result attacks
 	U64 queenAttacks	= 0ULL;

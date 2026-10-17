@@ -8,12 +8,9 @@
 #pragma once
 
 #include <string>
-#include <algorithm>
-#include <cctype>
 #include <array>
 
 #include "BitboardTypes.h"
-#include "AttackTables.h"
 #include "ZobristHash.h"
 
 
@@ -142,14 +139,14 @@ public:
 
 	[[nodiscard]] Side				 getCurrentSide() const noexcept { return mSide; }
 	[[nodiscard]] Castling			 getCurrentCastlingRights() const noexcept { return mCastlingRights; }
-	[[nodiscard]] Square			 getCurrentEnPassantSqaure() const noexcept { return mEnPassantSquare; }
+	[[nodiscard]] Square			 getCurrentEnPassantSquare() const noexcept { return mEnPassantSquare; }
 	[[nodiscard]] int				 getHalfMoveClock() const noexcept { return mHalfMoveClock; }
 
 	void							 setSide(Side s) noexcept;
 	void							 flipSide() noexcept;
 	void							 setCastlingRights(Castling c) noexcept;
 	void							 setEnPassantSquare(Square sq) noexcept;
-	void							 setHalfMoveClock(int clock) noexcept { mHalfMoveClock = clock; }
+	void							 setHalfMoveClock(const int clock) noexcept { mHalfMoveClock = clock; }
 	void							 incrementMoveCounter() noexcept { ++mMoveCounter; }
 	void							 decrementMoveCounter() noexcept
 	{
@@ -165,10 +162,10 @@ public:
 
 private:
 	// Hash update helpers (called internally when board changes)
-	void							  hashPiece(PieceType piece, Square sq) { mHash ^= ZobristHash::piece(piece, sq); }
+	void							  hashPiece(const PieceType piece, const Square sq) { mHash ^= ZobristHash::piece(piece, sq); }
 	void							  hashSide() { mHash ^= ZobristHash::sideToMove(); }
-	void							  hashCastling(Castling rights) { mHash ^= ZobristHash::castling(rights); }
-	void							  hashEnPassant(Square sq) { mHash ^= ZobristHash::enPassant(sq); }
+	void							  hashCastling(const Castling rights) { mHash ^= ZobristHash::castling(rights); }
+	void							  hashEnPassant(const Square sq) { mHash ^= ZobristHash::enPassant(sq); }
 
 
 	Bitboards						  mBitBoards{};						 // Array of all bitboards

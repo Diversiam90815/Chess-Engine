@@ -52,7 +52,7 @@ TEST_F(EnPassantTests, EnPassantSquareSetAfterDoublePawnPush)
 	Move doublePush(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(doublePush);
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant square should be e3 after e2-e4";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant square should be e3 after e2-e4";
 }
 
 
@@ -60,12 +60,12 @@ TEST_F(EnPassantTests, EnPassantSquareResetAfterOtherMove)
 {
 	// Make double pawn push
 	mExecution.makeMove(Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush));
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3);
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3);
 
 	// Make another move
 	mExecution.makeMove(Move(Square::b8, Square::c6, MoveFlag::Quiet));
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "En passant square should reset after non-double-push move";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "En passant square should reset after non-double-push move";
 }
 
 
@@ -134,7 +134,7 @@ TEST_F(EnPassantTests, EnPassantUnmakeRestoresPawn)
 	EXPECT_EQ(mBoard.pieceAt(Square::e5), PieceType::WPawn) << "White pawn should be back at e5";
 	EXPECT_EQ(mBoard.pieceAt(Square::d5), PieceType::BPawn) << "Black pawn should be restored at d5";
 	EXPECT_EQ(mBoard.pieceAt(Square::d6), PieceType::None) << "d6 should be empty";
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::d6) << "En passant square should be restored";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::d6) << "En passant square should be restored";
 }
 
 

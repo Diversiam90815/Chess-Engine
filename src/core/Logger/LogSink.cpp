@@ -15,10 +15,10 @@
 namespace
 {
 
-std::shared_mutex	  gSinkMutex;
-engine::LogSink		  gSink;
-std::atomic<bool>	  gHasSink{false};
-std::atomic<int>	  gLevel{static_cast<int>(engine::LogLevel::Info)};
+std::shared_mutex gSinkMutex;
+engine::LogSink	  gSink;
+std::atomic<bool> gHasSink{false};
+std::atomic<int>  gLevel{static_cast<int>(engine::LogLevel::Info)};
 
 } // namespace
 
@@ -44,7 +44,7 @@ bool engine::isLogEnabled(LogLevel level)
 }
 
 
-void engine::writeLog(LogLevel level, const char *file, int line, const char *function, const std::string &message)
+void engine::writeLog(const LogLevel level, const char *file, const int line, const char *function, const std::string &message)
 {
 	std::shared_lock lock(gSinkMutex);
 
@@ -53,7 +53,7 @@ void engine::writeLog(LogLevel level, const char *file, int line, const char *fu
 
 	try
 	{
-		gSink(LogRecord{level, file ? file : "", line, function ? function : "", message});
+		gSink(LogRecord{.level = level, .file = file ? file : "", .line = line, .function = function ? function : "", .message = message});
 	}
 	catch (...)
 	{

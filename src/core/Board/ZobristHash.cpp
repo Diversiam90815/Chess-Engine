@@ -5,7 +5,10 @@
   ==============================================================================
 */
 
+#include <random>
+
 #include "ZobristHash.h"
+
 
 // Static member definitions
 bool									 ZobristHash::mInitialized = false;

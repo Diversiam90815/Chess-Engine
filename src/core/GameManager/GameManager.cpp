@@ -6,6 +6,7 @@
 */
 
 #include "GameManager.h"
+#include "SystemInfo.h"
 
 
 GameManager::~GameManager()
@@ -25,7 +26,7 @@ bool GameManager::init()
 	mStateMachine	= std::make_unique<StateMachine>();
 
 	mGameController->setEventQueue(&mEvents);
-	mGameController->setCPUMoveCallback([this](Move move) { mStateMachine->onCPUMoveCalculated(move); });
+	mGameController->setCPUMoveCallback([this](const Move move) { mStateMachine->onCPUMoveCalculated(move); });
 
 	mStateMachine->setGameController(mGameController.get());
 	mStateMachine->setEventQueue(&mEvents);
@@ -61,20 +62,20 @@ void GameManager::shutDown()
 // Game Control
 //=========================================================================
 
-void GameManager::startGame(GameConfiguration config)
+void GameManager::startGame(GameConfiguration config) const
 {
 	LOG_INFO("Starting game. Mode : {}", static_cast<int>(config.mode));
 	mStateMachine->onGameStart(config);
 }
 
 
-void GameManager::resetGame()
+void GameManager::resetGame() const
 {
 	mStateMachine->onGameReset();
 }
 
 
-void GameManager::undoMove()
+void GameManager::undoMove() const
 {
 	mStateMachine->onUndoRequested();
 }
@@ -84,7 +85,7 @@ void GameManager::undoMove()
 // Input Events
 //=========================================================================
 
-void GameManager::submitMove(Square from, Square to, PieceType promotion)
+void GameManager::submitMove(const Square from, const Square to, const PieceType promotion) const
 {
 	LOG_INFO("Move submitted: {} -> {}", square_to_coordinates[to_index(from)], square_to_coordinates[to_index(to)]);
 
@@ -92,7 +93,7 @@ void GameManager::submitMove(Square from, Square to, PieceType promotion)
 }
 
 
-void GameManager::onSquareSelected(Square sq)
+void GameManager::onSquareSelected(const Square sq) const
 {
 	LOG_INFO("Square {} selected", square_to_coordinates[to_index(sq)]);
 
@@ -100,7 +101,7 @@ void GameManager::onSquareSelected(Square sq)
 }
 
 
-void GameManager::onPromotionChosen(PieceType piece)
+void GameManager::onPromotionChosen(const PieceType piece) const
 {
 	mStateMachine->onPromotionChosen(piece);
 }
@@ -143,7 +144,7 @@ std::array<PieceType, 64> GameManager::getBoardPieces() const
 }
 
 
-PieceType GameManager::getPieceAt(Square sq) const
+PieceType GameManager::getPieceAt(const Square sq) const
 {
 	return mGameController->getBoard().pieceAt(sq);
 }
@@ -161,16 +162,14 @@ const MoveList &GameManager::getLegalMoves() const
 }
 
 
-void GameManager::getLegalMovesFromSquare(Square from, MoveList &out) const
+void GameManager::getLegalMovesFromSquare(const Square from, MoveList &out) const
 {
 	out.clear();
 
-	const MoveList &all = mGameController->getAllLegalMoves();
-
-	for (const Move &move : all)
+	for (const Move &moves : getLegalMoves())
 	{
-		if (move.from() == from)
-			out.push(move);
+		if (moves.from() == from)
+			out.push(moves);
 	}
 }
 
@@ -181,7 +180,7 @@ const MoveList &GameManager::getSelectionMoves() const
 }
 
 
-std::string GameManager::getMoveNotation(Move move) const
+std::string GameManager::getMoveNotation(const Move move) const
 {
 	return mGameController->getMoveNotation(move);
 }
@@ -193,7 +192,7 @@ const std::vector<MoveHistoryEntry> &GameManager::getMoveHistory() const
 }
 
 
-const std::vector<PieceType> &GameManager::getCapturedPieces(Side player) const
+const std::vector<PieceType> &GameManager::getCapturedPieces(const Side player) const
 {
 	return (player == Side::White) ? mGameController->getWhitePlayer().getCapturedPieces() : mGameController->getBlackPlayer().getCapturedPieces();
 }

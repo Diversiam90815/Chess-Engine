@@ -5,7 +5,7 @@
   ==============================================================================
 */
 
-#include <memory>
+#pragma once
 
 #include "IGameController.h"
 #include "GameEngine.h"
@@ -78,7 +78,7 @@ public:
 	/// Every legal move in the current position.
 	const MoveList						&getAllLegalMoves() const;
 
-	std::string							 getMoveNotation(Move move) const { return mEngine.getMoveNotation(move); }
+	std::string							 getMoveNotation(const Move move) const { return mEngine.getMoveNotation(move); }
 
 	Player								&getWhitePlayer() { return mWhitePlayer; }
 	Player								&getBlackPlayer() { return mBlackPlayer; }
@@ -107,6 +107,6 @@ private:
 
 	std::function<void(Move)> mOnCPUMove;
 
-	void					  invalidateCache() { mCacheValid = false; }
+	void					  invalidateCache() const { mCacheValid = false; }
 	void					  ensureCacheValid() const;
 };

@@ -156,17 +156,17 @@ TEST_F(MoveHistoryTests, UnmakeRestoresEnPassantSquare)
 	// After double pawn push, en passant square is set
 	mExecution.makeMove(Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush));
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant should be e3";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant should be e3";
 
 	// Make another move (resets en passant)
 	mExecution.makeMove(Move(Square::b8, Square::c6, MoveFlag::Quiet));
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "En passant should be None";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "En passant should be None";
 
 	// Unmake should restore en passant
 	mExecution.unmakeMove();
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant should be restored to e3";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant should be restored to e3";
 }
 
 

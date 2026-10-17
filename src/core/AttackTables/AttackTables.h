@@ -29,8 +29,6 @@ public:
 	[[nodiscard]] U64 rookAttacks(const Square sq, const U64 occ) const noexcept { return getRookAttacks(to_index(sq), occ); }
 	[[nodiscard]] U64 queenAttacks(const Square sq, const U64 occ) const noexcept { return getQueenAttacks(to_index(sq), occ); }
 
-	void			  initLeaperAttacks();
-
 	static U64		  maskPawnAttacks(Side side, int square);
 	static U64		  maskKnightAttacks(int square);
 	static U64		  maskKingAttacks(int square);
@@ -41,18 +39,21 @@ public:
 	static U64		  generateBishopAttacks(int square, U64 blocker);
 	static U64		  setOccupancy(int index, int bitsInMask, U64 attackMask);
 
-	void			  initSliderAttacks(int bishop);
-	[[nodiscard]] U64 getBishopAttacks(int square, U64 occupancy) const;
-	[[nodiscard]] U64 getRookAttacks(int square, U64 occupancy) const;
-	[[nodiscard]] U64 getQueenAttacks(int square, U64 occupancy) const;
-
 private:
 	AttackTables()
 	{
+		initMasks();
 		initLeaperAttacks();
-		initSliderAttacks(/*bishop=*/1);
-		initSliderAttacks(/*bishop=*/0);
+		initSliderAttacks(/*bishop=*/true);
+		initSliderAttacks(/*bishop=*/false);
 	}
+
+	void			  initMasks();
+	void			  initLeaperAttacks();
+	void			  initSliderAttacks(bool bishop);
+	[[nodiscard]] U64 getBishopAttacks(int square, U64 occupancy) const;
+	[[nodiscard]] U64 getRookAttacks(int square, U64 occupancy) const;
+	[[nodiscard]] U64 getQueenAttacks(int square, U64 occupancy) const;
 
 	U64 mPawnAttacks[2][64]{};	   // pawn attack table [side][square]
 	U64 mKnightAttacks[64]{};	   // knight attack table [square]
@@ -63,7 +64,7 @@ private:
 	U64 mBishopMasks[64]{};		   // bishop occupancy masks [square]
 	U64 mRookMasks[64]{};		   // rook occupancy masks [square]
 
-	U64 mRookMagicNumbers[64]	= {0x8a80104000800020ULL, 0x140002000100040ULL,	 0x2801880a0017001ULL,	0x100081001000420ULL,  0x200020010080420ULL,  0x3001c0002010008ULL,
+	static constexpr U64 mRookMagicNumbers[64] = {0x8a80104000800020ULL, 0x140002000100040ULL,	 0x2801880a0017001ULL,	0x100081001000420ULL,  0x200020010080420ULL,  0x3001c0002010008ULL,
 								   0x8480008002000100ULL, 0x2080088004402900ULL, 0x800098204000ULL,		0x2024401000200040ULL, 0x100802000801000ULL,  0x120800800801000ULL,
 								   0x208808088000400ULL,  0x2802200800400ULL,	 0x2200800100020080ULL, 0x801000060821100ULL,  0x80044006422000ULL,	  0x100808020004000ULL,
 								   0x12108a0010204200ULL, 0x140848010000802ULL,	 0x481828014002800ULL,	0x8094004002004100ULL, 0x4010040010010802ULL, 0x20008806104ULL,
@@ -76,7 +77,7 @@ private:
 								   0x20030a0244872ULL,	  0x12001008414402ULL,	 0x2006104900a0804ULL,	0x1004081002402ULL};
 
 
-	U64 mBishopMagicNumbers[64] = {0x40040844404084ULL,	  0x2004208a004208ULL,	 0x10190041080202ULL,	0x108060845042010ULL,  0x581104180800210ULL,  0x2112080446200010ULL,
+	static constexpr U64 mBishopMagicNumbers[64] = {0x40040844404084ULL,	  0x2004208a004208ULL,	 0x10190041080202ULL,	0x108060845042010ULL,  0x581104180800210ULL,  0x2112080446200010ULL,
 								   0x1080820820060210ULL, 0x3c0808410220200ULL,	 0x4050404440404ULL,	0x21001420088ULL,	   0x24d0080801082102ULL, 0x1020a0a020400ULL,
 								   0x40308200402ULL,	  0x4011002100800ULL,	 0x401484104104005ULL,	0x801010402020200ULL,  0x400210c3880100ULL,	  0x404022024108200ULL,
 								   0x810018200204102ULL,  0x4002801a02003ULL,	 0x85040820080400ULL,	0x810102c808880400ULL, 0xe900410884800ULL,	  0x8002020480840102ULL,

@@ -6,7 +6,17 @@
 */
 
 #include "AttackTables.h"
-#include "BitBoardUtils.h"
+#include "BitboardUtils.h"
+
+
+void AttackTables::initMasks()
+{
+	for (int square = 0; square < 64; ++square)
+	{
+		mBishopMasks[square] = maskBishopAttacks(square);
+		mRookMasks[square]	 = maskRookAttacks(square);
+	}
+}
 
 
 void AttackTables::initLeaperAttacks()
@@ -291,15 +301,11 @@ U64 AttackTables::setOccupancy(const int index, const int bitsInMask, U64 attack
 }
 
 
-void AttackTables::initSliderAttacks(const int bishop)
+void AttackTables::initSliderAttacks(const bool bishop)
 {
 	// loop over all squares
 	for (int square = 0; square < 64; ++square)
 	{
-		// init bishop & rook masks
-		mBishopMasks[square]		= maskBishopAttacks(square);
-		mRookMasks[square]			= maskRookAttacks(square);
-
 		// ini current maks
 		const U64 attackMask		= bishop ? mBishopMasks[square] : mRookMasks[square];
 

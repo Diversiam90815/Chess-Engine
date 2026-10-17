@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "pch.h"
+
 #include "Execution/MoveExecution.h"
 #include "Generation/MoveGeneration.h"
 #include "Validation/MoveValidation.h"

@@ -6,6 +6,7 @@
 */
 
 #include "MoveExecution.h"
+#include "EngineLog.h"
 
 
 MoveExecution::MoveExecution(Chessboard &board) : mChessBoard(board) {}

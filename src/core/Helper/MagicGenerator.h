@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <iostream>
-#include <cstring>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 #include "AttackTables.h"

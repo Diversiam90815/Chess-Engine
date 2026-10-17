@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <string>
-#include <array>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 #include "ZobristHash.h"

@@ -7,14 +7,10 @@
 
 #pragma once
 
-#include <array>
-#include <memory>
-#include <string>
-#include <vector>
+#include "pch.h"
 
 #include "EventQueue.h"
 #include "GameController.h"
-#include "EngineLog.h"
 #include "StateMachine.h"
 
 

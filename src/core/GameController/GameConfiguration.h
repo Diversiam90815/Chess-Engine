@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <cassert>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 #include "Parameters.h"

@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <array>
-#include <cstdint>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 

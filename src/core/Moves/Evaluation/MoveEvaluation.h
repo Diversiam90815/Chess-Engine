@@ -8,10 +8,10 @@
 
 #pragma once
 
+#include "pch.h"
+
 #include "Move.h"
 #include "ChessBoard.h"
-
-#include <array>
 
 
 /**

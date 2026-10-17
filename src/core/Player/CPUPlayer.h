@@ -7,9 +7,7 @@
 
 #pragma once
 
-#include <memory>
-#include <random>
-#include <thread>
+#include "pch.h"
 
 #include "Parameters.h"
 #include "GameEngine.h"

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <bit>
+#include "pch.h"
 #include "BitboardTypes.h"
 
 

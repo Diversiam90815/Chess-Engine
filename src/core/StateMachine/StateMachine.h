@@ -7,10 +7,7 @@
 
 #pragma once
 
-#include <queue>
-#include <mutex>
-#include <atomic>
-#include <condition_variable>
+#include "pch.h"
 
 #include "Parameters.h"
 #include "Move.h"
@@ -96,7 +93,7 @@ private:
 
 	void				   transitionTo(GameState newState);
 	void				   onStateEnter(GameState enteringState) const;
-	GameState			   determineNextTurnState() const;
+	[[nodiscard]] GameState			   determineNextTurnState() const;
 	bool				   tryExecuteMove(Move move);
 
 	GameState			   resolveAndPlay(Square from, Square to, PieceType promotion);

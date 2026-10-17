@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <vector>
+#include "pch.h"
 
 #include "ChessBoard.h"
 #include "Notation/MoveNotation.h"
 #include "Move.h"
-#include "EngineLog.h"
 
 
 struct MoveHistoryEntry

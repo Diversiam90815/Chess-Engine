@@ -7,11 +7,6 @@
 
 #include "LogSink.h"
 
-#include <atomic>
-#include <mutex>
-#include <shared_mutex>
-
-
 namespace
 {
 

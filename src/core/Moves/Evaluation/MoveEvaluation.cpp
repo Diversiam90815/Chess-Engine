@@ -6,9 +6,6 @@
   ==============================================================================
 */
 
-#include <algorithm>
-#include <cstring>
-
 #include "MoveEvaluation.h"
 #include "PieceValues.h"
 

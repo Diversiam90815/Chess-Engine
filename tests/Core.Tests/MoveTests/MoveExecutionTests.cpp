@@ -27,9 +27,9 @@ protected:
 TEST_F(MoveExecutionTest, ExecuteMoveUpdatesBoard)
 {
 	// Move white pawn e2 to e4
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 
-	bool result = mExecution.makeMove(move);
+	const bool	   result = mExecution.makeMove(move);
 
 	EXPECT_TRUE(result) << "Move should succeed";
 	EXPECT_EQ(mBoard.pieceAt(Square::e2), PieceType::None) << "e2 should be empty after move";
@@ -41,7 +41,7 @@ TEST_F(MoveExecutionTest, ExecuteMoveSwitchesSide)
 {
 	EXPECT_EQ(mBoard.getCurrentSide(), Side::White) << "Initial side should be white";
 
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(move);
 
 	EXPECT_EQ(mBoard.getCurrentSide(), Side::Black) << "Side should be black after white's move";
@@ -61,8 +61,8 @@ TEST_F(MoveExecutionTest, ExecuteCaptureMove)
 	mBoard.updateOccupancies();
 
 	// Execute capture move
-	Move captureMove(Square::e4, Square::f5, MoveFlag::Capture);
-	bool result = mExecution.makeMove(captureMove);
+	constexpr Move captureMove(Square::e4, Square::f5, MoveFlag::Capture);
+	const bool	   result = mExecution.makeMove(captureMove);
 
 	EXPECT_TRUE(result) << "Capture move should succeed";
 	EXPECT_EQ(mBoard.pieceAt(Square::f5), PieceType::WKnight) << "f5 should have white knight after capture";
@@ -72,7 +72,7 @@ TEST_F(MoveExecutionTest, ExecuteCaptureMove)
 
 TEST_F(MoveExecutionTest, MoveHistoryIsRecorded)
 {
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(move);
 
 	EXPECT_EQ(mExecution.historySize(), 1) << "History should have one entry";
@@ -87,11 +87,11 @@ TEST_F(MoveExecutionTest, MoveHistoryIsRecorded)
 TEST_F(MoveExecutionTest, UnmakeMoveRestoresPosition)
 {
 	// Make a move
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(move);
 
 	// Unmake the move
-	bool result = mExecution.unmakeMove();
+	const bool result = mExecution.unmakeMove();
 
 	EXPECT_TRUE(result) << "Unmake should succeed";
 	EXPECT_EQ(mBoard.pieceAt(Square::e2), PieceType::WPawn) << "e2 should have pawn after unmake";
@@ -113,7 +113,7 @@ TEST_F(MoveExecutionTest, UnmakeCaptureRestoresCapturedPiece)
 	mBoard.updateOccupancies();
 
 	// Execute and unmake capture
-	Move captureMove(Square::e4, Square::f5, MoveFlag::Capture);
+	constexpr Move captureMove(Square::e4, Square::f5, MoveFlag::Capture);
 	mExecution.makeMove(captureMove);
 	mExecution.unmakeMove();
 
@@ -124,7 +124,7 @@ TEST_F(MoveExecutionTest, UnmakeCaptureRestoresCapturedPiece)
 
 TEST_F(MoveExecutionTest, UnmakeWithEmptyHistoryReturnsFalse)
 {
-	bool result = mExecution.unmakeMove();
+	const bool result = mExecution.unmakeMove();
 
 	EXPECT_FALSE(result) << "Unmake with empty history should return false";
 }
@@ -144,10 +144,10 @@ TEST_F(MoveExecutionTest, ClearHistoryRemovesAllEntries)
 
 TEST_F(MoveExecutionTest, DoublePawnPushSetsEnPassantSquare)
 {
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(move);
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant square should be e3 after e2-e4";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant square should be e3 after e2-e4";
 }
 
 
@@ -159,7 +159,7 @@ TEST_F(MoveExecutionTest, QuietMoveResetsEnPassantSquare)
 	// Make a quiet move
 	mExecution.makeMove(Move(Square::b8, Square::c6, MoveFlag::Quiet));
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "En passant should be reset after quiet move";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "En passant should be reset after quiet move";
 }
 
 
@@ -175,7 +175,7 @@ TEST_F(MoveExecutionTest, KingsideCastlingMovesKingAndRook)
 	mBoard.setCastlingRights(Castling::WK);
 	mBoard.updateOccupancies();
 
-	Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
 	mExecution.makeMove(castleMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::g1), PieceType::WKing) << "King should be at g1";
@@ -197,7 +197,7 @@ TEST_F(MoveExecutionTest, QueensideCastlingMovesKingAndRook)
 	mBoard.setCastlingRights(Castling::WQ);
 	mBoard.updateOccupancies();
 
-	Move castleMove(Square::e1, Square::c1, MoveFlag::QueenCastle);
+	constexpr Move castleMove(Square::e1, Square::c1, MoveFlag::QueenCastle);
 	mExecution.makeMove(castleMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::c1), PieceType::WKing) << "King should be at c1";
@@ -218,7 +218,7 @@ TEST_F(MoveExecutionTest, UnmakeCastlingRestoresPosition)
 	mBoard.setCastlingRights(Castling::WK);
 	mBoard.updateOccupancies();
 
-	Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move castleMove(Square::e1, Square::g1, MoveFlag::KingCastle);
 	mExecution.makeMove(castleMove);
 	mExecution.unmakeMove();
 
@@ -242,7 +242,7 @@ TEST_F(MoveExecutionTest, EnPassantCapturesCorrectPawn)
 	mBoard.setEnPassantSquare(Square::d6);
 	mBoard.updateOccupancies();
 
-	Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
 	mExecution.makeMove(enPassantMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::d6), PieceType::WPawn) << "White pawn should be at d6";
@@ -263,7 +263,7 @@ TEST_F(MoveExecutionTest, UnmakeEnPassantRestoresCapturedPawn)
 	mBoard.setEnPassantSquare(Square::d6);
 	mBoard.updateOccupancies();
 
-	Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
 	mExecution.makeMove(enPassantMove);
 	mExecution.unmakeMove();
 
@@ -283,7 +283,7 @@ TEST_F(MoveExecutionTest, PawnPromotionToQueen)
 	mBoard.setSide(Side::White);
 	mBoard.updateOccupancies();
 
-	Move promoMove(Square::e7, Square::e8, MoveFlag::QueenPromotion);
+	constexpr Move promoMove(Square::e7, Square::e8, MoveFlag::QueenPromotion);
 	mExecution.makeMove(promoMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::e8), PieceType::WQueen) << "e8 should have white queen after promotion";
@@ -301,7 +301,7 @@ TEST_F(MoveExecutionTest, PawnPromotionToKnight)
 	mBoard.setSide(Side::White);
 	mBoard.updateOccupancies();
 
-	Move promoMove(Square::e7, Square::e8, MoveFlag::KnightPromotion);
+	constexpr Move promoMove(Square::e7, Square::e8, MoveFlag::KnightPromotion);
 	mExecution.makeMove(promoMove);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::e8), PieceType::WKnight) << "e8 should have white knight after promotion";
@@ -319,7 +319,7 @@ TEST_F(MoveExecutionTest, PromotionCaptureWorks)
 	mBoard.setSide(Side::White);
 	mBoard.updateOccupancies();
 
-	Move promoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
+	constexpr Move promoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
 	mExecution.makeMove(promoCapture);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::d8), PieceType::WQueen) << "d8 should have white queen";
@@ -337,7 +337,7 @@ TEST_F(MoveExecutionTest, UnmakePromotionRestoresPawn)
 	mBoard.setSide(Side::White);
 	mBoard.updateOccupancies();
 
-	Move promoMove(Square::e7, Square::e8, MoveFlag::QueenPromotion);
+	constexpr Move promoMove(Square::e7, Square::e8, MoveFlag::QueenPromotion);
 	mExecution.makeMove(promoMove);
 	mExecution.unmakeMove();
 
@@ -361,7 +361,7 @@ TEST_F(MoveExecutionTest, CastlingRightsLostAfterKingMove)
 	// Move king
 	mExecution.makeMove(Move(Square::e1, Square::f1, MoveFlag::Quiet));
 
-	Castling rights = mBoard.getCurrentCastlingRights();
+	const Castling rights = mBoard.getCurrentCastlingRights();
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be lost";
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::WQ)) << "White queenside castling should be lost";
 }
@@ -382,7 +382,7 @@ TEST_F(MoveExecutionTest, CastlingRightsLostAfterRookMove)
 	// Move kingside rook
 	mExecution.makeMove(Move(Square::h1, Square::h2, MoveFlag::Quiet));
 
-	Castling rights = mBoard.getCurrentCastlingRights();
+	const Castling rights = mBoard.getCurrentCastlingRights();
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be lost";
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WQ)) << "White queenside castling should still be available";
 }
@@ -402,7 +402,7 @@ TEST_F(MoveExecutionTest, CastlingRightsRestoredOnUnmake)
 	mExecution.makeMove(Move(Square::e1, Square::f1, MoveFlag::Quiet));
 	mExecution.unmakeMove();
 
-	Castling rights = mBoard.getCurrentCastlingRights();
+	const Castling rights = mBoard.getCurrentCastlingRights();
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be restored";
 }
 

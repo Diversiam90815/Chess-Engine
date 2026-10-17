@@ -21,7 +21,7 @@ class MoveListTests : public ::testing::Test
 
 TEST_F(MoveListTests, DefaultConstructorCreatesEmptyList)
 {
-	MoveList list;
+	const MoveList list;
 
 	EXPECT_EQ(list.size(), 0) << "Default list should be empty";
 	EXPECT_TRUE(list.empty()) << "Default list should report empty";
@@ -30,8 +30,8 @@ TEST_F(MoveListTests, DefaultConstructorCreatesEmptyList)
 
 TEST_F(MoveListTests, PushAddsMove)
 {
-	MoveList list;
-	Move	 move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	MoveList	   list;
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 
 	list.push(move);
 
@@ -56,9 +56,9 @@ TEST_F(MoveListTests, ClearRemovesAllMoves)
 
 TEST_F(MoveListTests, IndexOperator)
 {
-	MoveList list;
-	Move	 move1(Square::e2, Square::e4);
-	Move	 move2(Square::d2, Square::d4);
+	MoveList	   list;
+	constexpr Move move1(Square::e2, Square::e4);
+	constexpr Move move2(Square::d2, Square::d4);
 
 	list.push(move1);
 	list.push(move2);

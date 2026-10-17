@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include "BitboardTypes.h"
 
 
@@ -58,11 +56,11 @@ class Move
 {
 public:
 	constexpr Move() : mData(0) {}
-	constexpr Move(Square from, Square to, MoveFlag flags = MoveFlag::Quiet)
+	constexpr Move(const Square from, const Square to, MoveFlag flags = MoveFlag::Quiet)
 		: mData(static_cast<uint16_t>(to_index(from)) | (static_cast<uint16_t>(to_index(to)) << 6) | (static_cast<uint16_t>(flags) << 12))
 	{
 	}
-	constexpr Move(const uint16_t data) : mData(data) {}
+	explicit constexpr Move(const uint16_t data) : mData(data) {}
 
 	// Accessors
 	[[nodiscard]] constexpr Square	 from() const { return static_cast<Square>(mData & 0x3F); }
@@ -89,7 +87,7 @@ public:
 	constexpr bool		  operator==(const Move &other) const { return mData == other.mData; }
 	constexpr bool		  operator!=(const Move &other) const { return mData != other.mData; }
 
-	static constexpr Move none() { return Move(); }
+	static constexpr Move none() { return {}; }
 
 private:
 	uint16_t mData;
@@ -104,20 +102,20 @@ public:
 
 	MoveList() : mCount(0) {}
 
-	void				 push(Move move) { mMoves[mCount++] = move; }
-	void				 clear() { mCount = 0; }
+	void					  push(const Move move) { mMoves[mCount++] = move; }
+	void					  clear() { mCount = 0; }
 
-	[[nodiscard]] size_t size() const { return mCount; }
-	[[nodiscard]] bool	 empty() const { return mCount == 0; }
+	[[nodiscard]] size_t	  size() const { return mCount; }
+	[[nodiscard]] bool		  empty() const { return mCount == 0; }
 
-	Move				&operator[](size_t i) { return mMoves[i]; }
-	const Move			&operator[](size_t i) const { return mMoves[i]; }
+	Move					 &operator[](const size_t i) { return mMoves[i]; }
+	const Move				 &operator[](const size_t i) const { return mMoves[i]; }
 
 	// Iterator support
-	Move				*begin() { return mMoves; }
-	Move				*end() { return mMoves + mCount; }
-	const Move			*begin() const { return mMoves; }
-	const Move			*end() const { return mMoves + mCount; }
+	Move					 *begin() { return mMoves; }
+	Move					 *end() { return mMoves + mCount; }
+	[[nodiscard]] const Move *begin() const { return mMoves; }
+	[[nodiscard]] const Move *end() const { return mMoves + mCount; }
 
 private:
 	Move   mMoves[MAX_MOVES];
@@ -135,7 +133,7 @@ struct MoveIntent
 	Square	  toSquare	 = Square::None;
 	PieceType promotion	 = PieceType::None;
 	MoveList  legalMoves; // Cached legal moves from selected square
-	bool	  fromCPU	 = false;
+	bool	  fromCPU = false;
 
 	void	  clear()
 	{

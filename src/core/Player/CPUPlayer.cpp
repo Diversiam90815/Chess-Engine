@@ -6,10 +6,14 @@
 */
 
 #include "CPUPlayer.h"
+#include "Evaluation.h"
+#include "EngineLog.h"
 
-constexpr int INF				  = std::numeric_limits<int>::max();
-constexpr int NEG_INF			  = std::numeric_limits<int>::min() + 1;
-constexpr int MAX_QUIESENCE_DEPTH = 8;
+
+constexpr int INF				   = std::numeric_limits<int>::max();
+constexpr int NEG_INF			   = std::numeric_limits<int>::min() + 1;
+constexpr int MAX_QUIESCENCE_DEPTH = 8;
+
 
 CPUPlayer::CPUPlayer(GameEngine &engine) : mEngine(engine), mRandomGenerator(mRandomDevice()) {}
 
@@ -32,16 +36,16 @@ void CPUPlayer::configure(const CPUConfiguration &config)
 }
 
 
-void CPUPlayer::calculateMoveAsync(std::function<void(Move)> callback)
+void CPUPlayer::calculateMoveAsync(const std::function<void(Move)> &callback)
 {
 	cancelCalculation();
 
 	mIsCalculating.store(true);
 
 	mSearchThread = std::jthread(
-		[this, callback](std::stop_token stopToken)
+		[this, callback](const std::stop_token &stopToken)
 		{
-			Move bestMove = computeBestMove(stopToken);
+			const Move bestMove = computeBestMove(stopToken);
 			mIsCalculating.store(false);
 
 			if (!stopToken.stop_requested() && callback)
@@ -52,7 +56,7 @@ void CPUPlayer::calculateMoveAsync(std::function<void(Move)> callback)
 
 Move CPUPlayer::calculateMove()
 {
-	std::stop_source stopSource;
+	const std::stop_source stopSource;
 	return computeBestMove(stopSource.get_token());
 }
 
@@ -68,7 +72,7 @@ void CPUPlayer::cancelCalculation()
 }
 
 
-Move CPUPlayer::computeBestMove(std::stop_token stopToken)
+Move CPUPlayer::computeBestMove(const std::stop_token &stopToken)
 {
 	// Snapshot the board so the search operates on an independent copy
 	mSearchEngine.snapshotFrom(mEngine);
@@ -76,10 +80,10 @@ Move CPUPlayer::computeBestMove(std::stop_token stopToken)
 	MoveList legalMoves;
 	mSearchEngine.generateLegalMoves(legalMoves);
 
-	if (legalMoves.size() == 0)
+	if (legalMoves.empty())
 	{
 		LOG_WARNING("CPU has no legal moves");
-		return Move();
+		return {};
 	}
 
 	if (legalMoves.size() == 1)
@@ -92,8 +96,7 @@ Move CPUPlayer::computeBestMove(std::stop_token stopToken)
 	mTranspositionHits = 0;
 	mMoveEvaluation.clearSearchState();
 
-	Move bestMove;
-	bestMove = searchAlphaBeta(legalMoves, getSearchDepth(), stopToken);
+	const Move bestMove = searchAlphaBeta(legalMoves, getSearchDepth(), stopToken);
 
 	LOG_INFO("CPU searched {} nodes, {} TranspositionHits", mNodesSearched, mTranspositionHits);
 
@@ -101,48 +104,44 @@ Move CPUPlayer::computeBestMove(std::stop_token stopToken)
 }
 
 
-Move CPUPlayer::searchAlphaBeta(const MoveList &moves, int depth, std::stop_token stopToken)
+Move CPUPlayer::searchAlphaBeta(const MoveList &moves, const int depth, const std::stop_token &stopToken)
 {
 	std::vector<ScoredMove> scoredMoves;
 	scoredMoves.reserve(moves.size());
 
 	// Check TT for a best-move hint for root ordering
-	uint64_t hash = mSearchEngine.getHash();
-	int		 ttScoreUnused{0};
-	Move	 ttMove{};
+	const uint64_t hash = mSearchEngine.getHash();
+	int			   ttScoreUnused{0};
+	Move		   ttMove{};
 	lookupTransposition(hash, 0, NEG_INF, INF, ttScoreUnused, ttMove);
 
 	// Copy and order moves
-	MoveList orderedMoves;
-	for (size_t i = 0; i < moves.size(); ++i)
-		orderedMoves.push(moves[i]);
+	MoveList orderedMoves = moves;
 
 	mMoveEvaluation.orderMoves(orderedMoves, mSearchEngine.getBoard(), ttMove, 0);
 
-	int alpha = NEG_INF;
-	int beta  = INF;
+	int			  alpha = NEG_INF;
+	constexpr int beta	= INF;
 
-	for (size_t i = 0; i < orderedMoves.size(); ++i)
+	for (const auto move : orderedMoves)
 	{
 		if (isCancelled(stopToken))
 			break;
 
-		Move move = orderedMoves[i];
-
 		if (!mSearchEngine.makeMoveUnchecked(move))
 			continue;
 
-		int score = -alphaBeta(depth - 1, -beta, -alpha, 1, stopToken);
+		const int score = -alphaBeta(depth - 1, -beta, -alpha, 1, stopToken);
 		mSearchEngine.undoMoveUnchecked();
 
-		scoredMoves.push_back({move, score});
+		scoredMoves.push_back({.move = move, .score = score});
 
 		if (score > alpha)
 			alpha = score;
 	}
 
 	if (scoredMoves.empty())
-		return Move();
+		return {};
 
 	if (mConfig.enableRandomization)
 		return selectWithRandomization(scoredMoves);
@@ -151,7 +150,7 @@ Move CPUPlayer::searchAlphaBeta(const MoveList &moves, int depth, std::stop_toke
 }
 
 
-int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_token stopToken)
+int CPUPlayer::alphaBeta(const int depth, int alpha, const int beta, const int ply, const std::stop_token &stopToken)
 {
 	if (isCancelled(stopToken))
 		return 0;
@@ -159,9 +158,9 @@ int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_toke
 	++mNodesSearched;
 
 	// Check transposition table
-	uint64_t hash = mSearchEngine.getHash();
-	int		 ttScore{0};
-	Move	 ttMove{};
+	const uint64_t hash = mSearchEngine.getHash();
+	int			   ttScore{0};
+	Move		   ttMove{};
 
 	if (lookupTransposition(hash, depth, alpha, beta, ttScore, ttMove))
 	{
@@ -173,7 +172,7 @@ int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_toke
 	mSearchEngine.generateLegalMoves(moves);
 
 	// Checkmate/Stalemate
-	if (moves.size() == 0)
+	if (moves.empty())
 	{
 		if (mSearchEngine.isInCheck())
 			return NEG_INF + ply; // prefer faster checkmate
@@ -183,24 +182,22 @@ int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_toke
 
 	if (depth <= 0)
 		return quiescence(alpha, beta, stopToken, 0);
-	
+
 	// order moves
 	mMoveEvaluation.orderMoves(moves, mSearchEngine.getBoard(), ttMove, ply);
 
-	Move						 bestMove{};
-	TranspositionEntry::NodeType nodeType = TranspositionEntry::NodeType::UpperBound;
+	Move bestMove{};
+	auto nodeType = TranspositionEntry::NodeType::UpperBound;
 
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (const auto move : moves)
 	{
 		if (isCancelled(stopToken))
 			break;
 
-		Move move = moves[i];
-
 		if (!mSearchEngine.makeMoveUnchecked(move))
 			continue;
 
-		int score = -alphaBeta(depth - 1, -beta, -alpha, ply + 1, stopToken);
+		const int score = -alphaBeta(depth - 1, -beta, -alpha, ply + 1, stopToken);
 		mSearchEngine.undoMoveUnchecked();
 
 		if (score >= beta)
@@ -226,14 +223,14 @@ int CPUPlayer::alphaBeta(int depth, int alpha, int beta, int ply, std::stop_toke
 }
 
 
-int CPUPlayer::quiescence(int alpha, int beta, std::stop_token stopToken, int qDepth)
+int CPUPlayer::quiescence(int alpha, const int beta, const std::stop_token &stopToken, const int qDepth)
 {
 	if (isCancelled(stopToken))
 		return 0;
 
 	++mNodesSearched;
 
-	int standPat = Evaluation::evaluate(mSearchEngine.getBoard());
+	const int standPat = Evaluation::evaluate(mSearchEngine.getBoard());
 
 	if (standPat >= beta)
 		return beta;
@@ -241,8 +238,8 @@ int CPUPlayer::quiescence(int alpha, int beta, std::stop_token stopToken, int qD
 	if (standPat > alpha)
 		alpha = standPat;
 
-	// depth limit prevents quiesence explosion
-	if (qDepth >= MAX_QUIESENCE_DEPTH)
+	// depth limit prevents quiescence explosion
+	if (qDepth >= MAX_QUIESCENCE_DEPTH)
 		return alpha;
 
 	// generate only capture moves
@@ -250,23 +247,21 @@ int CPUPlayer::quiescence(int alpha, int beta, std::stop_token stopToken, int qD
 	mSearchEngine.generateLegalMoves(moves);
 
 	MoveList captures{};
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (auto move : moves)
 	{
-		if (moves[i].isCapture())
-			captures.push(moves[i]);
+		if (move.isCapture())
+			captures.push(move);
 	}
 
 	// Order captures by MVV-LVA
-	mMoveEvaluation.orderCaptures(captures, mSearchEngine.getBoard());
+	MoveEvaluation::orderCaptures(captures, mSearchEngine.getBoard());
 
-	for (size_t i = 0; i < captures.size(); ++i)
+	for (const auto &move : captures)
 	{
-		Move &move = captures[i];
-
 		if (!mSearchEngine.makeMoveUnchecked(move))
 			continue;
 
-		int score = -quiescence(-beta, -alpha, stopToken, qDepth + 1);
+		const int score = -quiescence(-beta, -alpha, stopToken, qDepth + 1);
 		mSearchEngine.undoMoveUnchecked();
 
 		if (score >= beta)
@@ -283,9 +278,9 @@ int CPUPlayer::quiescence(int alpha, int beta, std::stop_token stopToken, int qD
 Move CPUPlayer::selectBestMove(std::vector<ScoredMove> &scoredMoves)
 {
 	if (scoredMoves.empty())
-		return Move();
+		return {};
 
-	auto best = std::max_element(scoredMoves.begin(), scoredMoves.end());
+	const auto best = std::ranges::max_element(scoredMoves, {}, &ScoredMove::score);
 
 	return best->move;
 }
@@ -294,12 +289,12 @@ Move CPUPlayer::selectBestMove(std::vector<ScoredMove> &scoredMoves)
 Move CPUPlayer::selectWithRandomization(std::vector<ScoredMove> &scoredMoves)
 {
 	if (scoredMoves.empty())
-		return Move();
+		return {};
 
 	// sort descending by score
-	std::sort(scoredMoves.begin(), scoredMoves.end());
+	std::ranges::sort(scoredMoves, std::greater{}, &ScoredMove::score);
 
-	auto topMoves = filterTopCandidates(scoredMoves, 5);
+	const auto topMoves = filterTopCandidates(scoredMoves, 5);
 
 	if (topMoves.empty())
 		return scoredMoves[0].move;
@@ -310,13 +305,13 @@ Move CPUPlayer::selectWithRandomization(std::vector<ScoredMove> &scoredMoves)
 }
 
 
-std::vector<ScoredMove> CPUPlayer::filterTopCandidates(std::vector<ScoredMove> &moves, size_t maxCount) const
+std::vector<ScoredMove> CPUPlayer::filterTopCandidates(const std::vector<ScoredMove> &moves, const size_t maxCount)
 {
 	if (moves.empty())
 		return {};
 
-	int						bestScore = moves[0].score;
-	int						threshold = 50;
+	const int				bestScore = moves[0].score;
+	constexpr int			threshold = 50;
 
 	std::vector<ScoredMove> filtered;
 
@@ -333,9 +328,9 @@ std::vector<ScoredMove> CPUPlayer::filterTopCandidates(std::vector<ScoredMove> &
 }
 
 
-void CPUPlayer::storeTransposition(uint64_t hash, int depth, int score, TranspositionEntry::NodeType type, Move bestMove)
+void CPUPlayer::storeTransposition(const uint64_t hash, const int depth, const int score, const TranspositionEntry::NodeType type, const Move bestMove)
 {
-	auto it = mTranspositionTable.find(hash);
+	const auto it = mTranspositionTable.find(hash);
 
 	if (it != mTranspositionTable.end() && it->second.depth > depth)
 		return; // keep deeper entry
@@ -352,13 +347,13 @@ void CPUPlayer::storeTransposition(uint64_t hash, int depth, int score, Transpos
 		}
 	}
 
-	mTranspositionTable[hash] = {hash, depth, score, type, bestMove};
+	mTranspositionTable[hash] = {.hash = hash, .depth = depth, .score = score, .type = type, .bestMove = bestMove};
 }
 
 
-bool CPUPlayer::lookupTransposition(uint64_t hash, int depth, int alpha, int beta, int &score, Move &bestMove)
+bool CPUPlayer::lookupTransposition(const uint64_t hash, const int depth, const int alpha, const int beta, int &score, Move &bestMove)
 {
-	auto it = mTranspositionTable.find(hash);
+	const auto it = mTranspositionTable.find(hash);
 	if (it == mTranspositionTable.end())
 		return false;
 

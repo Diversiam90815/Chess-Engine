@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "ChessBoard.h"
+#include "BitboardUtils.h"
 
 
 namespace BoardTests
@@ -37,7 +38,7 @@ TEST_F(ChessboardTest, InitialSideIsWhite)
 
 TEST_F(ChessboardTest, InitialCastlingRightsAllAvailable)
 {
-	Castling rights = mBoard.getCurrentCastlingRights();
+	const Castling rights = mBoard.getCurrentCastlingRights();
 
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be available";
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WQ)) << "White queenside castling should be available";
@@ -48,7 +49,7 @@ TEST_F(ChessboardTest, InitialCastlingRightsAllAvailable)
 
 TEST_F(ChessboardTest, InitialEnPassantSquareIsNone)
 {
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "No en passant square on initial board";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "No en passant square on initial board";
 }
 
 
@@ -141,7 +142,7 @@ TEST_F(ChessboardTest, ClearRemovesAllPieces)
 	// Check that all squares are empty
 	for (int sq = 0; sq < 64; ++sq)
 	{
-		Square square = static_cast<Square>(sq);
+		const auto square = static_cast<Square>(sq);
 		EXPECT_EQ(mBoard.pieceAt(square), PieceType::None) << "Square " << sq << " should be empty after clear";
 	}
 }
@@ -173,7 +174,7 @@ TEST_F(ChessboardTest, SetCastlingRightsUpdatesCorrectly)
 {
 	mBoard.setCastlingRights(Castling::WK);
 
-	Castling rights = mBoard.getCurrentCastlingRights();
+	const Castling rights = mBoard.getCurrentCastlingRights();
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WK)) << "White kingside should be set";
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::WQ)) << "White queenside should not be set";
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::BK)) << "Black kingside should not be set";
@@ -185,7 +186,7 @@ TEST_F(ChessboardTest, SetEnPassantSquareUpdatesCorrectly)
 {
 	mBoard.setEnPassantSquare(Square::e3);
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant square should be e3";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant square should be e3";
 }
 
 
@@ -198,7 +199,7 @@ TEST_F(ChessboardTest, SaveAndRestoreState)
 	mBoard.setHalfMoveClock(15);
 
 	// Save state
-	BoardState state = mBoard.saveState();
+	const BoardState state = mBoard.saveState();
 
 	// Modify further
 	mBoard.flipSide();
@@ -210,7 +211,7 @@ TEST_F(ChessboardTest, SaveAndRestoreState)
 	mBoard.restoreState(state);
 
 	// Verify restoration
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::d6) << "En passant should be restored to d6";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::d6) << "En passant should be restored to d6";
 	EXPECT_EQ(mBoard.getCurrentCastlingRights(), Castling::WK | Castling::BQ) << "Castling rights should be restored";
 	EXPECT_EQ(mBoard.getHalfMoveClock(), 15) << "Half move clock should be restored to 15";
 }
@@ -231,7 +232,7 @@ TEST_F(ChessboardTest, ParseFENStartPosition)
 	EXPECT_EQ(board.getCurrentSide(), Side::White) << "White should move first";
 
 	// Verify castling
-	Castling rights = board.getCurrentCastlingRights();
+	const Castling rights = board.getCurrentCastlingRights();
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be available";
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WQ)) << "White queenside castling should be available";
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::BK)) << "Black kingside castling should be available";
@@ -244,7 +245,7 @@ TEST_F(ChessboardTest, ParseFENWithEnPassant)
 	Chessboard board;
 	board.parseFEN("rnbqkbnr/pppp1ppp/8/4pP2/8/8/PPPPP1PP/RNBQKBNR w KQkq e6 0 3");
 
-	EXPECT_EQ(board.getCurrentEnPassantSqaure(), Square::e6) << "En passant square should be e6";
+	EXPECT_EQ(board.getCurrentEnPassantSquare(), Square::e6) << "En passant square should be e6";
 }
 
 
@@ -253,7 +254,7 @@ TEST_F(ChessboardTest, ParseFENWithLimitedCastling)
 	Chessboard board;
 	board.parseFEN("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w Kq - 0 1");
 
-	Castling rights = board.getCurrentCastlingRights();
+	const Castling rights = board.getCurrentCastlingRights();
 	EXPECT_TRUE(static_cast<bool>(rights & Castling::WK)) << "White kingside castling should be available";
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::WQ)) << "White queenside castling should not be available";
 	EXPECT_FALSE(static_cast<bool>(rights & Castling::BK)) << "Black kingside castling should not be available";
@@ -281,7 +282,7 @@ TEST_F(ChessboardTest, ZobristHashIsComputed)
 TEST_F(ChessboardTest, ZobristHashChangesAfterMove)
 {
 	mBoard.computeHash();
-	uint64_t initialHash = mBoard.getHash();
+	const uint64_t initialHash = mBoard.getHash();
 
 	// Make a move
 	mBoard.movePiece(PieceType::WPawn, Square::e2, Square::e4);
@@ -298,15 +299,15 @@ TEST_F(ChessboardTest, OccupanciesAreCorrect)
 	const auto &occ		 = mBoard.occ();
 
 	// White occupancy should have 16 bits set (16 pieces)
-	U64			whiteOcc = occ[static_cast<int>(Side::White)];
+	const U64	whiteOcc = occ[static_cast<int>(Side::White)];
 	EXPECT_EQ(BitUtils::popCount(whiteOcc), 16) << "White should have 16 pieces";
 
 	// Black occupancy should have 16 bits set
-	U64 blackOcc = occ[static_cast<int>(Side::Black)];
+	const U64 blackOcc = occ[static_cast<int>(Side::Black)];
 	EXPECT_EQ(BitUtils::popCount(blackOcc), 16) << "Black should have 16 pieces";
 
 	// Both occupancy should have 32 bits set
-	U64 bothOcc = occ[static_cast<int>(Side::Both)];
+	const U64 bothOcc = occ[static_cast<int>(Side::Both)];
 	EXPECT_EQ(BitUtils::popCount(bothOcc), 32) << "Total should be 32 pieces";
 }
 
@@ -317,7 +318,7 @@ TEST_F(ChessboardTest, OccupanciesUpdateAfterRemoval)
 	mBoard.updateOccupancies();
 
 	const auto &occ		 = mBoard.occ();
-	U64			whiteOcc = occ[static_cast<int>(Side::White)];
+	const U64	whiteOcc = occ[static_cast<int>(Side::White)];
 
 	EXPECT_EQ(BitUtils::popCount(whiteOcc), 15) << "White should have 15 pieces after removal";
 }

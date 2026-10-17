@@ -15,7 +15,7 @@
 namespace MovePrinter
 {
 
-void printAttackedSquares(MoveGeneration &gen, Side side)
+void printAttackedSquares(const MoveGeneration &gen, const Side side)
 {
 	printf("\nAttacked squares for %s:\n", side == Side::White ? "White" : "Black");
 	for (int rank = 0; rank < 8; ++rank)

@@ -15,13 +15,13 @@
 class PerftScenario : public IScenario
 {
 public:
-	explicit PerftScenario(int maxDepth = 4) : mMaxDepth(maxDepth) {}
+	explicit PerftScenario(const int maxDepth = 4) : mMaxDepth(maxDepth) {}
 
-	std::string name() const override { return "Perft"; }
-	void		run(GameEngine &engine) override;
+	[[nodiscard]] std::string name() const override { return "Perft"; }
+	void					  run(GameEngine &engine) override;
 
 private:
-	uint64_t perft(GameEngine &engine, int depth);
+	static uint64_t perft(GameEngine &engine, int depth);
 
-	int		 mMaxDepth;
+	int				mMaxDepth;
 };

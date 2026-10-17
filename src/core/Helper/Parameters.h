@@ -7,10 +7,6 @@
 
 #pragma once
 
-#include <array>
-
-#include "BitboardTypes.h"
-
 
 // <summary>
 // Represents the possible end states of a chess game.
@@ -52,15 +48,15 @@ constexpr auto cpuDifficultyToString(const CPUDifficulty diff)
 // </summary>
 enum class GameState
 {
-	Init				 = 1,
-	WaitingForInput		 = 2,
-	WaitingForTarget	 = 3,
-	PawnPromotion		 = 4,
-	WaitingForCPUMove	 = 6,
-	GameOver			 = 7,
+	Init			  = 1,
+	WaitingForInput	  = 2,
+	WaitingForTarget  = 3,
+	PawnPromotion	  = 4,
+	WaitingForCPUMove = 6,
+	GameOver		  = 7,
 };
 
-constexpr auto gameStateToString(GameState state)
+constexpr auto gameStateToString(const GameState state)
 {
 	switch (state)
 	{
@@ -93,4 +89,3 @@ constexpr auto drawReasonToString(const DrawReason reason)
 	default: return "None";
 	}
 }
-

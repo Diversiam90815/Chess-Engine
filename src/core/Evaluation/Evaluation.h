@@ -10,7 +10,6 @@
 
 #include "ChessBoard.h"
 #include "BitboardUtils.h"
-#include "PieceValues.h"
 
 
 class Evaluation
@@ -34,7 +33,7 @@ private:
 	[[nodiscard]] static int		   evaluateMobility(const Chessboard &board);
 
 	[[nodiscard]] static int		   scorePieceSquare(U64 bitboard, const int table[64], bool isWhite);
-	[[nodiscard]] static constexpr int mirrorSquare(int sq) { return sq ^ 56; }
+	[[nodiscard]] static constexpr int mirrorSquare(const int sq) { return sq ^ 56; }
 
 	// clang-format off
 	static constexpr int PST_PAWN[64] =

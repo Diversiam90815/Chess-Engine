@@ -13,6 +13,6 @@
 class AttackMapScenario : public IScenario
 {
 public:
-	std::string name() const override { return "Attack Map"; }
-	void		run(GameEngine &engine) override;
+	[[nodiscard]] std::string name() const override { return "Attack Map"; }
+	void					  run(GameEngine &engine) override;
 };

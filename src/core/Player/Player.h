@@ -5,14 +5,11 @@
   ==============================================================================
 */
 
-
 #pragma once
 
-#include <vector>
+#include "pch.h"
 
 #include "EventQueue.h"
-#include "EngineLog.h"
-#include "Parameters.h"
 
 
 /**
@@ -23,33 +20,33 @@ class Player
 {
 public:
 	Player() = default;
-	Player(Side color);
+	explicit Player(Side color);
 	~Player() = default;
 
-	Side getPlayerColor() const;
-	void setPlayerColor(Side value);
+	[[nodiscard]] Side							getPlayerColor() const;
+	void										setPlayerColor(Side value);
 
 	/**
 	 * @brief	Destination for PieceCaptured notifications. May be null.
 	 */
-	void setEventQueue(EventQueue *events) { mEvents = events; }
+	void										setEventQueue(EventQueue *events) { mEvents = events; }
 
 	/**
 	 * @brief	Record a newly captured opponent piece.
 	 */
-	void addCapturedPiece(const PieceType piece);
+	void										addCapturedPiece(PieceType piece);
 
 	/**
 	 * @brief	Remove the most recently captured piece (undo support).
 	 */
-	void removeLastCapturedPiece();
+	void										removeLastCapturedPiece();
 
 	/**
 	 * @brief	Reset player state to initial (fresh game).
 	 */
-	void reset();
+	void										reset();
 
-	const std::vector<PieceType> &getCapturedPieces() const { return mCapturedPieces; }
+	[[nodiscard]] const std::vector<PieceType> &getCapturedPieces() const { return mCapturedPieces; }
 
 private:
 	Side				   mSide = Side::None;

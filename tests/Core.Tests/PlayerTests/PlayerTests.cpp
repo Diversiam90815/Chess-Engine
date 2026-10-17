@@ -31,7 +31,7 @@ protected:
 	}
 
 	/// Everything the players published since the last call.
-	std::vector<engine::PieceCaptured> drainCaptures()
+	std::vector<engine::PieceCaptured> drainCaptures() const
 	{
 		std::vector<engine::PieceCaptured> captures;
 		engine::EngineEvent				   event;
@@ -57,7 +57,7 @@ protected:
 
 TEST_F(PlayerTests, DefaultConstructor)
 {
-	Player player;
+	const Player player;
 
 	EXPECT_EQ(player.getPlayerColor(), Side::None) << "Default player should have no color";
 }
@@ -231,7 +231,7 @@ TEST_F(PlayerTests, Reset)
 
 TEST_F(PlayerTests, ResetPreservesPlayerColor)
 {
-	Side originalColor = mWhitePlayer->getPlayerColor();
+	const Side originalColor = mWhitePlayer->getPlayerColor();
 
 	mWhitePlayer->addCapturedPiece(PieceType::BQueen);
 	mWhitePlayer->reset();

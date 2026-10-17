@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "EngineEvent.h"
 #include "EngineTypes.h"
 #include "GameConfiguration.h"
 

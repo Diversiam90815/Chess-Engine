@@ -6,6 +6,7 @@
 */
 
 #include "Evaluation.h"
+#include "PieceValues.h"
 
 
 int Evaluation::evaluate(const Chessboard &board)
@@ -93,13 +94,13 @@ int Evaluation::evaluateMobility(const Chessboard &board)
 }
 
 
-int Evaluation::scorePieceSquare(U64 bitboard, const int table[64], bool isWhite)
+int Evaluation::scorePieceSquare(U64 bitboard, const int table[64], const bool isWhite)
 {
 	int score = 0;
 
 	while (bitboard)
 	{
-		int sq = BitUtils::lsb(bitboard);
+		const int sq = BitUtils::lsb(bitboard);
 		score += table[isWhite ? sq : mirrorSquare(sq)];
 		bitboard &= bitboard - 1; // clear LSB
 	}

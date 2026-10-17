@@ -69,41 +69,41 @@ Engine_API void SetLogLevel(int level)
 //			Game Management
 //=============================================
 
-Engine_API void StartGame(CGameConfiguration config)
+Engine_API void StartGame(const CGameConfiguration config)
 {
-	if (auto *engine = EngineInstance::Engine())
+	if (const auto *engine = EngineInstance::Engine())
 		engine->startGame(ToGameConfiguration(config));
 }
 
 
 Engine_API void ResetGame()
 {
-	if (auto *engine = EngineInstance::Engine())
+	if (const auto *engine = EngineInstance::Engine())
 		engine->resetGame();
 }
 
 
 Engine_API void UndoMove()
 {
-	if (auto *engine = EngineInstance::Engine())
+	if (const auto *engine = EngineInstance::Engine())
 		engine->undoMove();
 }
 
 
-Engine_API bool GetBoardState(int *boardState)
+Engine_API bool GetBoardState(int *boardstate)
 {
-	if (!boardState)
+	if (!boardstate)
 		return false;
 
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	if (!engine)
 		return false;
 
-	std::array<PieceType, 64> pieces = engine->getBoardPieces();
+	const std::array<PieceType, 64> pieces = engine->getBoardPieces();
 
 	for (int sq = 0; sq < 64; ++sq)
 	{
-		boardState[sq] = static_cast<int>(pieces[sq]);
+		boardstate[sq] = static_cast<int>(pieces[sq]);
 	}
 
 	return true;
@@ -112,21 +112,21 @@ Engine_API bool GetBoardState(int *boardState)
 
 Engine_API int GetGameState()
 {
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	return engine ? static_cast<int>(engine->getGameState()) : 0;
 }
 
 
 Engine_API int GetCurrentSide()
 {
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	return engine ? static_cast<int>(engine->getCurrentSide()) : static_cast<int>(Side::None);
 }
 
 
 Engine_API bool IsInCheck()
 {
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	return engine ? engine->isInCheck() : false;
 }
 
@@ -140,14 +140,14 @@ Engine_API void OnSquareSelected(int square)
 	if (square < 0 || square >= 64)
 		return;
 
-	if (auto *engine = EngineInstance::Engine())
+	if (const auto *engine = EngineInstance::Engine())
 		engine->onSquareSelected(static_cast<Square>(square));
 }
 
 
 Engine_API void OnPawnPromotionChosen(int pieceType)
 {
-	if (auto *engine = EngineInstance::Engine())
+	if (const auto *engine = EngineInstance::Engine())
 		engine->onPromotionChosen(static_cast<PieceType>(pieceType));
 }
 
@@ -157,14 +157,14 @@ Engine_API void SubmitMove(int from, int to, int promotion)
 	if (from < 0 || from >= 64 || to < 0 || to >= 64)
 		return;
 
-	if (auto *engine = EngineInstance::Engine())
+	if (const auto *engine = EngineInstance::Engine())
 		engine->submitMove(static_cast<Square>(from), static_cast<Square>(to), static_cast<PieceType>(promotion));
 }
 
 
 Engine_API int GetNumLegalMoves()
 {
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	if (!engine)
 		return 0;
 
@@ -172,9 +172,9 @@ Engine_API int GetNumLegalMoves()
 }
 
 
-Engine_API bool GetLegalMoveAtIndex(int index, MoveInstance *move)
+Engine_API bool GetLegalMoveAtIndex(const int index, MoveInstance *move)
 {
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	if (!engine || !move)
 		return false;
 
@@ -188,9 +188,9 @@ Engine_API bool GetLegalMoveAtIndex(int index, MoveInstance *move)
 }
 
 
-Engine_API int GetLegalMovesForSquare(int square, MoveInstance *moves, int maxMoves)
+Engine_API int GetLegalMovesForSquare(int square, MoveInstance *moves, const int maxMoves)
 {
-	auto *engine = EngineInstance::Engine();
+	const auto *engine = EngineInstance::Engine();
 	if (!engine || !moves || maxMoves <= 0)
 		return -1;
 

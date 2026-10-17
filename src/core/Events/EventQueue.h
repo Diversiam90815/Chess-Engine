@@ -7,11 +7,7 @@
 
 #pragma once
 
-#include <chrono>
-#include <condition_variable>
-#include <deque>
-#include <functional>
-#include <mutex>
+#include "pch.h"
 
 #include "EngineEvent.h"
 
@@ -25,45 +21,46 @@
 class EventQueue
 {
 public:
-	EventQueue()  = default;
-	~EventQueue() = default;
+	EventQueue()									   = default;
+	~EventQueue()									   = default;
 
-	EventQueue(const EventQueue &)			 = delete;
-	EventQueue &operator=(const EventQueue &) = delete;
+	EventQueue(const EventQueue &)					   = delete;
+	EventQueue			&operator=(const EventQueue &) = delete;
 
 	/**
 	 * @brief	Append an event and notify waiters.
 	 */
-	void		push(engine::EngineEvent event);
+	void				 push(engine::EngineEvent event);
 
 	/**
 	 * @brief	Take the oldest event if one is pending. Never blocks.
 	 * @return	true if an event was written to @p out.
 	 */
-	bool		poll(engine::EngineEvent &out);
+	bool				 poll(engine::EngineEvent &out);
 
 	/**
 	 * @brief	Take the oldest event, waiting for one to arrive.
+	 * @param	out The event referenced as an [OUT] parameter
 	 * @param	timeout	Zero waits indefinitely (until close()).
 	 * @return	true if an event was written to @p out, false on timeout or close.
 	 */
-	bool		waitAndPop(engine::EngineEvent &out, std::chrono::milliseconds timeout = std::chrono::milliseconds::zero());
+	bool				 waitAndPop(engine::EngineEvent &out, std::chrono::milliseconds timeout = std::chrono::milliseconds::zero());
 
 	/**
 	 * @brief	Install a callback invoked after every push.
 	 *			Pass nullptr to remove it.
 	 */
-	void		setWakeHook(std::function<void()> hook);
+	void				 setWakeHook(std::function<void()> hook);
 
 	/**
 	 * @brief	Wake every blocked waiter and reject further pushes. Used at shutdown.
 	 */
-	void		close();
+	void				 close();
 
 	/**
 	 * @brief	Drop all pending events without delivering them.
 	 */
-	void		clear();
+	void				 clear();
 
 	[[nodiscard]] bool	 isClosed() const;
 	[[nodiscard]] size_t size() const;

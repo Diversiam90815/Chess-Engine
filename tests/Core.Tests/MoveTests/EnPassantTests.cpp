@@ -11,6 +11,8 @@
 #include "Validation/MoveValidation.h"
 #include "Execution/MoveExecution.h"
 
+#include <algorithm>
+
 
 namespace MoveTests
 {
@@ -25,34 +27,24 @@ protected:
 
 	void		   SetUp() override { mBoard.init(); }
 
-	bool		   hasEnPassantMove(const MoveList &moves) const
+	static bool	   hasEnPassantMove(const MoveList &moves)
 	{
-		for (size_t i = 0; i < moves.size(); ++i)
-		{
-			if (moves[i].isEnPassant())
-				return true;
-		}
-		return false;
+		return std::ranges::any_of(moves, [&](const Move &move) { return move.isEnPassant(); });
 	}
 
-	bool hasEnPassantTo(const MoveList &moves, Square target) const
+	static bool hasEnPassantTo(const MoveList &moves, const Square target)
 	{
-		for (size_t i = 0; i < moves.size(); ++i)
-		{
-			if (moves[i].isEnPassant() && moves[i].to() == target)
-				return true;
-		}
-		return false;
+		return std::ranges::any_of(moves, [&](const Move &move) { return move.isEnPassant() && move.to() == target; });
 	}
 };
 
 
 TEST_F(EnPassantTests, EnPassantSquareSetAfterDoublePawnPush)
 {
-	Move doublePush(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move doublePush(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 	mExecution.makeMove(doublePush);
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3) << "En passant square should be e3 after e2-e4";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3) << "En passant square should be e3 after e2-e4";
 }
 
 
@@ -60,12 +52,12 @@ TEST_F(EnPassantTests, EnPassantSquareResetAfterOtherMove)
 {
 	// Make double pawn push
 	mExecution.makeMove(Move(Square::e2, Square::e4, MoveFlag::DoublePawnPush));
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::e3);
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::e3);
 
 	// Make another move
 	mExecution.makeMove(Move(Square::b8, Square::c6, MoveFlag::Quiet));
 
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::None) << "En passant square should reset after non-double-push move";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::None) << "En passant square should reset after non-double-push move";
 }
 
 
@@ -106,7 +98,7 @@ TEST_F(EnPassantTests, EnPassantCaptureRemovesPawn)
 	mBoard.updateOccupancies();
 
 	// Execute en passant
-	Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
 	mExecution.makeMove(enPassant);
 
 	EXPECT_EQ(mBoard.pieceAt(Square::d6), PieceType::WPawn) << "White pawn should be at d6";
@@ -127,14 +119,14 @@ TEST_F(EnPassantTests, EnPassantUnmakeRestoresPawn)
 	mBoard.setEnPassantSquare(Square::d6);
 	mBoard.updateOccupancies();
 
-	Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
 	mExecution.makeMove(enPassant);
 	mExecution.unmakeMove();
 
 	EXPECT_EQ(mBoard.pieceAt(Square::e5), PieceType::WPawn) << "White pawn should be back at e5";
 	EXPECT_EQ(mBoard.pieceAt(Square::d5), PieceType::BPawn) << "Black pawn should be restored at d5";
 	EXPECT_EQ(mBoard.pieceAt(Square::d6), PieceType::None) << "d6 should be empty";
-	EXPECT_EQ(mBoard.getCurrentEnPassantSqaure(), Square::d6) << "En passant square should be restored";
+	EXPECT_EQ(mBoard.getCurrentEnPassantSquare(), Square::d6) << "En passant square should be restored";
 }
 
 
@@ -209,9 +201,9 @@ TEST_F(EnPassantTests, EnPassantFromBothSides)
 	mGeneration.generateAllMoves(moves);
 
 	int enPassantCount = 0;
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (auto move : moves)
 	{
-		if (moves[i].isEnPassant() && moves[i].to() == Square::d6)
+		if (move.isEnPassant() && move.to() == Square::d6)
 			++enPassantCount;
 	}
 
@@ -254,7 +246,7 @@ TEST_F(EnPassantTests, EnPassantIsLegalMove)
 	mBoard.setEnPassantSquare(Square::d6);
 	mBoard.updateOccupancies();
 
-	Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
 
 	EXPECT_TRUE(mValidation.isMoveLegal(enPassant)) << "En passant should be a legal move";
 }
@@ -275,7 +267,7 @@ TEST_F(EnPassantTests, EnPassantBlockedByPin)
 	mBoard.setEnPassantSquare(Square::d6);
 	mBoard.updateOccupancies();
 
-	Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move enPassant(Square::e5, Square::d6, MoveFlag::EnPassant);
 
 	// En passant would leave king in check (both pawns removed from 5th rank)
 	EXPECT_FALSE(mValidation.isMoveLegal(enPassant)) << "En passant should be illegal when it exposes king to check";

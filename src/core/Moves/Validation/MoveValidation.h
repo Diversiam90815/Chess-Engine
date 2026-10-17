@@ -5,6 +5,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 #include "ChessBoard.h"
 #include "Move.h"
 #include "Generation/MoveGeneration.h"
@@ -31,17 +33,17 @@ public:
 	/**
 	 * @brief Check if a move is legal (doesn't leave own king in check).
 	 */
-	[[nodiscard]] bool		 isMoveLegal(Move move);
+	[[nodiscard]] bool		 isMoveLegal(Move move) const;
 
 	/**
 	 * @brief Check if current position is checkmate.
 	 */
-	[[nodiscard]] bool		 isCheckmate();
+	[[nodiscard]] bool		 isCheckmate() const;
 
 	/**
 	 * @brief Check if current position is stalemate.
 	 */
-	[[nodiscard]] bool		 isStalemate();
+	[[nodiscard]] bool		 isStalemate() const;
 
 	/**
 	 * @brief Check for draw conditions (50-move, insufficient material).
@@ -56,12 +58,12 @@ public:
 	/**
 	 * @brief Generate all legal moves for current side.
 	 */
-	void					 generateLegalMoves(MoveList &legalMoves);
+	void					 generateLegalMoves(MoveList &legalMoves) const;
 
 	/**
 	 * @brief Count legal moves (optimization: can early-exit for checkmate/stalemate).
 	 */
-	[[nodiscard]] size_t	 countLegalMoves();
+	[[nodiscard]] size_t	 countLegalMoves() const;
 
 
 private:

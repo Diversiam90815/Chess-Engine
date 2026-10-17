@@ -9,6 +9,8 @@
 
 #include "Generation/MoveGeneration.h"
 
+#include <algorithm>
+
 
 namespace MoveTests
 {
@@ -22,32 +24,17 @@ protected:
 
 	void		   SetUp() override { mBoard.init(); }
 
-	bool		   hasMoveTo(const MoveList &moves, Square to) const
+	static bool	   hasMoveFromTo(const MoveList &moves, const Square from, const Square to)
 	{
-		for (size_t i = 0; i < moves.size(); ++i)
-		{
-			if (moves[i].to() == to)
-				return true;
-		}
-		return false;
+		return std::ranges::any_of(moves, [&](const Move &move) { return move.from() == from && move.to() == to; });
 	}
 
-	bool hasMoveFromTo(const MoveList &moves, Square from, Square to) const
-	{
-		for (size_t i = 0; i < moves.size(); ++i)
-		{
-			if (moves[i].from() == from && moves[i].to() == to)
-				return true;
-		}
-		return false;
-	}
-
-	size_t countMovesFrom(const MoveList &moves, Square from) const
+	static size_t countMovesFrom(const MoveList &moves, const Square from)
 	{
 		size_t count = 0;
-		for (size_t i = 0; i < moves.size(); ++i)
+		for (auto move : moves)
 		{
-			if (moves[i].from() == from)
+			if (move.from() == from)
 				++count;
 		}
 		return count;
@@ -80,7 +67,7 @@ TEST_F(MoveGenerationTest, PawnInitialMovesCalculatedCorrectly)
 	mGeneration.generateAllMoves(moves);
 
 	// Test pawn at e2 - should have exactly two moves (e3 and e4)
-	size_t e2Moves = countMovesFrom(moves, Square::e2);
+	const size_t e2Moves = countMovesFrom(moves, Square::e2);
 	EXPECT_EQ(e2Moves, 2) << "Pawn at e2 should have exactly two moves (e3 and e4)";
 
 	EXPECT_TRUE(hasMoveFromTo(moves, Square::e2, Square::e3)) << "Pawn should be able to move e2->e3";
@@ -146,7 +133,7 @@ TEST_F(MoveGenerationTest, KnightMovesCalculatedCorrectly)
 	mGeneration.generateAllMoves(moves);
 
 	// Knight in center should have 8 L-shaped moves
-	size_t knightMoves = countMovesFrom(moves, Square::e4);
+	const size_t knightMoves = countMovesFrom(moves, Square::e4);
 	EXPECT_EQ(knightMoves, 8) << "Knight in the center should have 8 possible L-shaped moves";
 
 	// Check specific knight moves
@@ -176,7 +163,7 @@ TEST_F(MoveGenerationTest, KnightAtCornerHasLimitedMoves)
 	mGeneration.generateAllMoves(moves);
 
 	// Knight in corner should have 2 moves
-	size_t knightMoves = countMovesFrom(moves, Square::a1);
+	const size_t knightMoves = countMovesFrom(moves, Square::a1);
 	EXPECT_EQ(knightMoves, 2) << "Knight in corner should have 2 moves";
 
 	EXPECT_TRUE(hasMoveFromTo(moves, Square::a1, Square::b3)) << "Knight should move to b3";
@@ -199,7 +186,7 @@ TEST_F(MoveGenerationTest, BishopMovesCalculatedCorrectly)
 	mGeneration.generateAllMoves(moves);
 
 	// Bishop in center should have 13 diagonal moves
-	size_t bishopMoves = countMovesFrom(moves, Square::e4);
+	const size_t bishopMoves = countMovesFrom(moves, Square::e4);
 	EXPECT_EQ(bishopMoves, 13) << "Bishop in the center should have 13 diagonal moves";
 }
 
@@ -246,7 +233,7 @@ TEST_F(MoveGenerationTest, RookMovesCalculatedCorrectly)
 	mGeneration.generateAllMoves(moves);
 
 	// Rook at e4 should have 14 straight-line moves
-	size_t rookMoves = countMovesFrom(moves, Square::e4);
+	const size_t rookMoves = countMovesFrom(moves, Square::e4);
 	EXPECT_EQ(rookMoves, 14) << "Rook in the center should have 14 straight-line moves";
 }
 
@@ -266,7 +253,7 @@ TEST_F(MoveGenerationTest, QueenMovesCalculatedCorrectly)
 	mGeneration.generateAllMoves(moves);
 
 	// Queen at e4 should have 27 moves (14 rook + 13 bishop)
-	size_t queenMoves = countMovesFrom(moves, Square::e4);
+	const size_t queenMoves = countMovesFrom(moves, Square::e4);
 	EXPECT_EQ(queenMoves, 27) << "Queen in the center should have 27 moves";
 }
 
@@ -285,7 +272,7 @@ TEST_F(MoveGenerationTest, KingMovesCalculatedCorrectly)
 	mGeneration.generateAllMoves(moves);
 
 	// King in center should have 8 moves (one in each direction)
-	size_t kingMoves = countMovesFrom(moves, Square::e4);
+	const size_t kingMoves = countMovesFrom(moves, Square::e4);
 	EXPECT_EQ(kingMoves, 8) << "King in the center should have 8 moves";
 }
 
@@ -343,11 +330,11 @@ TEST_F(MoveGenerationTest, CastlingMovesGenerated)
 	bool hasKingsideCastle	= false;
 	bool hasQueensideCastle = false;
 
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (auto move : moves)
 	{
-		if (moves[i].from() == Square::e1 && moves[i].to() == Square::g1)
+		if (move.from() == Square::e1 && move.to() == Square::g1)
 			hasKingsideCastle = true;
-		if (moves[i].from() == Square::e1 && moves[i].to() == Square::c1)
+		if (move.from() == Square::e1 && move.to() == Square::c1)
 			hasQueensideCastle = true;
 	}
 
@@ -374,9 +361,9 @@ TEST_F(MoveGenerationTest, EnPassantCaptureGenerated)
 
 	// Should have en passant capture
 	bool hasEnPassant = false;
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (auto move : moves)
 	{
-		if (moves[i].from() == Square::e5 && moves[i].to() == Square::d6 && moves[i].isEnPassant())
+		if (move.from() == Square::e5 && move.to() == Square::d6 && move.isEnPassant())
 		{
 			hasEnPassant = true;
 			break;
@@ -403,12 +390,10 @@ TEST_F(MoveGenerationTest, PawnPromotionMovesGenerated)
 
 	// Count promotion moves (should have 4: Q, R, B, N)
 	size_t promotionCount = 0;
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (auto move : moves)
 	{
-		if (moves[i].from() == Square::e7 && moves[i].to() == Square::e8 && moves[i].isPromotion())
-		{
+		if (move.from() == Square::e7 && move.to() == Square::e8 && move.isPromotion())
 			++promotionCount;
-		}
 	}
 
 	EXPECT_EQ(promotionCount, 4) << "Should generate 4 promotion moves (Q, R, B, N)";

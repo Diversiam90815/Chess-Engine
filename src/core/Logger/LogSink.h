@@ -7,9 +7,7 @@
 
 #pragma once
 
-#include <functional>
-#include <string>
-#include <mutex>
+#include "pch.h"
 
 
 namespace engine
@@ -29,7 +27,7 @@ enum class LogLevel
 struct LogRecord
 {
 	LogLevel		   level{LogLevel::Info};
-	const char		  *file{""};	 // source file of the call
+	const char		  *file{""}; // source file of the call
 	int				   line{0};
 	const char		  *function{""};
 	const std::string &message;

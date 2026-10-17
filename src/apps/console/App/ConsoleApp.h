@@ -61,10 +61,10 @@ private:
 	void					 dispatch(const Command &command);
 
 	void					 submitMove(const Command &command);
-	
+
 	[[nodiscard]] bool		 resolveSan(const std::string &san, Square &from, Square &to, PieceType &promotion) const;
 
-	bool					 readLine(const char *prompt, std::string &line) const;
+	static bool				 readLine(const char *prompt, std::string &line);
 
 	//=========================================================================
 	// State

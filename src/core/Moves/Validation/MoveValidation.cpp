@@ -6,6 +6,7 @@
 */
 
 #include "MoveValidation.h"
+#include "BitboardUtils.h"
 
 
 MoveValidation::MoveValidation(Chessboard &board, MoveGeneration &generation, MoveExecution &execution) : mBoard(board), mGeneration(generation), mExecution(execution) {}
@@ -17,19 +18,19 @@ bool MoveValidation::isInCheck() const
 }
 
 
-bool MoveValidation::isKingAttacked(Side side) const
+bool MoveValidation::isKingAttacked(const Side side) const
 {
-	Square kingPos = getKingSquare(side);
+	const Square kingPos = getKingSquare(side);
 
 	if (kingPos == Square::None)
 		return false;
 
-	Side attacker = (side == Side::White) ? Side::Black : Side::White;
+	const Side attacker = (side == Side::White) ? Side::Black : Side::White;
 	return mGeneration.isSquareAttacked(kingPos, attacker);
 }
 
 
-bool MoveValidation::isMoveLegal(Move move)
+bool MoveValidation::isMoveLegal(const Move move) const
 {
 	// Make move
 	if (!mExecution.makeMove(move))
@@ -37,9 +38,9 @@ bool MoveValidation::isMoveLegal(Move move)
 
 	// Check if the side that just moved left king in check
 	// Note: makeMove flips the side, so we use the opposite side
-	Side movedSide	 = (mBoard.getCurrentSide() == Side::White) ? Side::Black : Side::White;
+	const Side movedSide   = (mBoard.getCurrentSide() == Side::White) ? Side::Black : Side::White;
 
-	bool kingInCheck = isKingAttacked(movedSide);
+	const bool kingInCheck = isKingAttacked(movedSide);
 
 	mExecution.unmakeMove();
 
@@ -47,7 +48,7 @@ bool MoveValidation::isMoveLegal(Move move)
 }
 
 
-bool MoveValidation::isCheckmate()
+bool MoveValidation::isCheckmate() const
 {
 	if (!isInCheck())
 		return false;
@@ -56,7 +57,7 @@ bool MoveValidation::isCheckmate()
 }
 
 
-bool MoveValidation::isStalemate()
+bool MoveValidation::isStalemate() const
 {
 	if (isInCheck())
 		return false;
@@ -89,30 +90,31 @@ DrawReason MoveValidation::getDrawReason() const
 }
 
 
-void MoveValidation::generateLegalMoves(MoveList &legalMoves)
+void MoveValidation::generateLegalMoves(MoveList &legalMoves) const
 {
 	MoveList pseudoMoves;
 	mGeneration.generateAllMoves(pseudoMoves);
 
 	legalMoves.clear();
 
-	for (size_t i = 0; i < pseudoMoves.size(); ++i)
+	for (const auto pseudoMove : pseudoMoves)
 	{
-		if (isMoveLegal(pseudoMoves[i]))
-			legalMoves.push(pseudoMoves[i]);
+		if (isMoveLegal(pseudoMove))
+			legalMoves.push(pseudoMove);
 	}
 }
 
 
-size_t MoveValidation::countLegalMoves()
+size_t MoveValidation::countLegalMoves() const
 {
 	MoveList pseudoMoves;
 	mGeneration.generateAllMoves(pseudoMoves);
 
 	size_t count = 0;
-	for (size_t i = 0; i < pseudoMoves.size(); ++i)
+
+	for (const auto pseudoMove : pseudoMoves)
 	{
-		if (isMoveLegal(pseudoMoves[i]))
+		if (isMoveLegal(pseudoMove))
 		{
 			count++;
 			// return count;	// TODO: Early exit for optimization
@@ -123,10 +125,10 @@ size_t MoveValidation::countLegalMoves()
 }
 
 
-Square MoveValidation::getKingSquare(Side side) const
+Square MoveValidation::getKingSquare(const Side side) const
 {
-	PieceType kingType = (side == Side::White) ? WKing : BKing;
-	U64		  kingBB   = mBoard.pieces()[kingType];
+	const PieceType kingType = (side == Side::White) ? WKing : BKing;
+	const U64		kingBB	 = mBoard.pieces()[kingType];
 
 	if (!kingBB)
 		return Square::None;
@@ -143,13 +145,13 @@ bool MoveValidation::hasInsufficientMaterial() const
 	if (pieces[WPawn] || pieces[BPawn] || pieces[WRook] || pieces[BRook] || pieces[WQueen] || pieces[BQueen])
 		return false;
 
-	int whiteBishops = BitUtils::popCount(pieces[WBishop]);
-	int blackBishops = BitUtils::popCount(pieces[BBishop]);
-	int whiteKnights = BitUtils::popCount(pieces[WKnight]);
-	int blackKnights = BitUtils::popCount(pieces[BKnight]);
+	const int whiteBishops = BitUtils::popCount(pieces[WBishop]);
+	const int blackBishops = BitUtils::popCount(pieces[BBishop]);
+	const int whiteKnights = BitUtils::popCount(pieces[WKnight]);
+	const int blackKnights = BitUtils::popCount(pieces[BKnight]);
 
-	int whiteMinors	 = whiteBishops + whiteKnights;
-	int blackMinors	 = blackBishops + blackKnights;
+	const int whiteMinors  = whiteBishops + whiteKnights;
+	const int blackMinors  = blackBishops + blackKnights;
 
 	// K vs K
 	if (whiteMinors == 0 && blackMinors == 0)

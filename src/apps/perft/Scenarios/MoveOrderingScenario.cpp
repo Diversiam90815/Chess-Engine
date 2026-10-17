@@ -26,7 +26,7 @@ void MoveOrderingScenario::run(GameEngine &engine)
 	}
 
 	// Order with a fresh MoveEvaluation (no search state — shows base ordering)
-	MoveEvaluation eval;
+	const MoveEvaluation eval;
 	eval.orderMoves(moves, engine.getBoard(), Move{}, 0);
 
 	printf("   Move ordering (%zu moves, no TT/killer/history state):\n\n", moves.size());

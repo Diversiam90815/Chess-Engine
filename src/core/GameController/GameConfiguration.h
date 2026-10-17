@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <assert.h>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 #include "Parameters.h"
@@ -65,7 +65,7 @@ struct GameConfiguration
 		return config;
 	}
 
-	static GameConfiguration createSinglePlayer(Side humanColor, CPUDifficulty difficulty)
+	static GameConfiguration createSinglePlayer(const Side humanColor, const CPUDifficulty difficulty)
 	{
 		GameConfiguration config{};
 		config.mode							 = GameModeSelection::SinglePlayer;
@@ -79,7 +79,7 @@ struct GameConfiguration
 	// Accessors
 	//=========================================================================
 
-	const SinglePlayerConfig &getSinglePlayer() const
+	[[nodiscard]] const SinglePlayerConfig &getSinglePlayer() const
 	{
 		assert(mode == GameModeSelection::SinglePlayer);
 		return singlePlayer;

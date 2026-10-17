@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <string>
-#include <variant>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 #include "Move.h"

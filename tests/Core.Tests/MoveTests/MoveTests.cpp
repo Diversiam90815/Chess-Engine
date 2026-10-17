@@ -20,7 +20,7 @@ class MoveTests : public ::testing::Test
 
 TEST_F(MoveTests, DefaultConstructorCreatesInvalidMove)
 {
-	Move move;
+	constexpr Move move;
 
 	EXPECT_FALSE(move.isValid()) << "Default constructed move should be invalid";
 	EXPECT_EQ(move.raw(), 0) << "Default move should have raw value of 0";
@@ -29,7 +29,7 @@ TEST_F(MoveTests, DefaultConstructorCreatesInvalidMove)
 
 TEST_F(MoveTests, ConstructorWithSquaresAndFlags)
 {
-	Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 
 	EXPECT_EQ(move.from(), Square::e2) << "From square should be e2";
 	EXPECT_EQ(move.to(), Square::e4) << "To square should be e4";
@@ -40,7 +40,7 @@ TEST_F(MoveTests, ConstructorWithSquaresAndFlags)
 
 TEST_F(MoveTests, ConstructorWithDefaultFlags)
 {
-	Move move(Square::e2, Square::e3);
+	constexpr Move move(Square::e2, Square::e3);
 
 	EXPECT_EQ(move.from(), Square::e2) << "From square should be e2";
 	EXPECT_EQ(move.to(), Square::e3) << "To square should be e3";
@@ -52,11 +52,11 @@ TEST_F(MoveTests, ConstructorWithDefaultFlags)
 TEST_F(MoveTests, ConstructorFromRawData)
 {
 	// Create a move and get its raw data
-	Move	 original(Square::d2, Square::d4, MoveFlag::DoublePawnPush);
-	uint16_t rawData = original.raw();
+	constexpr Move	   original(Square::d2, Square::d4, MoveFlag::DoublePawnPush);
+	constexpr uint16_t rawData = original.raw();
 
 	// Construct from raw data
-	Move	 reconstructed(rawData);
+	constexpr Move	   reconstructed(rawData);
 
 	EXPECT_EQ(reconstructed.from(), Square::d2) << "Reconstructed from should match";
 	EXPECT_EQ(reconstructed.to(), Square::d4) << "Reconstructed to should match";
@@ -66,10 +66,10 @@ TEST_F(MoveTests, ConstructorFromRawData)
 
 TEST_F(MoveTests, IsCapture)
 {
-	Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
-	Move captureMove(Square::e4, Square::d5, MoveFlag::Capture);
-	Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
-	Move promoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
+	constexpr Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
+	constexpr Move captureMove(Square::e4, Square::d5, MoveFlag::Capture);
+	constexpr Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move promoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
 
 	EXPECT_FALSE(quietMove.isCapture()) << "Quiet move should not be capture";
 	EXPECT_TRUE(captureMove.isCapture()) << "Capture move should be capture";
@@ -80,12 +80,12 @@ TEST_F(MoveTests, IsCapture)
 
 TEST_F(MoveTests, IsPromotion)
 {
-	Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
-	Move knightPromo(Square::e7, Square::e8, MoveFlag::KnightPromotion);
-	Move bishopPromo(Square::e7, Square::e8, MoveFlag::BishopPromotion);
-	Move rookPromo(Square::e7, Square::e8, MoveFlag::RookPromotion);
-	Move queenPromo(Square::e7, Square::e8, MoveFlag::QueenPromotion);
-	Move promoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
+	constexpr Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
+	constexpr Move knightPromo(Square::e7, Square::e8, MoveFlag::KnightPromotion);
+	constexpr Move bishopPromo(Square::e7, Square::e8, MoveFlag::BishopPromotion);
+	constexpr Move rookPromo(Square::e7, Square::e8, MoveFlag::RookPromotion);
+	constexpr Move queenPromo(Square::e7, Square::e8, MoveFlag::QueenPromotion);
+	constexpr Move promoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
 
 	EXPECT_FALSE(quietMove.isPromotion()) << "Quiet move should not be promotion";
 	EXPECT_TRUE(knightPromo.isPromotion()) << "Knight promotion should be promotion";
@@ -98,9 +98,9 @@ TEST_F(MoveTests, IsPromotion)
 
 TEST_F(MoveTests, IsCastle)
 {
-	Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
-	Move kingCastle(Square::e1, Square::g1, MoveFlag::KingCastle);
-	Move queenCastle(Square::e1, Square::c1, MoveFlag::QueenCastle);
+	constexpr Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
+	constexpr Move kingCastle(Square::e1, Square::g1, MoveFlag::KingCastle);
+	constexpr Move queenCastle(Square::e1, Square::c1, MoveFlag::QueenCastle);
 
 	EXPECT_FALSE(quietMove.isCastle()) << "Quiet move should not be castle";
 	EXPECT_TRUE(kingCastle.isCastle()) << "King castle should be castle";
@@ -110,9 +110,9 @@ TEST_F(MoveTests, IsCastle)
 
 TEST_F(MoveTests, IsEnPassant)
 {
-	Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
-	Move captureMove(Square::e4, Square::d5, MoveFlag::Capture);
-	Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
+	constexpr Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
+	constexpr Move captureMove(Square::e4, Square::d5, MoveFlag::Capture);
+	constexpr Move enPassantMove(Square::e5, Square::d6, MoveFlag::EnPassant);
 
 	EXPECT_FALSE(quietMove.isEnPassant()) << "Quiet move should not be en passant";
 	EXPECT_FALSE(captureMove.isEnPassant()) << "Regular capture should not be en passant";
@@ -122,8 +122,8 @@ TEST_F(MoveTests, IsEnPassant)
 
 TEST_F(MoveTests, IsDoublePush)
 {
-	Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
-	Move doublePush(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move quietMove(Square::e2, Square::e3, MoveFlag::Quiet);
+	constexpr Move doublePush(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
 
 	EXPECT_FALSE(quietMove.isDoublePush()) << "Quiet move should not be double push";
 	EXPECT_TRUE(doublePush.isDoublePush()) << "Double pawn push should be double push";
@@ -132,10 +132,10 @@ TEST_F(MoveTests, IsDoublePush)
 
 TEST_F(MoveTests, PromotionPieceOffset)
 {
-	Move knightPromo(Square::e7, Square::e8, MoveFlag::KnightPromotion);
-	Move bishopPromo(Square::e7, Square::e8, MoveFlag::BishopPromotion);
-	Move rookPromo(Square::e7, Square::e8, MoveFlag::RookPromotion);
-	Move queenPromo(Square::e7, Square::e8, MoveFlag::QueenPromotion);
+	constexpr Move knightPromo(Square::e7, Square::e8, MoveFlag::KnightPromotion);
+	constexpr Move bishopPromo(Square::e7, Square::e8, MoveFlag::BishopPromotion);
+	constexpr Move rookPromo(Square::e7, Square::e8, MoveFlag::RookPromotion);
+	constexpr Move queenPromo(Square::e7, Square::e8, MoveFlag::QueenPromotion);
 
 	// Offset: 0=Knight, 1=Bishop, 2=Rook, 3=Queen
 	EXPECT_EQ(knightPromo.promotionPieceOffset(), 0) << "Knight promotion offset should be 0";
@@ -147,10 +147,10 @@ TEST_F(MoveTests, PromotionPieceOffset)
 
 TEST_F(MoveTests, PromotionCaptureOffset)
 {
-	Move knightPromoCapture(Square::e7, Square::d8, MoveFlag::KnightPromoCapture);
-	Move bishopPromoCapture(Square::e7, Square::d8, MoveFlag::BishopPromoCapture);
-	Move rookPromoCapture(Square::e7, Square::d8, MoveFlag::RookPromoCapture);
-	Move queenPromoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
+	constexpr Move knightPromoCapture(Square::e7, Square::d8, MoveFlag::KnightPromoCapture);
+	constexpr Move bishopPromoCapture(Square::e7, Square::d8, MoveFlag::BishopPromoCapture);
+	constexpr Move rookPromoCapture(Square::e7, Square::d8, MoveFlag::RookPromoCapture);
+	constexpr Move queenPromoCapture(Square::e7, Square::d8, MoveFlag::QueenPromoCapture);
 
 	EXPECT_EQ(knightPromoCapture.promotionPieceOffset(), 0) << "Knight promo capture offset should be 0";
 	EXPECT_EQ(bishopPromoCapture.promotionPieceOffset(), 1) << "Bishop promo capture offset should be 1";
@@ -161,10 +161,10 @@ TEST_F(MoveTests, PromotionCaptureOffset)
 
 TEST_F(MoveTests, EqualityOperator)
 {
-	Move move1(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
-	Move move2(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
-	Move move3(Square::d2, Square::d4, MoveFlag::DoublePawnPush);
-	Move move4(Square::e2, Square::e4, MoveFlag::Quiet);
+	constexpr Move move1(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move2(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move3(Square::d2, Square::d4, MoveFlag::DoublePawnPush);
+	constexpr Move move4(Square::e2, Square::e4, MoveFlag::Quiet);
 
 	EXPECT_TRUE(move1 == move2) << "Identical moves should be equal";
 	EXPECT_FALSE(move1 == move3) << "Moves with different squares should not be equal";
@@ -174,9 +174,9 @@ TEST_F(MoveTests, EqualityOperator)
 
 TEST_F(MoveTests, InequalityOperator)
 {
-	Move move1(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
-	Move move2(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
-	Move move3(Square::d2, Square::d4, MoveFlag::DoublePawnPush);
+	constexpr Move move1(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move2(Square::e2, Square::e4, MoveFlag::DoublePawnPush);
+	constexpr Move move3(Square::d2, Square::d4, MoveFlag::DoublePawnPush);
 
 	EXPECT_FALSE(move1 != move2) << "Identical moves should not be unequal";
 	EXPECT_TRUE(move1 != move3) << "Different moves should be unequal";
@@ -185,7 +185,7 @@ TEST_F(MoveTests, InequalityOperator)
 
 TEST_F(MoveTests, NoneStaticMethod)
 {
-	Move nullMove = Move::none();
+	constexpr Move nullMove = Move::none();
 
 	EXPECT_FALSE(nullMove.isValid()) << "None move should be invalid";
 	EXPECT_EQ(nullMove.raw(), 0) << "None move should have raw value of 0";
@@ -202,9 +202,9 @@ TEST_F(MoveTests, AllSquaresCanBeEncoded)
 			if (from == to)
 				continue; // Skip same square moves
 
-			Square fromSq = static_cast<Square>(from);
-			Square toSq	  = static_cast<Square>(to);
-			Move   move(fromSq, toSq, MoveFlag::Quiet);
+			auto fromSq = static_cast<Square>(from);
+			auto toSq	= static_cast<Square>(to);
+			Move move(fromSq, toSq, MoveFlag::Quiet);
 
 			EXPECT_EQ(move.from(), fromSq) << "From square encoding failed for " << from;
 			EXPECT_EQ(move.to(), toSq) << "To square encoding failed for " << to;

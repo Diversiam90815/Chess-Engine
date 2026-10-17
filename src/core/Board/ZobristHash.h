@@ -7,9 +7,7 @@
 
 #pragma once
 
-#include <array>
-#include <random>
-#include <cstdint>
+#include "pch.h"
 
 #include "BitboardTypes.h"
 
@@ -34,7 +32,7 @@ public:
 	/**
 	 * @brief	Get hash for a piece at a square.
 	 */
-	static uint64_t piece(PieceType piece, Square sq) { return mPieceKeys[static_cast<int>(piece)][static_cast<int>(sq)]; }
+	static uint64_t piece(const PieceType piece, Square sq) { return mPieceKeys[static_cast<int>(piece)][static_cast<int>(sq)]; }
 
 	/**
 	 * @brief	Get hash for side to move (XOR when black to move).
@@ -54,7 +52,7 @@ public:
 		if (sq == Square::None)
 			return 0;
 
-		int file = static_cast<int>(sq) % 8;
+		const int file = static_cast<int>(sq) % 8;
 		return mEnPassantKeys[file];
 	}
 

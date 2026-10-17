@@ -16,7 +16,7 @@
 namespace
 {
 
-const char *squareName(Square square)
+const char *squareName(const Square square)
 {
 	const int index = to_index(square);
 	return (index >= 0 && index < 64) ? square_to_coordinates[index] : "--";
@@ -25,7 +25,7 @@ const char *squareName(Square square)
 } // namespace
 
 
-void GameView::printBanner() const
+void GameView::printBanner()
 {
 	printf("\n");
 	printf("=============================================\n");
@@ -58,7 +58,7 @@ void GameView::printStatus() const
 }
 
 
-void GameView::printLegalMoves(Square from) const
+void GameView::printLegalMoves(const Square from) const
 {
 	MoveList moves;
 	mEngine.getLegalMovesFromSquare(from, moves);
@@ -106,7 +106,7 @@ void GameView::printAllLegalMoves() const
 }
 
 
-void GameView::printHistory(const std::vector<std::string> &sanLog) const
+void GameView::printHistory(const std::vector<std::string> &sanLog)
 {
 	if (sanLog.empty())
 	{
@@ -130,7 +130,7 @@ void GameView::printHistory(const std::vector<std::string> &sanLog) const
 }
 
 
-void GameView::printHelp() const
+void GameView::printHelp()
 {
 	printf("\n");
 	printf("  Commands\n");
@@ -150,13 +150,13 @@ void GameView::printHelp() const
 }
 
 
-void GameView::printMovePlayed(const engine::MoveExecuted &event, Side mover) const
+void GameView::printMovePlayed(const engine::MoveExecuted &event, const Side mover)
 {
 	printf("\n  %s plays %s\n", sideName(mover).c_str(), event.notation.c_str());
 }
 
 
-void GameView::printCapture(const engine::PieceCaptured &event) const
+void GameView::printCapture(const engine::PieceCaptured &event)
 {
 	if (!event.captured)
 		return;
@@ -165,7 +165,7 @@ void GameView::printCapture(const engine::PieceCaptured &event) const
 }
 
 
-void GameView::printGameEnded(const engine::GameEnded &event) const
+void GameView::printGameEnded(const engine::GameEnded &event)
 {
 	printf("\n  ---------------------------------\n");
 
@@ -195,19 +195,19 @@ void GameView::printGameEnded(const engine::GameEnded &event) const
 }
 
 
-void GameView::printMessage(const std::string &text) const
+void GameView::printMessage(const std::string &text)
 {
 	printf("  %s\n", text.c_str());
 }
 
 
-void GameView::printError(const std::string &text) const
+void GameView::printError(const std::string &text)
 {
 	printf("  ! %s\n", text.c_str());
 }
 
 
-std::string GameView::sideName(Side side)
+std::string GameView::sideName(const Side side)
 {
 	switch (side)
 	{
@@ -218,7 +218,7 @@ std::string GameView::sideName(Side side)
 }
 
 
-std::string GameView::pieceName(PieceType piece)
+std::string GameView::pieceName(const PieceType piece)
 {
 	switch (piece)
 	{

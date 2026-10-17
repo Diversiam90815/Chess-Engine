@@ -8,11 +8,11 @@
 #include "MoveNotation.h"
 
 
-std::string MoveNotation::toSAN(Move &move, const Chessboard &board, bool isCheck, bool isCheckmate)
+std::string MoveNotation::toSAN(const Move &move, const Chessboard &board, const bool isCheck, const bool isCheckmate)
 {
-	MoveFlag	flags = move.flags();
+	const MoveFlag flags = move.flags();
 
-	std::string notation;
+	std::string	   notation;
 
 	// handle castling
 	if (flags == MoveFlag::KingCastle)
@@ -21,15 +21,15 @@ std::string MoveNotation::toSAN(Move &move, const Chessboard &board, bool isChec
 		notation = "O-O-O";
 	else
 	{
-		Square	  from	 = move.from();
-		Square	  to	 = move.to();
-		PieceType piece	 = board.pieceAt(from);
+		const Square	from   = move.from();
+		const Square	to	   = move.to();
+		const PieceType piece  = board.pieceAt(from);
 
-		bool	  isPawn = (piece == WPawn || piece == BPawn);
+		const bool		isPawn = (piece == WPawn || piece == BPawn);
 
 		if (!isPawn)
 		{
-			char pieceChar = pieceToSANChar(piece);
+			const char pieceChar = pieceToSANChar(piece);
 			if (pieceChar != '\0')
 				notation += pieceChar;
 
@@ -52,8 +52,8 @@ std::string MoveNotation::toSAN(Move &move, const Chessboard &board, bool isChec
 		if (move.isPromotion())
 		{
 			notation += '=';
-			int				  promoOffset  = move.promotionPieceOffset(); // 0 = Knight, 1 = Bishop, 2 = Rook, 3 = Queen
-			static const char promoChars[] = {'N', 'B', 'R', 'Q'};
+			const int			  promoOffset  = move.promotionPieceOffset(); // 0 = Knight, 1 = Bishop, 2 = Rook, 3 = Queen
+			static constexpr char promoChars[] = {'N', 'B', 'R', 'Q'};
 			notation += promoChars[promoOffset];
 		}
 	}
@@ -68,7 +68,7 @@ std::string MoveNotation::toSAN(Move &move, const Chessboard &board, bool isChec
 }
 
 
-std::string MoveNotation::toUCI(Move move)
+std::string MoveNotation::toUCI(const Move move)
 {
 	std::string uci;
 
@@ -77,8 +77,8 @@ std::string MoveNotation::toUCI(Move move)
 
 	if (move.isPromotion())
 	{
-		int				  promoOffset  = move.promotionPieceOffset();
-		static const char promoChars[] = {'n', 'b', 'r', 'q'};
+		const int			  promoOffset  = move.promotionPieceOffset();
+		static constexpr char promoChars[] = {'n', 'b', 'r', 'q'};
 		uci += promoChars[promoOffset];
 	}
 

@@ -13,6 +13,6 @@
 class MoveOrderingScenario : public IScenario
 {
 public:
-	std::string name() const override { return "Move Ordering"; }
-	void		run(GameEngine &engine) override;
+	[[nodiscard]] std::string name() const override { return "Move Ordering"; }
+	void					  run(GameEngine &engine) override;
 };

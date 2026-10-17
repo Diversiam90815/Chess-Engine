@@ -37,7 +37,7 @@ void Perft::run()
 	printf("Chess Engine - Console App\n");
 	printf("==========================\n\n");
 
-	for (auto &scenario : mScenarios)
+	for (const auto &scenario : mScenarios)
 	{
 		printf(">>> Running: %s\n", scenario->name().c_str());
 		mEngine.resetGame();

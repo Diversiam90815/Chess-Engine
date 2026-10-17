@@ -8,7 +8,6 @@
 #include "ConsoleApp.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <iostream>
 
 #include "CommandParser.h"
@@ -37,12 +36,12 @@ std::string stripCheckSuffix(std::string s)
 
 std::string toLowerAscii(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	std::transform(s.begin(), s.end(), s.begin(), [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
 	return s;
 }
 
 // Colour is irrelevant to move submission, mirrors CommandParser::parsePromotion.
-PieceType promotionFromOffset(int offset)
+PieceType promotionFromOffset(const int offset)
 {
 	switch (offset)
 	{
@@ -82,21 +81,21 @@ int ConsoleApp::run()
 {
 	configureConsole();
 	mView.setUnicode(true);
-	mView.printBanner();
+	GameView::printBanner();
 
 	// The engine writes no log file itself: this app keeps one
 	ConsoleLogging::enable(ConsoleLogging::defaultFolder());
 
 	if (!mEngine.init())
 	{
-		mView.printError("The engine failed to start.");
+		GameView::printError("The engine failed to start.");
 		return 1;
 	}
 
 	if (!startNewGame())
 		return 0; // input ended during setup
 
-	mView.printHelp();
+	GameView::printHelp();
 
 	while (mRunning)
 	{
@@ -124,7 +123,7 @@ int ConsoleApp::run()
 
 bool ConsoleApp::startNewGame()
 {
-	auto config = GameSetup::run();
+	const auto config = GameSetup::run();
 
 	if (!config)
 		return false;
@@ -145,7 +144,7 @@ bool ConsoleApp::startNewGame()
 // Event Pump
 //=========================================================================
 
-void ConsoleApp::pumpUntilIdle(std::chrono::milliseconds firstWait)
+void ConsoleApp::pumpUntilIdle(const std::chrono::milliseconds firstWait)
 {
 	engine::EngineEvent event;
 
@@ -166,9 +165,9 @@ void ConsoleApp::pumpUntilIdle(std::chrono::milliseconds firstWait)
 void ConsoleApp::handleEvent(const engine::EngineEvent &event)
 {
 	std::visit(
-		[this](const auto &e)
+		[this]<typename T0>(const T0 &e)
 		{
-			using T = std::decay_t<decltype(e)>;
+			using T = std::decay_t<T0>;
 
 			if constexpr (std::is_same_v<T, engine::GameStateChanged>)
 			{
@@ -180,7 +179,7 @@ void ConsoleApp::handleEvent(const engine::EngineEvent &event)
 			}
 			else if constexpr (std::is_same_v<T, engine::MoveExecuted>)
 			{
-				mView.printMovePlayed(e, mMover);
+				GameView::printMovePlayed(e, mMover);
 				mMoveLog.push_back(e.notation);
 			}
 			else if constexpr (std::is_same_v<T, engine::MoveUndone>)
@@ -188,7 +187,7 @@ void ConsoleApp::handleEvent(const engine::EngineEvent &event)
 				if (!mMoveLog.empty())
 					mMoveLog.pop_back();
 
-				mView.printMessage("Move taken back.");
+				GameView::printMessage("Move taken back.");
 			}
 			else if constexpr (std::is_same_v<T, engine::BoardStateChanged>)
 			{
@@ -196,12 +195,12 @@ void ConsoleApp::handleEvent(const engine::EngineEvent &event)
 			}
 			else if constexpr (std::is_same_v<T, engine::PieceCaptured>)
 			{
-				mView.printCapture(e);
+				GameView::printCapture(e);
 			}
 			else if constexpr (std::is_same_v<T, engine::GameEnded>)
 			{
 				mBoardDirty = true;
-				mView.printGameEnded(e);
+				GameView::printGameEnded(e);
 			}
 		},
 		event);
@@ -234,14 +233,14 @@ void ConsoleApp::promptPromotion()
 		if (line.empty())
 			continue;
 
-		if (auto piece = CommandParser::parsePromotion(line[0]))
+		if (const auto piece = CommandParser::parsePromotion(line[0]))
 		{
 			mEngine.onPromotionChosen(*piece);
 			pumpUntilIdle(2000ms);
 			return;
 		}
 
-		mView.printError("Pick one of q, r, b or n.");
+		GameView::printError("Pick one of q, r, b or n.");
 	}
 }
 
@@ -277,11 +276,11 @@ void ConsoleApp::dispatch(const Command &command)
 	{
 	case CommandType::None: break;
 
-	case CommandType::Invalid: mView.printError(command.error); break;
+	case CommandType::Invalid: GameView::printError(command.error); break;
 
 	case CommandType::Quit: mRunning = false; break;
 
-	case CommandType::Help: mView.printHelp(); break;
+	case CommandType::Help: GameView::printHelp(); break;
 
 	case CommandType::ShowBoard: mBoardDirty = true; break;
 
@@ -290,11 +289,11 @@ void ConsoleApp::dispatch(const Command &command)
 		mBoardDirty = true;
 		break;
 
-	case CommandType::History: mView.printHistory(mMoveLog); break;
+	case CommandType::History: GameView::printHistory(mMoveLog); break;
 
 	case CommandType::ListMoves:
 		if (mState == GameState::GameOver)
-			mView.printMessage("The game is over.");
+			GameView::printMessage("The game is over.");
 		else if (command.square != Square::None)
 			mView.printLegalMoves(command.square);
 		else
@@ -305,13 +304,13 @@ void ConsoleApp::dispatch(const Command &command)
 	{
 		if (mMoveLog.empty())
 		{
-			mView.printMessage("Nothing to undo.");
+			GameView::printMessage("Nothing to undo.");
 			break;
 		}
 
 		if (mState == GameState::GameOver)
 		{
-			mView.printMessage("The game is over - type 'new' to play again.");
+			GameView::printMessage("The game is over - type 'new' to play again.");
 			break;
 		}
 
@@ -345,7 +344,7 @@ void ConsoleApp::submitMove(const Command &command)
 {
 	if (mState == GameState::GameOver)
 	{
-		mView.printMessage("The game is over - type 'new' to play again.");
+		GameView::printMessage("The game is over - type 'new' to play again.");
 		return;
 	}
 
@@ -357,7 +356,7 @@ void ConsoleApp::submitMove(const Command &command)
 	{
 		if (!resolveSan(command.SAN, from, to, promotion))
 		{
-			mView.printError("'" + command.SAN + "' is not a legal move. Try 'moves' to see what is available.");
+			GameView::printError("'" + command.SAN + "' is not a legal move. Try 'moves' to see what is available.");
 			return;
 		}
 	}
@@ -381,7 +380,7 @@ void ConsoleApp::submitMove(const Command &command)
 
 		if (!matches)
 		{
-			mView.printError("Illegal move. Try 'moves' to see what is available.");
+			GameView::printError("Illegal move. Try 'moves' to see what is available.");
 			return;
 		}
 	}
@@ -412,7 +411,7 @@ bool ConsoleApp::resolveSan(const std::string &san, Square &from, Square &to, Pi
 }
 
 
-bool ConsoleApp::readLine(const char *prompt, std::string &line) const
+bool ConsoleApp::readLine(const char *prompt, std::string &line)
 {
 	printf("%s", prompt);
 	fflush(stdout);

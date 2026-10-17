@@ -13,6 +13,6 @@
 class MoveGenerationScenario : public IScenario
 {
 public:
-	std::string name() const override { return "Move Generation"; }
-	void		run(GameEngine &engine) override;
+	[[nodiscard]] std::string name() const override { return "Move Generation"; }
+	void					  run(GameEngine &engine) override;
 };

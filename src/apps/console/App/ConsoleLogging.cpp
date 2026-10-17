@@ -22,7 +22,7 @@ constexpr auto LogFile		 = "Chess.log";
 constexpr auto SlowLogTime	 = std::chrono::microseconds(500);
 
 
-LogLevel toLoggerLevel(engine::LogLevel level)
+LogLevel	   toLoggerLevel(const engine::LogLevel level)
 {
 	switch (level)
 	{
@@ -40,8 +40,8 @@ LogLevel toLoggerLevel(engine::LogLevel level)
 
 void ConsoleLogging::enable(const std::filesystem::path &folder)
 {
-	std::error_code		  ec;
-	std::filesystem::path logFolder = (folder.empty() ? std::filesystem::current_path(ec) : folder) / LoggingFolder;
+	std::error_code				ec;
+	const std::filesystem::path logFolder = (folder.empty() ? std::filesystem::current_path(ec) : folder) / LoggingFolder;
 
 	if (!std::filesystem::exists(logFolder) && !std::filesystem::create_directories(logFolder, ec))
 		return;
@@ -56,8 +56,7 @@ void ConsoleLogging::enable(const std::filesystem::path &folder)
 
 	logging::addMSVCOutput().checkForPresentDebugger(true).setLevel(LogLevel::Debug).setMaxSkipDuration(SlowLogTime);
 
-	engine::setLogSink([](const engine::LogRecord &record)
-					   { logging::log(toLoggerLevel(record.level), record.file, record.line, record.function, record.message); });
+	engine::setLogSink([](const engine::LogRecord &record) { logging::log(toLoggerLevel(record.level), record.file, record.line, record.function, record.message); });
 }
 
 

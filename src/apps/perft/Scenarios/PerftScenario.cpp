@@ -25,12 +25,12 @@ void					  PerftScenario::run(GameEngine &engine)
 	{
 		engine.resetGame(); // always start from initial position
 
-		auto	 start	  = std::chrono::steady_clock::now();
-		uint64_t nodes	  = perft(engine, depth);
-		auto	 ms		  = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count();
+		auto		   start	= std::chrono::steady_clock::now();
+		const uint64_t nodes	= perft(engine, depth);
+		const auto	   ms		= std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count();
 
-		uint64_t expected = (depth < static_cast<int>(std::size(kKnownPerft))) ? kKnownPerft[depth] : 0;
-		bool	 match	  = (expected == 0 || nodes == expected);
+		const uint64_t expected = (depth < static_cast<int>(std::size(kKnownPerft))) ? kKnownPerft[depth] : 0;
+		const bool	   match	= (expected == 0 || nodes == expected);
 
 		printf("%-8d %-14llu %-14llu %-10s %lldms\n", depth, nodes, expected, match ? "OK" : "FAIL", ms);
 	}
@@ -38,7 +38,7 @@ void					  PerftScenario::run(GameEngine &engine)
 }
 
 
-uint64_t PerftScenario::perft(GameEngine &engine, int depth)
+uint64_t PerftScenario::perft(GameEngine &engine, const int depth)
 {
 	if (depth == 0)
 		return 1;
@@ -47,9 +47,9 @@ uint64_t PerftScenario::perft(GameEngine &engine, int depth)
 	engine.generateLegalMoves(moves);
 
 	uint64_t nodes = 0;
-	for (size_t i = 0; i < moves.size(); ++i)
+	for (const auto move : moves)
 	{
-		engine.makeMoveUnchecked(moves[i]);
+		engine.makeMoveUnchecked(move);
 		nodes += perft(engine, depth - 1);
 		engine.undoMoveUnchecked();
 	}

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #define BOARD_SIZE		  8
 #define MAX_STRING_LENGTH 250

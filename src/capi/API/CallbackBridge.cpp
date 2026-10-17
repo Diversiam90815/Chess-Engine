@@ -59,9 +59,9 @@ void CallbackBridge::drain()
 void CallbackBridge::dispatch(const engine::EngineEvent &event)
 {
 	std::visit(
-		[this](const auto &e)
+		[this]<typename T0>(const T0 &e)
 		{
-			using T = std::decay_t<decltype(e)>;
+			using T = std::decay_t<T0>;
 
 			if constexpr (std::is_same_v<T, engine::GameStateChanged>)
 			{
@@ -128,7 +128,7 @@ bool CallbackBridge::sendToHost(MessageType type, void *message) const
 }
 
 
-UIGamePhase CallbackBridge::mapToUIPhase(GameState state)
+UIGamePhase CallbackBridge::mapToUIPhase(const GameState state)
 {
 	switch (state)
 	{
